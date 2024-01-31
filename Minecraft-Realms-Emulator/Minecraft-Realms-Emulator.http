@@ -1,0 +1,6 @@
+@Minecraft_Realms_Emulator_HostAddress = http://localhost:8080
+
+GET {{Minecraft_Realms_Emulator_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
