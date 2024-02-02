@@ -6,5 +6,11 @@ Accept: application/json
 ###
 
 GET {{Minecraft_Realms_Emulator_HostAddress}}/mco/client/compatible
+Accept: application/json
+
+###
+
+GET {{Minecraft_Realms_Emulator_HostAddress}}/worlds
+Accept: application/json
 
 ###
