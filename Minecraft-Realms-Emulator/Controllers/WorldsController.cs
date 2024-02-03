@@ -81,7 +81,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         {
             var worlds = await _context.Worlds.ToListAsync();
 
-            var world = worlds.Find(p => p.Id == id);
+            var world = worlds.Find(w => w.Id == id);
 
             if (world == null) return NotFound("World not found");
             if (world.State != State.UNINITIALIZED.ToString()) return NotFound("World already initialized");
@@ -97,9 +97,41 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPost("{id}/reset")]
-        public ActionResult<World> Reset(int id)
+        public ActionResult<bool> Reset(int id)
         {
             Console.WriteLine($"Resetting world {id}");
+            return Ok(true);
+        }
+
+        [HttpPut("{id}/open")]
+        public async Task<ActionResult<bool>> Open(int id)
+        {
+            var worlds = await _context.Worlds.ToListAsync();
+
+            var world = worlds.Find(w => w.Id == id);
+
+            if (world == null) return NotFound("World not found");
+
+            world.State = State.OPEN.ToString();
+
+            _context.SaveChanges();
+
+            return Ok(true);
+        }
+
+        [HttpPut("{id}/close")]
+        public async Task<ActionResult<bool>> Close(int id)
+        {
+            var worlds = await _context.Worlds.ToListAsync();
+            
+            var world = worlds.Find(w => w.Id == id);
+
+            if (world == null) return NotFound("World not found");
+
+            world.State = State.CLOSED.ToString();
+
+            _context.SaveChanges();
+
             return Ok(true);
         }
     }
