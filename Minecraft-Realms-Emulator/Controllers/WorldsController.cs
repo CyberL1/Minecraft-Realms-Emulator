@@ -53,8 +53,8 @@ namespace Minecraft_Realms_Emulator.Controllers
                 };
 
                 worlds.Add(world);
-
                 _context.Worlds.Add(world);
+
                 _context.SaveChanges();
             }
 
@@ -90,7 +90,17 @@ namespace Minecraft_Realms_Emulator.Controllers
             world.Motd = body.Description;
             world.State = State.OPEN.ToString();
 
+            var subscription = new Subscription
+            {
+                RemoteId = world.RemoteSubscriptionId,
+                StartDate = ((DateTimeOffset) DateTime.Now).ToUnixTimeMilliseconds().ToString(),
+                DaysLeft = 30,
+                SubscriptionType = SubscriptionType.NORMAL.ToString()
+            };
+
             _context.Worlds.Update(world);
+            _context.Subscriptions.Add(subscription);
+
             _context.SaveChanges();
 
             return Ok(world);

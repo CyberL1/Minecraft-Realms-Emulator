@@ -3,7 +3,7 @@
     public class World
     {
         public int Id { get; set; }
-        public string? RemoteSubscriptionId { get; set; }
+        public string RemoteSubscriptionId { get; set; } = Guid.NewGuid().ToString();
         public string? Owner { get; set; }
         public string? OwnerUUID { get; set; }
         public string? Name { get; set; }
