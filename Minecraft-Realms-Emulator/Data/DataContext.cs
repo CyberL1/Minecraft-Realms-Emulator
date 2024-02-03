@@ -6,5 +6,6 @@ namespace Minecraft_Realms_Emulator.Data
     public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
     {
         public DbSet<World> Worlds { get; set; }
+        public DbSet<Subscription> Subscriptions { get; set; }
     }
 }
