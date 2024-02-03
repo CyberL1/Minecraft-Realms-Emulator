@@ -75,5 +75,32 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             return world;
         }
+
+        [HttpPost("{id}/initialize")]
+        public async Task<ActionResult<World>> Initialize(int id, WorldCreate body)
+        {
+            var worlds = await _context.Worlds.ToListAsync();
+
+            var world = worlds.Find(p => p.Id == id);
+
+            if (world == null) return NotFound("World not found");
+            if (world.State != State.UNINITIALIZED.ToString()) return NotFound("World already initialized");
+
+            world.Name = body.Name;
+            world.Motd = body.Description;
+            world.State = State.OPEN.ToString();
+
+            _context.Worlds.Update(world);
+            _context.SaveChanges();
+
+            return Ok(world);
+        }
+
+        [HttpPost("{id}/reset")]
+        public ActionResult<World> Reset(int id)
+        {
+            Console.WriteLine($"Resetting world {id}");
+            return Ok(true);
+        }
     }
 }
