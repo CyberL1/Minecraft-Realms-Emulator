@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using System.Diagnostics.Eventing.Reader;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -139,6 +140,23 @@ namespace Minecraft_Realms_Emulator.Controllers
             if (world == null) return NotFound("World not found");
 
             world.State = State.CLOSED.ToString();
+
+            _context.SaveChanges();
+
+            return Ok(true);
+        }
+
+        [HttpPost("{id}")]
+        public async Task<ActionResult<bool>> UpdateWorld(int id, WorldCreate body)
+        {
+            var worlds = await _context.Worlds.ToListAsync();
+
+            var world = worlds.Find(w => w.Id == id);
+
+            if (world == null) return NotFound("World not found");
+
+            world.Name = body.Name;
+            world.Motd = body.Description;
 
             _context.SaveChanges();
 
