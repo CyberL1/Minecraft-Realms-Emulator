@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
-using System.Diagnostics.Eventing.Reader;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -21,7 +20,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         public async Task<ActionResult<ServersArray>> GetWorlds()
         {
             var worlds = await _context.Worlds.ToListAsync();
-
+                
             string cookie = Request.Headers.Cookie;
             
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
@@ -48,7 +47,6 @@ namespace Minecraft_Realms_Emulator.Controllers
                     MinigameId = null,
                     MinigameName = null,
                     MinigameImage = null,
-                    Slots = [],
                     ActiveSlot = 1,
                     Member = false
                 };
@@ -161,6 +159,13 @@ namespace Minecraft_Realms_Emulator.Controllers
             _context.SaveChanges();
 
             return Ok(true);
+        }
+
+        [HttpPost("{wId}/slot/{sId}")]
+        public bool U(int wId, int sId, object o)
+        {
+            Console.WriteLine(o);
+            return true;
         }
     }
 }
