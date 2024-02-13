@@ -91,9 +91,8 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var subscription = new Subscription
             {
-                RemoteId = world.RemoteSubscriptionId,
+                World = world,
                 StartDate = ((DateTimeOffset) DateTime.Now).ToUnixTimeMilliseconds().ToString(),
-                DaysLeft = 30,
                 SubscriptionType = SubscriptionType.NORMAL.ToString()
             };
 
