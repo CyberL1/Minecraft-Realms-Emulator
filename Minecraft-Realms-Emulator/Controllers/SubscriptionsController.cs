@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
-using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Responses;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -21,11 +21,18 @@ namespace Minecraft_Realms_Emulator.Controllers
             var world = await _context.Worlds.FindAsync(id);
             var subscriptions = await _context.Subscriptions.ToListAsync();
 
-            if (world == null) return NotFound("Subscription njot found");
+            if (world == null) return NotFound("Subscription not found");
 
-            var subscription = subscriptions.Find(s => s.RemoteId == world.RemoteSubscriptionId);
+            var subscription = subscriptions.Find(s => s.World.RemoteSubscriptionId == world.RemoteSubscriptionId);
 
-            return Ok(subscription);
+            var sub = new Subscription
+            {
+                StartDate = subscription.StartDate,
+                DaysLeft = subscription.World.DaysLeft,
+                SubscriptionType = subscription.SubscriptionType
+            };
+
+            return Ok(sub);
         }
     }
 }
