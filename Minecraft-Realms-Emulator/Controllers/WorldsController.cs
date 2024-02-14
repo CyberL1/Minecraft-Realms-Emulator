@@ -166,5 +166,18 @@ namespace Minecraft_Realms_Emulator.Controllers
             Console.WriteLine(o);
             return true;
         }
+
+        [HttpGet("{Id}/backups")]
+        public async Task<ActionResult<BackupList>> GetBackups(int id)
+        {
+            var backups = await _context.Backups.Where(b => b.World.Id == id).ToListAsync();
+
+            BackupList worldBackups = new()
+            {
+                Backups = backups
+            };
+
+            return Ok(worldBackups);
+        }
     }
 }
