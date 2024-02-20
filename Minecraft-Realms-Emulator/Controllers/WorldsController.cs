@@ -20,9 +20,9 @@ namespace Minecraft_Realms_Emulator.Controllers
         public async Task<ActionResult<ServersArray>> GetWorlds()
         {
             var worlds = await _context.Worlds.ToListAsync();
-                
+
             string cookie = Request.Headers.Cookie;
-            
+
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
             string playerName = cookie.Split(";")[1].Split("=")[1];
 
@@ -92,12 +92,20 @@ namespace Minecraft_Realms_Emulator.Controllers
             var subscription = new Subscription
             {
                 World = world,
-                StartDate = ((DateTimeOffset) DateTime.Now).ToUnixTimeMilliseconds().ToString(),
+                StartDate = ((DateTimeOffset)DateTime.Now).ToUnixTimeMilliseconds().ToString(),
                 SubscriptionType = SubscriptionType.NORMAL.ToString()
             };
 
+            var connection = new Connection
+            {
+                World = world,
+                Address = "127.0.0.1"
+            };
+
             _context.Worlds.Update(world);
+
             _context.Subscriptions.Add(subscription);
+            _context.Connections.Add(connection);
 
             _context.SaveChanges();
 
@@ -131,7 +139,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         public async Task<ActionResult<bool>> Close(int id)
         {
             var worlds = await _context.Worlds.ToListAsync();
-            
+
             var world = worlds.Find(w => w.Id == id);
 
             if (world == null) return NotFound("World not found");
