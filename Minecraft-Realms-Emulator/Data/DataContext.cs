@@ -9,5 +9,6 @@ namespace Minecraft_Realms_Emulator.Data
         public DbSet<Subscription> Subscriptions { get; set; }
         public DbSet<Connection> Connections { get; set; }
         public DbSet<Backup> Backups { get; set; }
+        public DbSet<Invite> Invites { get; set; }
     }
 }
