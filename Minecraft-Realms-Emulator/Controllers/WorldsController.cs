@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using System.Collections.Immutable;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -24,9 +25,10 @@ namespace Minecraft_Realms_Emulator.Controllers
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
             string playerName = cookie.Split(";")[1].Split("=")[1];
 
-            var worlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID).ToListAsync();
+            var ownedWorlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID).ToListAsync();
+            var memberWorlds = await _context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Select(p => p.World).ToListAsync();
 
-            if (worlds.ToArray().Length == 0)
+            if (ownedWorlds.ToArray().Length == 0)
             {
                 var world = new World
                 {
@@ -40,7 +42,6 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Expired = false,
                     ExpiredTrial = false,
                     WorldType = WorldType.NORMAL.ToString(),
-                    Players = [],
                     MaxPlayers = 10,
                     MinigameId = null,
                     MinigameName = null,
@@ -49,15 +50,20 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Member = false
                 };
 
-                worlds.Add(world);
+                ownedWorlds.Add(world);
                 _context.Worlds.Add(world);
 
                 _context.SaveChanges();
             }
 
+            List<World> allWorlds = [];
+
+            allWorlds.AddRange(ownedWorlds);
+            allWorlds.AddRange(memberWorlds);
+
             ServersArray servers = new()
             {
-                Servers = worlds
+                Servers = allWorlds
             };
 
             return Ok(servers);

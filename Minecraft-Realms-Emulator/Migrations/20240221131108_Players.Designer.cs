@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Minecraft_Realms_Emulator.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240220110531_Worlds_Players")]
-    partial class Worlds_Players
+    [Migration("20240221131108_Players")]
+    partial class Players
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -112,6 +112,45 @@ namespace Minecraft_Realms_Emulator.Migrations
                     b.ToTable("Invites");
                 });
 
+            modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Player", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Accepted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("Online")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("Operator")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Permission")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Uuid")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("WorldId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorldId");
+
+                    b.ToTable("Players");
+                });
+
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Subscription", b =>
                 {
                     b.Property<int>("Id")
@@ -185,10 +224,6 @@ namespace Minecraft_Realms_Emulator.Migrations
                     b.Property<string>("OwnerUUID")
                         .HasColumnType("text");
 
-                    b.Property<JsonDocument[]>("Players")
-                        .IsRequired()
-                        .HasColumnType("jsonb[]");
-
                     b.Property<string>("RemoteSubscriptionId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -243,6 +278,17 @@ namespace Minecraft_Realms_Emulator.Migrations
                     b.Navigation("World");
                 });
 
+            modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Player", b =>
+                {
+                    b.HasOne("Minecraft_Realms_Emulator.Entities.World", "World")
+                        .WithMany("Players")
+                        .HasForeignKey("WorldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("World");
+                });
+
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Subscription", b =>
                 {
                     b.HasOne("Minecraft_Realms_Emulator.Entities.World", "World")
@@ -252,6 +298,11 @@ namespace Minecraft_Realms_Emulator.Migrations
                         .IsRequired();
 
                     b.Navigation("World");
+                });
+
+            modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.World", b =>
+                {
+                    b.Navigation("Players");
                 });
 #pragma warning restore 612, 618
         }
