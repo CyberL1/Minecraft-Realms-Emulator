@@ -19,16 +19,14 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet]
         public async Task<ActionResult<ServersArray>> GetWorlds()
         {
-            var worlds = await _context.Worlds.ToListAsync();
-
             string cookie = Request.Headers.Cookie;
 
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
             string playerName = cookie.Split(";")[1].Split("=")[1];
 
-            var hasWorld = worlds.Find(p => p.OwnerUUID == playerUUID);
+            var worlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID).ToListAsync();
 
-            if (hasWorld == null)
+            if (worlds == null)
             {
                 var world = new World
                 {
