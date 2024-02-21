@@ -2,9 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Migrations;
 using Minecraft_Realms_Emulator.Responses;
-using System;
-using System.Text.Json;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -53,9 +52,17 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpPut("accept/{id}")]
         public ActionResult<bool> AcceptInvite(string id)
         {
-            var invite = _context.Invites.FirstOrDefault(i => i.InvitationId == id);
+            string cookie = Request.Headers.Cookie;
+            string playerUUID = cookie.Split(";")[0].Split(":")[2];
+
+            var invite = _context.Invites.Include(i => i.World).FirstOrDefault(i => i.InvitationId == id);
 
             if (invite == null) return NotFound("Invite not found");
+
+            var player = _context.Players.Where(p => p.World.Id == invite.World.Id).FirstOrDefault(p => p.Uuid == playerUUID);
+
+            player.Accepted = true;
+
             _context.Invites.Remove(invite);
 
             _context.SaveChanges();
@@ -64,7 +71,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPut("reject/{id}")]
-        public async Task<ActionResult<bool>> RejectInvite(string id)
+        public ActionResult<bool> RejectInvite(string id)
         {
             var invite = _context.Invites.Include(i => i.World).FirstOrDefault(i => i.InvitationId == id);
 
@@ -74,11 +81,10 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             string cookie = Request.Headers.Cookie;
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
-            
-            World world = await _context.Worlds.FindAsync(invite.World.Id);
-            var playerIndex = world.Players.FindIndex(p => p.RootElement.GetProperty("uuid").ToString() == playerUUID);
 
-            world.Players.RemoveAt(playerIndex);
+            var player = _context.Players.Where(p => p.World.Id == invite.World.Id).FirstOrDefault(p => p.Uuid == playerUUID);
+
+            _context.Players.Remove(player);
 
             _context.SaveChanges();
 
@@ -97,22 +103,28 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             if (world == null) return NotFound("World not found");
 
-            if (world.Players.Exists(p => p.RootElement.GetProperty("name").ToString() == body.Name)) return NotFound("Player already invited");
-
             // Get player UUID
             var playerInfo = await new HttpClient().GetFromJsonAsync<MinecraftPlayerInfo>($"https://api.mojang.com/users/profiles/minecraft/{body.Name}");
-            body.Uuid = playerInfo.Id;
 
-            JsonDocument player = JsonDocument.Parse(JsonSerializer.Serialize(body));
-            world.Players.Add(player);
+            var playerInDB = await _context.Players.Where(p => p.World.Id == wId).FirstOrDefaultAsync(p => p.Uuid == playerInfo.Id);
 
-            _context.Worlds.Update(world);
+            if (playerInDB?.Uuid == playerInfo.Id) return BadRequest("Player already invited");
+
+            Player player = new()
+            {
+                Name = body.Name,
+                Uuid = playerInfo.Id,
+                World = world
+            };
+
+            _context.Players.Add(player);
+//            world.Players.Add(player);
 
             Invite invite = new()
             {
                 InvitationId = Guid.NewGuid().ToString(),
                 World = world,
-                RecipeintUUID = body.Uuid,
+                RecipeintUUID = playerInfo.Id,
                 Date = DateTime.UtcNow,
             };
 
@@ -134,7 +146,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var players = world.Players.ToList();
 
-            var playerIndex = world.Players.FindIndex(p => p.RootElement.GetProperty("uuid").ToString() == uuid);
+            var playerIndex = world.Players.FindIndex(p => p.Uuid == uuid);
 
             world.Players.RemoveAt(playerIndex);
 

@@ -15,7 +15,7 @@ namespace Minecraft_Realms_Emulator.Entities
         public bool Expired { get; set; } = false;
         public bool ExpiredTrial { get; set; } = false;
         public string WorldType { get; set; } = "NORMAL";
-        public List<JsonDocument> Players { get; set; } = [];
+        public List<Player> Players { get; set; } = [];
         public int MaxPlayers { get; set; } = 10;
         public string? MinigameName { get; set; }
         public int? MinigameId { get; set; }
