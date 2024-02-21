@@ -26,7 +26,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var worlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID).ToListAsync();
 
-            if (worlds == null)
+            if (worlds.ToArray().Length == 0)
             {
                 var world = new World
                 {
