@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
-using System.Collections.Immutable;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -190,6 +189,14 @@ namespace Minecraft_Realms_Emulator.Controllers
             };
 
             return Ok(worldBackups);
+        }
+
+        [HttpGet("v1/{wId}/join/pc")]
+        public ActionResult<Connection> Join(int wId)
+        {
+            var connection = _context.Connections.FirstOrDefault(x => x.World.Id == wId);
+
+            return Ok(connection);
         }
     }
 }
