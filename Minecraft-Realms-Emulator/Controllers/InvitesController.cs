@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
-using Minecraft_Realms_Emulator.Migrations;
 using Minecraft_Realms_Emulator.Responses;
 
 namespace Minecraft_Realms_Emulator.Controllers
