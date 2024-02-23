@@ -145,9 +145,9 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var players = world.Players.ToList();
 
-            var playerIndex = world.Players.FindIndex(p => p.Uuid == uuid);
+            var player = _context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == uuid);
 
-            world.Players.RemoveAt(playerIndex);
+            _context.Players.Remove(player);
 
             var invite = await _context.Invites.FirstOrDefaultAsync(i => i.RecipeintUUID == uuid);
 
