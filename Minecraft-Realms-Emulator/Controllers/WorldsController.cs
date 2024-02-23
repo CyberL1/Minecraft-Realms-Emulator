@@ -72,7 +72,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<World>> GetWorldById(int id)
         {
-            var world = await _context.Worlds.FindAsync(id);
+            var world = await _context.Worlds.Include(w => w.Players).FirstOrDefaultAsync(w => w.Id == id);
 
             if (world == null) return NotFound("World not found");
 
