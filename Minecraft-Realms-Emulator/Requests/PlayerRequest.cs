@@ -1,6 +1,6 @@
-﻿namespace Minecraft_Realms_Emulator.Entities
+﻿namespace Minecraft_Realms_Emulator.Requests
 {
-    public class Player
+    public class PlayerRequest
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -9,6 +9,5 @@
         public bool Accepted { get; set; }
         public bool Online { get; set; }
         public string Permission { get; set; } = "MEMBER";
-        public World World { get; set; }
     }
 }
