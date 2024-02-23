@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
 
 namespace Minecraft_Realms_Emulator.Controllers
@@ -91,7 +92,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPost("{wId}")]
-        public async Task<ActionResult<World>> InvitePlayer(int wId, Player body)
+        public async Task<ActionResult<World>> InvitePlayer(int wId, PlayerRequest body)
         {
             string cookie = Request.Headers.Cookie;
             string playerName = cookie.Split(";")[1].Split("=")[1];
