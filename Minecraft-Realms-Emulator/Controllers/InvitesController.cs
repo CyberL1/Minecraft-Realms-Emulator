@@ -99,7 +99,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             if (body.Name == playerName) return Forbid("You cannot invite yourself");
 
-            var world = await _context.Worlds.FirstOrDefaultAsync(w => w.Id == wId);
+            var world = await _context.Worlds.Include(w => w.Players).FirstOrDefaultAsync(w => w.Id == wId);
 
             if (world == null) return NotFound("World not found");
 
@@ -118,7 +118,6 @@ namespace Minecraft_Realms_Emulator.Controllers
             };
 
             _context.Players.Add(player);
-//            world.Players.Add(player);
 
             Invite invite = new()
             {
