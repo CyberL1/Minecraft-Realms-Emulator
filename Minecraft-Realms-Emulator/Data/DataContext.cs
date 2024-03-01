@@ -11,5 +11,6 @@ namespace Minecraft_Realms_Emulator.Data
         public DbSet<Backup> Backups { get; set; }
         public DbSet<Invite> Invites { get; set; }
         public DbSet<Player> Players { get; set; }
+        public DbSet<Configuration> Configuration { get; set; }
     }
 }
