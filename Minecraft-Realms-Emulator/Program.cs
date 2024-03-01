@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
+using Minecraft_Realms_Emulator.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,9 @@ builder.Services.AddDbContext<DataContext>(options =>
 });
 
 var app = builder.Build();
+
+// Initialize database
+Database.Initialize(app);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
