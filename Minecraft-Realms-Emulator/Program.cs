@@ -3,6 +3,13 @@ using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
+DotNetEnv.Env.Load();
+
+if (Environment.GetEnvironmentVariable("CONNECTION_STRING") == null)
+{
+    Console.WriteLine("CONNECTION_STRING environment variable missing");
+    return;
+}
 
 // Add services to the container.
 
@@ -13,7 +20,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<DataContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
 });
 
 var app = builder.Build();
