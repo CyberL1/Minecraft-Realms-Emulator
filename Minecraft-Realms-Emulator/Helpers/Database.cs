@@ -22,9 +22,20 @@ namespace Minecraft_Realms_Emulator.Helpers
                 };
 
                 db.Configuration.Add(newsLink);
-
-                db.SaveChanges();
             }
+
+            if (db.Configuration.FirstOrDefault(s => s.Key == "defaultServerAddress") == null)
+            {
+                var defaultServerAddress = new Configuration
+                {
+                    Key = "defaultServerAddress",
+                    Value = "127.0.0.1"
+                };
+
+                db.Configuration.Add(defaultServerAddress);
+            }
+
+            db.SaveChanges();
         }
     }
 }

@@ -102,7 +102,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var connection = new Connection
             {
                 World = world,
-                Address = "127.0.0.1"
+                Address = _context.Configuration.FirstOrDefault(x => x.Key == "defaultServerAddress").Value
             };
 
             _context.Worlds.Update(world);
