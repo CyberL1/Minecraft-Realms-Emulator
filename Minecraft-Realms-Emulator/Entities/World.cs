@@ -11,6 +11,7 @@ namespace Minecraft_Realms_Emulator.Entities
         public string? Name { get; set; }
         public string? Motd { get; set; }
         public string State { get; set; } = "OPEN";
+        public int DaysLeft { get; set; } = 30;
         public bool Expired { get; set; } = false;
         public bool ExpiredTrial { get; set; } = false;
         public string WorldType { get; set; } = "NORMAL";

@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
         public World World { get; set; }
-        public DateTime StartDate { get; set; } = DateTime.Now;
+        public string StartDate { get; set; } = ((DateTimeOffset) DateTime.Now).ToUnixTimeMilliseconds().ToString();
         public string SubscriptionType { get; set; } = "NORMAL";
     }
 }
