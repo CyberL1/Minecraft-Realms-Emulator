@@ -170,8 +170,9 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("StartDate")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("SubscriptionType")
                         .IsRequired()
@@ -196,6 +197,9 @@ namespace Minecraft_Realms_Emulator.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ActiveSlot")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DaysLeft")
                         .HasColumnType("integer");
 
                     b.Property<bool>("Expired")

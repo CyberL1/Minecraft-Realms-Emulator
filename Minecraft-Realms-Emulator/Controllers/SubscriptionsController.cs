@@ -16,7 +16,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             _context = context;
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<SubscriptionResponse>> Get(int id)
+        public async Task<ActionResult<Subscription>> Get(int id)
         {
             var world = await _context.Worlds.FindAsync(id);
             var subscriptions = await _context.Subscriptions.ToListAsync();
@@ -25,10 +25,10 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var subscription = subscriptions.Find(s => s.World.RemoteSubscriptionId == world.RemoteSubscriptionId);
 
-            var sub = new SubscriptionResponse
+            var sub = new Subscription
             {
-                StartDate = ((DateTimeOffset) subscription.StartDate).ToUnixTimeMilliseconds(),
-                DaysLeft = (subscription.StartDate.AddDays(30) - DateTime.UtcNow).Days,
+                StartDate = subscription.StartDate,
+                DaysLeft = subscription.World.DaysLeft,
                 SubscriptionType = subscription.SubscriptionType
             };
 
