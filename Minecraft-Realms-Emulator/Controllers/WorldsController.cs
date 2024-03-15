@@ -95,7 +95,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var subscription = new Subscription
             {
                 World = world,
-                StartDate = ((DateTimeOffset)DateTime.Now).ToUnixTimeMilliseconds().ToString(),
+                StartDate = DateTime.UtcNow,
                 SubscriptionType = SubscriptionType.NORMAL.ToString()
             };
 
