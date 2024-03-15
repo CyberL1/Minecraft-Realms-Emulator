@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Responses;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -17,7 +18,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ServersArray>> GetWorlds()
+        public async Task<ActionResult<ServersResponse>> GetWorlds()
         {
             string cookie = Request.Headers.Cookie;
 
@@ -37,7 +38,6 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Name = null,
                     Motd = null,
                     State = State.UNINITIALIZED.ToString(),
-                    DaysLeft = 30,
                     Expired = false,
                     ExpiredTrial = false,
                     WorldType = WorldType.NORMAL.ToString(),
@@ -60,7 +60,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             allWorlds.AddRange(ownedWorlds);
             allWorlds.AddRange(memberWorlds);
 
-            ServersArray servers = new()
+            ServersResponse servers = new()
             {
                 Servers = allWorlds
             };
@@ -95,7 +95,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var subscription = new Subscription
             {
                 World = world,
-                StartDate = ((DateTimeOffset)DateTime.Now).ToUnixTimeMilliseconds().ToString(),
+                StartDate = DateTime.UtcNow,
                 SubscriptionType = SubscriptionType.NORMAL.ToString()
             };
 
