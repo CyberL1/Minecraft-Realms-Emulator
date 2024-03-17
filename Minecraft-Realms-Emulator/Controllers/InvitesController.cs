@@ -137,13 +137,9 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpDelete("{wId}/invite/{uuid}")]
         public async Task<ActionResult<bool>> DeleteInvite(int wId, string uuid)
         {
-            Console.WriteLine($"{wId} - {uuid}");
-
             var world = await _context.Worlds.FirstOrDefaultAsync(w => w.Id == wId);
 
             if (world == null) return NotFound("World not found");
-
-            var players = world.Players.ToList();
 
             var player = _context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == uuid);
 
@@ -167,8 +163,6 @@ namespace Minecraft_Realms_Emulator.Controllers
             var world = await _context.Worlds.FirstOrDefaultAsync(w => w.Id == wId);
 
             if (world == null) return NotFound("World not found");
-
-            var players = world.Players.ToList();
 
             var player = _context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == playerUUID);
 
