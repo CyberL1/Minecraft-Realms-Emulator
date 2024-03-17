@@ -28,7 +28,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var sub = new Subscription
             {
                 StartDate = ((DateTimeOffset) subscription.StartDate).ToUnixTimeMilliseconds(),
-                DaysLeft = subscription.World.DaysLeft,
+                DaysLeft =  ((DateTimeOffset) subscription.StartDate.AddDays(30) - DateTime.Today).Days,
                 SubscriptionType = subscription.SubscriptionType
             };
 
