@@ -3,6 +3,7 @@ using System;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Minecraft_Realms_Emulator.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Minecraft_Realms_Emulator.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240317120329_Worlds_Subscription_field")]
+    partial class Worlds_Subscription_field
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,7 +55,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasIndex("WorldId");
 
-                    b.ToTable("Backups", (string)null);
+                    b.ToTable("Backups");
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Configuration", b =>
@@ -66,7 +69,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("Configuration", (string)null);
+                    b.ToTable("Configuration");
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Connection", b =>
@@ -91,7 +94,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasIndex("WorldId");
 
-                    b.ToTable("Connections", (string)null);
+                    b.ToTable("Connections");
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Invite", b =>
@@ -120,7 +123,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasIndex("WorldId");
 
-                    b.ToTable("Invites", (string)null);
+                    b.ToTable("Invites");
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Player", b =>
@@ -159,7 +162,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasIndex("WorldId");
 
-                    b.ToTable("Players", (string)null);
+                    b.ToTable("Players");
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Subscription", b =>
@@ -185,7 +188,7 @@ namespace Minecraft_Realms_Emulator.Migrations
                     b.HasIndex("WorldId")
                         .IsUnique();
 
-                    b.ToTable("Subscriptions", (string)null);
+                    b.ToTable("Subscriptions");
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.World", b =>
@@ -240,7 +243,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Worlds", (string)null);
+                    b.ToTable("Worlds");
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Backup", b =>

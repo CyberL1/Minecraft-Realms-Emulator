@@ -18,18 +18,15 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Subscription>> Get(int id)
         {
-            var world = await _context.Worlds.FindAsync(id);
-            var subscriptions = await _context.Subscriptions.ToListAsync();
+            var world = await _context.Worlds.Include(w => w.Subscription).FirstOrDefaultAsync(w => w.Id == id);
 
-            if (world == null) return NotFound("Subscription not found");
-
-            var subscription = subscriptions.Find(s => s.World.RemoteSubscriptionId == world.RemoteSubscriptionId);
+            if (world?.Subscription == null) return NotFound("Subscription not found");
 
             var sub = new Subscription
             {
-                StartDate = ((DateTimeOffset) subscription.StartDate).ToUnixTimeMilliseconds(),
-                DaysLeft =  ((DateTimeOffset) subscription.StartDate.AddDays(30) - DateTime.Today).Days,
-                SubscriptionType = subscription.SubscriptionType
+                StartDate = ((DateTimeOffset)world.Subscription.StartDate).ToUnixTimeMilliseconds(),
+                DaysLeft =  ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days,
+                SubscriptionType = world.Subscription.SubscriptionType
             };
 
             return Ok(sub);

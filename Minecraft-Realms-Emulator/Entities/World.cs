@@ -5,15 +5,12 @@ namespace Minecraft_Realms_Emulator.Entities
     public class World
     {
         public int Id { get; set; }
-        public string RemoteSubscriptionId { get; set; } = Guid.NewGuid().ToString();
+        public Subscription? Subscription { get; set; }
         public string? Owner { get; set; }
         public string? OwnerUUID { get; set; }
         public string? Name { get; set; }
         public string? Motd { get; set; }
         public string State { get; set; } = "OPEN";
-        public int DaysLeft { get; set; } = 30;
-        public bool Expired { get; set; } = false;
-        public bool ExpiredTrial { get; set; } = false;
         public string WorldType { get; set; } = "NORMAL";
         public List<Player> Players { get; set; } = [];
         public int MaxPlayers { get; set; } = 10;
