@@ -157,5 +157,26 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             return Ok(true);
         }
+
+        [HttpDelete("{wId}")]
+        public async Task<ActionResult<bool>> LeaveWorld(int wId)
+        {
+            string cookie = Request.Headers.Cookie;
+            string playerUUID = cookie.Split(";")[0].Split(":")[2];
+
+            var world = await _context.Worlds.FirstOrDefaultAsync(w => w.Id == wId);
+
+            if (world == null) return NotFound("World not found");
+
+            var players = world.Players.ToList();
+
+            var player = _context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == playerUUID);
+
+            _context.Players.Remove(player);
+
+            _context.SaveChanges();
+
+            return Ok(true);
+        }
     }
 }
