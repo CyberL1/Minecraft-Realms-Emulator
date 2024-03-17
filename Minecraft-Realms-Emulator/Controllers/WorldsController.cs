@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -24,22 +26,20 @@ namespace Minecraft_Realms_Emulator.Controllers
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
             string playerName = cookie.Split(";")[1].Split("=")[1];
 
-            var ownedWorlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID).ToListAsync();
-            var memberWorlds = await _context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Select(p => p.World).ToListAsync();
+            var ownedWorlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID).Include(w => w.Subscription).ToListAsync();
+            var memberWorlds = await _context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Select(p => p.World).ToListAsync();
+
+            List<WorldResponse> allWorlds = [];
 
             if (ownedWorlds.ToArray().Length == 0)
             {
                 var world = new World
                 {
-                    RemoteSubscriptionId = Guid.NewGuid().ToString(),
                     Owner = playerName,
                     OwnerUUID = playerUUID,
                     Name = null,
                     Motd = null,
                     State = State.UNINITIALIZED.ToString(),
-                    DaysLeft = 30,
-                    Expired = false,
-                    ExpiredTrial = false,
                     WorldType = WorldType.NORMAL.ToString(),
                     MaxPlayers = 10,
                     MinigameId = null,
@@ -55,10 +55,61 @@ namespace Minecraft_Realms_Emulator.Controllers
                 _context.SaveChanges();
             }
 
-            List<World> allWorlds = [];
+            foreach (var world in ownedWorlds)
+            {
+                WorldResponse response = new()
+                {
+                    Id = world.Id,
+                    Owner = world.Owner,
+                    OwnerUUID = world.OwnerUUID,
+                    Name = world.Name,
+                    Motd = world.Motd,
+                    State = world.State,
+                    WorldType = world.WorldType,
+                    MaxPlayers = world.MaxPlayers,
+                    MinigameId = world.MinigameId,
+                    MinigameName = world.MinigameName,
+                    MinigameImage = world.MinigameImage,
+                    ActiveSlot = world.ActiveSlot,
+                    Member = world.Member,
+                    Players = world.Players
+                };
 
-            allWorlds.AddRange(ownedWorlds);
-            allWorlds.AddRange(memberWorlds);
+                if (world.Subscription != null)
+                {
+                    response.DaysLeft = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days;
+                    response.Expired = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days < 0;
+                    response.ExpiredTrial = false;
+                }
+
+                allWorlds.Add(response);
+            }
+
+            foreach (var world in memberWorlds)
+            {
+                WorldResponse response = new()
+                {
+                    Id = world.Id,
+                    Owner = world.Owner,
+                    OwnerUUID = world.OwnerUUID,
+                    Name = world.Name,
+                    Motd = world.Motd,
+                    State = world.State,
+                    WorldType = world.WorldType,
+                    MaxPlayers = world.MaxPlayers,
+                    MinigameId = world.MinigameId,
+                    MinigameName = world.MinigameName,
+                    MinigameImage = world.MinigameImage,
+                    ActiveSlot = world.ActiveSlot,
+                    Member = world.Member,
+                    Players = world.Players,
+                    DaysLeft = 0,
+                    Expired = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days < 0,
+                    ExpiredTrial = false
+                };
+
+                allWorlds.Add(response);
+            }
 
             ServersArray servers = new()
             {
@@ -69,13 +120,34 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<World>> GetWorldById(int id)
+        public async Task<ActionResult<WorldResponse>> GetWorldById(int id)
         {
-            var world = await _context.Worlds.Include(w => w.Players).FirstOrDefaultAsync(w => w.Id == id);
+            var world = await _context.Worlds.Include(w => w.Players).Include(w => w.Subscription).FirstOrDefaultAsync(w => w.Id == id);
 
-            if (world == null) return NotFound("World not found");
+            if (world?.Subscription == null) return NotFound("World not found");
 
-            return world;
+            WorldResponse response = new()
+            {
+                Id = world.Id,
+                Owner = world.Owner,
+                OwnerUUID = world.OwnerUUID,
+                Name = world.Name,
+                Motd = world.Motd,
+                State = world.State,
+                WorldType = world.WorldType,
+                MaxPlayers = world.MaxPlayers,
+                MinigameId = world.MinigameId,
+                MinigameName = world.MinigameName,
+                MinigameImage = world.MinigameImage,
+                ActiveSlot = world.ActiveSlot,
+                Member = world.Member,
+                Players = world.Players,
+                DaysLeft = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days,
+                Expired = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days < 0,
+                ExpiredTrial = false
+            };
+
+            return response;
         }
 
         [HttpPost("{id}/initialize")]
@@ -88,16 +160,16 @@ namespace Minecraft_Realms_Emulator.Controllers
             if (world == null) return NotFound("World not found");
             if (world.State != State.UNINITIALIZED.ToString()) return NotFound("World already initialized");
 
-            world.Name = body.Name;
-            world.Motd = body.Description;
-            world.State = State.OPEN.ToString();
-
             var subscription = new Subscription
             {
-                World = world,
                 StartDate = DateTime.UtcNow,
                 SubscriptionType = SubscriptionType.NORMAL.ToString()
             };
+
+            world.Name = body.Name;
+            world.Motd = body.Description;
+            world.State = State.OPEN.ToString();
+            world.Subscription = subscription;
 
             var connection = new Connection
             {
@@ -143,7 +215,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         {
             var worlds = await _context.Worlds.ToListAsync();
 
-            var world = worlds.Find(w => w.Id == id);
+            var world = worlds.FirstOrDefault(w => w.Id == id);
 
             if (world == null) return NotFound("World not found");
 

@@ -2,6 +2,6 @@
 {
     public class ServersArray
     {
-        public List<World>? Servers { get; set; }
+        public List<WorldResponse>? Servers { get; set; }
     }
 }
