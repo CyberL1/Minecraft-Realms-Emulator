@@ -16,13 +16,13 @@ namespace Minecraft_Realms_Emulator.Controllers
             _context = context;
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<Subscription>> Get(int id)
+        public async Task<ActionResult<SubscriptionResponse>> Get(int id)
         {
             var world = await _context.Worlds.Include(w => w.Subscription).FirstOrDefaultAsync(w => w.Id == id);
 
             if (world?.Subscription == null) return NotFound("Subscription not found");
 
-            var sub = new Subscription
+            var sub = new SubscriptionResponse
             {
                 StartDate = ((DateTimeOffset)world.Subscription.StartDate).ToUnixTimeMilliseconds(),
                 DaysLeft =  ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days,
