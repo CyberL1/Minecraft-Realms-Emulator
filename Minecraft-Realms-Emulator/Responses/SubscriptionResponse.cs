@@ -1,6 +1,6 @@
 ﻿namespace Minecraft_Realms_Emulator.Responses
 {
-    public class Subscription
+    public class SubscriptionResponse
     {
         public long StartDate { get; set; }
         public int DaysLeft { get; set; }
