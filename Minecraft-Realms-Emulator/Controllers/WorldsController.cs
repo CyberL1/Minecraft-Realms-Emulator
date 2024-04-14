@@ -2,8 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
-using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {

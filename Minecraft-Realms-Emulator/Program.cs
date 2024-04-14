@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Helpers;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
@@ -18,9 +19,13 @@ builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.Re
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var dataSourceBuilder = new NpgsqlDataSourceBuilder(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
+dataSourceBuilder.EnableDynamicJson();
+await using var dataSource = dataSourceBuilder.Build();
+
 builder.Services.AddDbContext<DataContext>(options =>
 {
-    options.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
+    options.UseNpgsql(dataSource);
 });
 
 var app = builder.Build();

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Minecraft_Realms_Emulator.Data;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -6,9 +7,16 @@ namespace Minecraft_Realms_Emulator.Controllers
     [ApiController]
     public class TrialController : ControllerBase
     {
+        private readonly DataContext _context;
+
+        public TrialController(DataContext context)
+        {
+            _context = context;
+        }
+
         [HttpGet(Name = "GetTrial")]
-        public bool Get() { 
-            return true;
+        public bool Get() {
+            return bool.Parse(_context.Configuration.FirstOrDefault(x => x.Key == "trialMode").Value);
         }
     }
 }
