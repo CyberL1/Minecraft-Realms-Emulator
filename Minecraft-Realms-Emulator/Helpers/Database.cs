@@ -18,7 +18,7 @@ namespace Minecraft_Realms_Emulator.Helpers
                 var newsLink = new Configuration
                 {
                     Key = "newsLink",
-                    Value = "https://github.com/CyberL1/Minecraft-Realms-Emulator"
+                    Value = "\"https://github.com/CyberL1/Minecraft-Realms-Emulator\""
                 };
 
                 db.Configuration.Add(newsLink);
@@ -29,10 +29,21 @@ namespace Minecraft_Realms_Emulator.Helpers
                 var defaultServerAddress = new Configuration
                 {
                     Key = "defaultServerAddress",
-                    Value = "127.0.0.1"
+                    Value = "\"127.0.0.1\""
                 };
 
                 db.Configuration.Add(defaultServerAddress);
+            }
+
+            if (db.Configuration.FirstOrDefault(x => x.Key == "trialMode") == null)
+            {
+                var trialMode = new Configuration
+                {
+                    Key = "trialMode",
+                    Value = true
+                };
+
+                db.Configuration.Add(trialMode);
             }
 
             db.SaveChanges();
