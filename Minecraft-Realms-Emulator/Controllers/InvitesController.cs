@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
 using Minecraft_Realms_Emulator.Requests;
@@ -9,6 +10,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [RequireMinecraftCookie]
     public class InvitesController : ControllerBase
     {
         private readonly DataContext _context;
