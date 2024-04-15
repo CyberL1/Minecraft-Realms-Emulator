@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Helpers;
+using Minecraft_Realms_Emulator.Middlewares;
 using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,7 +41,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthorization();
+app.UseMiddleware<MinecraftCookieMiddleware>();
 
 app.MapControllers();
 
