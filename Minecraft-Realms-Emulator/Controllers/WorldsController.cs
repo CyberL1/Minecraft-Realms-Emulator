@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Requests;
+using Minecraft_Realms_Emulator.Responses;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -19,7 +21,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ServersArray>> GetWorlds()
+        public async Task<ActionResult<ServersResponse>> GetWorlds()
         {
             string cookie = Request.Headers.Cookie;
 
@@ -39,8 +41,8 @@ namespace Minecraft_Realms_Emulator.Controllers
                     OwnerUUID = playerUUID,
                     Name = null,
                     Motd = null,
-                    State = State.UNINITIALIZED.ToString(),
-                    WorldType = WorldType.NORMAL.ToString(),
+                    State = "UNINITIALIZED",
+                    WorldType = "NORMAL",
                     MaxPlayers = 10,
                     MinigameId = null,
                     MinigameName = null,
@@ -111,7 +113,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                 allWorlds.Add(response);
             }
 
-            ServersArray servers = new()
+            ServersResponse servers = new()
             {
                 Servers = allWorlds
             };
@@ -151,14 +153,14 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPost("{id}/initialize")]
-        public async Task<ActionResult<World>> Initialize(int id, WorldCreate body)
+        public async Task<ActionResult<World>> Initialize(int id, WorldCreateRequest body)
         {
             var worlds = await _context.Worlds.ToListAsync();
 
             var world = worlds.Find(w => w.Id == id);
 
             if (world == null) return NotFound("World not found");
-            if (world.State != State.UNINITIALIZED.ToString()) return NotFound("World already initialized");
+            if (world.State != "UNINITIALIZED") return NotFound("World already initialized");
 
             var subscription = new Subscription
             {
@@ -168,7 +170,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             world.Name = body.Name;
             world.Motd = body.Description;
-            world.State = State.OPEN.ToString();
+            world.State = "OPEN";
             world.Subscription = subscription;
 
             var connection = new Connection
@@ -203,7 +205,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             if (world == null) return NotFound("World not found");
 
-            world.State = State.OPEN.ToString();
+            world.State = "OPEN";
 
             _context.SaveChanges();
 
@@ -219,7 +221,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             if (world == null) return NotFound("World not found");
 
-            world.State = State.CLOSED.ToString();
+            world.State = "CLOSED";
 
             _context.SaveChanges();
 
@@ -227,7 +229,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPost("{id}")]
-        public async Task<ActionResult<bool>> UpdateWorld(int id, WorldCreate body)
+        public async Task<ActionResult<bool>> UpdateWorld(int id, WorldCreateRequest body)
         {
             var worlds = await _context.Worlds.ToListAsync();
 
@@ -251,11 +253,11 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpGet("{Id}/backups")]
-        public async Task<ActionResult<BackupList>> GetBackups(int id)
+        public async Task<ActionResult<BackupsResponse>> GetBackups(int id)
         {
             var backups = await _context.Backups.Where(b => b.World.Id == id).ToListAsync();
 
-            BackupList worldBackups = new()
+            BackupsResponse worldBackups = new()
             {
                 Backups = backups
             };

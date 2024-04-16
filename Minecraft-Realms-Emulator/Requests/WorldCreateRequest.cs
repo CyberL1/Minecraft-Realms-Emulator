@@ -1,6 +1,6 @@
-﻿namespace Minecraft_Realms_Emulator.Entities
+﻿namespace Minecraft_Realms_Emulator.Requests
 {
-    public class WorldCreate
+    public class WorldCreateRequest
     {
         public string? Name { get; set; }
         public string? Description { get; set; }
