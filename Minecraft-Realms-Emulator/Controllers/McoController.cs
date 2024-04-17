@@ -2,6 +2,7 @@
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Responses;
+using Newtonsoft.Json;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -36,7 +37,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var news = new NewsResponse
             {
-                NewsLink = newsLink.Value
+                NewsLink = JsonConvert.DeserializeObject(newsLink.Value),
             };
 
             return news;
