@@ -5,6 +5,7 @@ using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
 using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
+using Newtonsoft.Json;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -165,7 +166,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var subscription = new Subscription
             {
                 StartDate = DateTime.UtcNow,
-                SubscriptionType = SubscriptionType.NORMAL.ToString()
+                SubscriptionType = "NORMAL"
             };
 
             world.Name = body.Name;
@@ -173,10 +174,12 @@ namespace Minecraft_Realms_Emulator.Controllers
             world.State = "OPEN";
             world.Subscription = subscription;
 
+            var defaultServerAddress = _context.Configuration.FirstOrDefault(x => x.Key == "defaultServerAddress");
+
             var connection = new Connection
             {
                 World = world,
-                Address = _context.Configuration.FirstOrDefault(x => x.Key == "defaultServerAddress").Value
+                Address = JsonConvert.DeserializeObject(defaultServerAddress.Value)
             };
 
             _context.Worlds.Update(world);
