@@ -22,7 +22,7 @@ builder.Services.AddSwaggerGen();
 
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
 dataSourceBuilder.EnableDynamicJson();
-await using var dataSource = dataSourceBuilder.Build();
+var dataSource = dataSourceBuilder.Build();
 
 builder.Services.AddDbContext<DataContext>(options =>
 {
