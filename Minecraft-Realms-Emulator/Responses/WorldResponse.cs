@@ -6,5 +6,6 @@
         public int DaysLeft { get; set; } = 30;
         public bool Expired { get; set; } = false;
         public bool ExpiredTrial { get; set; } = false;
+        public string Compatibility { get; set; } = null!;
     }
 }
