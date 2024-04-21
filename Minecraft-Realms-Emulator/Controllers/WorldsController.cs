@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
 using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
 using Newtonsoft.Json;
+using Semver;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -28,6 +30,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
             string playerName = cookie.Split(";")[1].Split("=")[1];
+            string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
             var ownedWorlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID).Include(w => w.Subscription).ToListAsync();
             var memberWorlds = await _context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Select(p => p.World).ToListAsync();
@@ -49,7 +52,8 @@ namespace Minecraft_Realms_Emulator.Controllers
                     MinigameName = null,
                     MinigameImage = null,
                     ActiveSlot = 1,
-                    Member = false
+                    Member = false,
+                    ActiveVersion = gameVersion
                 };
 
                 ownedWorlds.Add(world);
@@ -60,6 +64,9 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             foreach (var world in ownedWorlds)
             {
+                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.Strict).ComparePrecedenceTo(SemVersion.Parse(world.ActiveVersion, SemVersionStyles.Strict));
+                string isCompatible = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
+
                 WorldResponse response = new()
                 {
                     Id = world.Id,
@@ -75,7 +82,9 @@ namespace Minecraft_Realms_Emulator.Controllers
                     MinigameImage = world.MinigameImage,
                     ActiveSlot = world.ActiveSlot,
                     Member = world.Member,
-                    Players = world.Players
+                    Players = world.Players,
+                    ActiveVersion = world.ActiveVersion,
+                    Compatibility = isCompatible
                 };
 
                 if (world.Subscription != null)
@@ -90,6 +99,9 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             foreach (var world in memberWorlds)
             {
+                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.Strict).ComparePrecedenceTo(SemVersion.Parse(world.ActiveVersion, SemVersionStyles.Strict));
+                string isCompatible = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
+
                 WorldResponse response = new()
                 {
                     Id = world.Id,
@@ -108,7 +120,9 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Players = world.Players,
                     DaysLeft = 0,
                     Expired = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days < 0,
-                    ExpiredTrial = false
+                    ExpiredTrial = false,
+                    ActiveVersion = world.ActiveVersion,
+                    Compatibility = isCompatible
                 };
 
                 allWorlds.Add(response);
@@ -125,9 +139,15 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<WorldResponse>> GetWorldById(int id)
         {
+            string cookie = Request.Headers.Cookie;
+            string gameVersion = cookie.Split(";")[2].Split("=")[1];
+
             var world = await _context.Worlds.Include(w => w.Players).Include(w => w.Subscription).FirstOrDefaultAsync(w => w.Id == id);
 
             if (world?.Subscription == null) return NotFound("World not found");
+
+            int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.Strict).ComparePrecedenceTo(SemVersion.Parse(world.ActiveVersion, SemVersionStyles.Strict));
+            string isCompatible = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
 
             WorldResponse response = new()
             {
@@ -143,11 +163,14 @@ namespace Minecraft_Realms_Emulator.Controllers
                 MinigameName = world.MinigameName,
                 MinigameImage = world.MinigameImage,
                 ActiveSlot = world.ActiveSlot,
+                Slots = world.Slots,
                 Member = world.Member,
                 Players = world.Players,
                 DaysLeft = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days,
                 Expired = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days < 0,
-                ExpiredTrial = false
+                ExpiredTrial = false,
+                ActiveVersion = world.ActiveVersion,
+                Compatibility = isCompatible
             };
 
             return response;

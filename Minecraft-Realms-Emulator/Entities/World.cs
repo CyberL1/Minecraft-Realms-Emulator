@@ -20,5 +20,6 @@ namespace Minecraft_Realms_Emulator.Entities
         public int ActiveSlot { get; set; } = 1;
         public JsonDocument[] Slots { get; set; } = [];
         public bool Member { get; set; } = false;
+        public string ActiveVersion { get; set; } = null!;
     }
 }
