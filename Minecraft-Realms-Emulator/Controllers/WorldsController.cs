@@ -99,7 +99,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             foreach (var world in memberWorlds)
             {
-                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.Strict).ComparePrecedenceTo(SemVersion.Parse(world.ActiveVersion, SemVersionStyles.Strict));
+                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(world.ActiveVersion, SemVersionStyles.OptionalPatch));
                 string isCompatible = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
 
                 WorldResponse response = new()
@@ -146,7 +146,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             if (world?.Subscription == null) return NotFound("World not found");
 
-            int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.Strict).ComparePrecedenceTo(SemVersion.Parse(world.ActiveVersion, SemVersionStyles.Strict));
+            int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(world.ActiveVersion, SemVersionStyles.OptionalPatch));
             string isCompatible = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
 
             WorldResponse response = new()
