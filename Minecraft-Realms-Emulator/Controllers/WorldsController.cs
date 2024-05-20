@@ -297,5 +297,18 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             return Ok(connection);
         }
+
+        [HttpDelete("{wId}")]
+        public ActionResult<bool> DeleteRealm(int wId)
+        {
+            var world = _context.Worlds.Find(wId);
+
+            if (world == null) return NotFound("World not found");
+
+            _context.Worlds.Remove(world);
+            _context.SaveChanges();
+
+            return Ok(true);
+        }
     }
 }
