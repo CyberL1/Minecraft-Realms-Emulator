@@ -13,7 +13,7 @@ namespace Minecraft_Realms_Emulator.Helpers
 
             db.Database.Migrate();
 
-            if (db.Configuration.FirstOrDefault(s => s.Key == "newsLink") == null)
+            if (!db.Configuration.Any(s => s.Key == "newsLink"))
             {
                 var newsLink = new Configuration
                 {
@@ -24,7 +24,7 @@ namespace Minecraft_Realms_Emulator.Helpers
                 db.Configuration.Add(newsLink);
             }
 
-            if (db.Configuration.FirstOrDefault(s => s.Key == "defaultServerAddress") == null)
+            if (!db.Configuration.Any(s => s.Key == "defaultServerAddress"))
             {
                 var defaultServerAddress = new Configuration
                 {
@@ -35,7 +35,7 @@ namespace Minecraft_Realms_Emulator.Helpers
                 db.Configuration.Add(defaultServerAddress);
             }
 
-            if (db.Configuration.FirstOrDefault(x => x.Key == "trialMode") == null)
+            if (!db.Configuration.Any(x => x.Key == "trialMode"))
             {
                 var trialMode = new Configuration
                 {
