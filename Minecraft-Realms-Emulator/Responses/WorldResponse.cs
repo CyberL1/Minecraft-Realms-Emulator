@@ -9,7 +9,7 @@ namespace Minecraft_Realms_Emulator.Entities
         public bool Expired { get; set; } = false;
         public bool ExpiredTrial { get; set; } = false;
         public string Compatibility { get; set; } = null!;
-        public List<SlotsResponse> Slots { get; set; } = null!;
+        public List<SlotResponse> Slots { get; set; } = null!;
         public string ActiveVersion { get; set; } = null!;
     }
 }
