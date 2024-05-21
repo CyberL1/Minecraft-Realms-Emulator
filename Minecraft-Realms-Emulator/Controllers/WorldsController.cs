@@ -138,13 +138,14 @@ namespace Minecraft_Realms_Emulator.Controllers
             return Ok(servers);
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<WorldResponse>> GetWorldById(int id)
+        [HttpGet("{wId}")]
+        [CheckRealmOwner]
+        public async Task<ActionResult<WorldResponse>> GetWorldById(int wId)
         {
             string cookie = Request.Headers.Cookie;
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var world = await _context.Worlds.Include(w => w.Players).Include(w => w.Subscription).Include(w => w.Slots).FirstOrDefaultAsync(w => w.Id == id);
+            var world = await _context.Worlds.Include(w => w.Players).Include(w => w.Subscription).Include(w => w.Slots).FirstOrDefaultAsync(w => w.Id == wId);
 
             if (world?.Subscription == null) return NotFound("World not found");
 
@@ -208,6 +209,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPost("{id}/initialize")]
+        [CheckRealmOwner]
         public async Task<ActionResult<World>> Initialize(int id, WorldCreateRequest body)
         {
             string cookie = Request.Headers.Cookie;
@@ -268,6 +270,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPost("{id}/reset")]
+        [CheckRealmOwner]
         public ActionResult<bool> Reset(int id)
         {
             Console.WriteLine($"Resetting world {id}");
@@ -291,6 +294,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPut("{id}/close")]
+        [CheckRealmOwner]
         public async Task<ActionResult<bool>> Close(int id)
         {
             var worlds = await _context.Worlds.ToListAsync();
@@ -307,6 +311,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPost("{id}")]
+        [CheckRealmOwner]
         public async Task<ActionResult<bool>> UpdateWorld(int id, WorldCreateRequest body)
         {
             var worlds = await _context.Worlds.ToListAsync();
@@ -324,6 +329,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPost("{wId}/slot/{sId}")]
+        [CheckRealmOwner]
         public async Task<ActionResult<bool>> UpdateSlotAsync(int wId, int sId, SlotOptionsRequest body)
         {
             var slots = await _context.Slots.Where(s => s.World.Id == wId).ToListAsync();
@@ -346,6 +352,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPut("{wId}/slot/{sId}")]
+        [CheckRealmOwner]
         public ActionResult<bool> SwitchSlot(int wId, int sId)
         {
             var world = _context.Worlds.Find(wId);
@@ -386,6 +393,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpGet("{Id}/backups")]
+        [CheckRealmOwner]
         public async Task<ActionResult<BackupsResponse>> GetBackups(int id)
         {
             var backups = await _context.Backups.Where(b => b.World.Id == id).ToListAsync();
@@ -407,6 +415,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpDelete("{wId}")]
+        [CheckRealmOwner]
         public ActionResult<bool> DeleteRealm(int wId)
         {
             var world = _context.Worlds.Find(wId);

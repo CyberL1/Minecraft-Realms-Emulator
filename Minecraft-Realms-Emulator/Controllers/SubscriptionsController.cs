@@ -17,10 +17,11 @@ namespace Minecraft_Realms_Emulator.Controllers
         {
             _context = context;
         }
-        [HttpGet("{id}")]
-        public async Task<ActionResult<SubscriptionResponse>> Get(int id)
+        [HttpGet("{wId}")]
+        [CheckRealmOwner]
+        public async Task<ActionResult<SubscriptionResponse>> Get(int wId)
         {
-            var world = await _context.Worlds.Include(w => w.Subscription).FirstOrDefaultAsync(w => w.Id == id);
+            var world = await _context.Worlds.Include(w => w.Subscription).FirstOrDefaultAsync(w => w.Id == wId);
 
             if (world?.Subscription == null) return NotFound("Subscription not found");
 
