@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Migrations;
 using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
 using Newtonsoft.Json;
@@ -344,10 +345,42 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPut("{wId}/slot/{sId}")]
-        public bool SwitchSlot(int wId, int sId)
+        public async Task<ActionResult<bool>> SwitchSlot(int wId, int sId)
         {
-            Console.WriteLine($"Switching world {wId} to slot {sId}");
-            return true;
+            var world = _context.Worlds.Find(wId);
+
+            if (world == null) return NotFound("World not found");
+
+            var slot = _context.Slots.Where(s => s.World.Id == wId).Where(s => s.SlotId == sId).Any();
+
+            if (!slot)
+            {
+                string cookie = Request.Headers.Cookie;
+                string gameVersion = cookie.Split(";")[2].Split("=")[1];
+
+                _context.Slots.Add(new() {
+                    World = world,
+                    SlotId = sId,
+                    SlotName = "",
+                    Version = gameVersion,
+                    GameMode = 0,
+                    Difficulty = 2,
+                    SpawnProtection = 0,
+                    ForceGameMode = false,
+                    Pvp = true,
+                    SpawnAnimals = true,
+                    SpawnMonsters = true,
+                    SpawnNPCs = true,
+                    CommandBlocks = false
+                });
+
+                _context.SaveChanges();
+            }
+
+            world.ActiveSlot = sId;
+            _context.SaveChanges();
+
+            return Ok(true);
         }
 
         [HttpGet("{Id}/backups")]
