@@ -150,14 +150,14 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             Slot activeSlot = world.Slots.Find(s => s.SlotId == world.ActiveSlot);
 
-            int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(activeSlot.Version, SemVersionStyles.OptionalPatch));
-            string isCompatible = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
-
-            List<SlotsResponse> slots = [];
+            List<SlotResponse> slots = [];
 
             foreach (var slot in world.Slots)
             {
-                slots.Add(new SlotsResponse()
+                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(slot.Version, SemVersionStyles.OptionalPatch));
+                string compatibility = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
+
+                slots.Add(new SlotResponse()
                 {
                     SlotId = slot.SlotId,
                     Options = JsonConvert.SerializeObject(new
@@ -173,10 +173,12 @@ namespace Minecraft_Realms_Emulator.Controllers
                         spawnNPCs = slot.SpawnNPCs,
                         commandBlocks = slot.CommandBlocks,
                         version = slot.Version,
-                        compatibility = isCompatible
+                        compatibility
                     })
                 });
             }
+
+            var activeSlotOptions = JsonConvert.DeserializeObject<SlotOptionsResponse>(slots.Find(s => s.SlotId == activeSlot.SlotId).Options);
 
             WorldResponse response = new()
             {
@@ -198,8 +200,8 @@ namespace Minecraft_Realms_Emulator.Controllers
                 DaysLeft = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days,
                 Expired = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days < 0,
                 ExpiredTrial = false,
-                ActiveVersion = activeSlot.Version,
-                Compatibility = isCompatible
+                ActiveVersion = activeSlotOptions.Version,
+                Compatibility = activeSlotOptions.Compatibility
             };
 
             return response;
@@ -344,7 +346,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPut("{wId}/slot/{sId}")]
-        public async Task<ActionResult<bool>> SwitchSlot(int wId, int sId)
+        public ActionResult<bool> SwitchSlot(int wId, int sId)
         {
             var world = _context.Worlds.Find(wId);
 
@@ -357,7 +359,8 @@ namespace Minecraft_Realms_Emulator.Controllers
                 string cookie = Request.Headers.Cookie;
                 string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-                _context.Slots.Add(new() {
+                _context.Slots.Add(new()
+                {
                     World = world,
                     SlotId = sId,
                     SlotName = "",
