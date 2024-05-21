@@ -42,6 +42,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<MinecraftCookieMiddleware>();
+app.UseMiddleware<CheckRealmOwnerMiddleware>();
 
 app.MapControllers();
 
