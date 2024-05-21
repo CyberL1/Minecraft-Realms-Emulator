@@ -2,7 +2,7 @@
 {
     public class SlotOptionsRequest
     {
-        public string SlotName { get; set; } = null!;
+        public string SlotName { get; set; } = string.Empty;
         public string Version { get; set; } = null!;
         public int GameMode { get; set; }
         public int Difficulty { get; set; }
