@@ -1,4 +1,6 @@
-﻿namespace Minecraft_Realms_Emulator.Entities
+﻿using Minecraft_Realms_Emulator.Responses;
+
+namespace Minecraft_Realms_Emulator.Entities
 {
     public class WorldResponse : World
     {
@@ -7,5 +9,7 @@
         public bool Expired { get; set; } = false;
         public bool ExpiredTrial { get; set; } = false;
         public string Compatibility { get; set; } = null!;
+        public List<SlotsResponse> Slots { get; set; } = null!;
+        public string ActiveVersion { get; set; } = null!;
     }
 }

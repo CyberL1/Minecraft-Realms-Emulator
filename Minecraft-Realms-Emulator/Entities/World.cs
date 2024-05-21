@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace Minecraft_Realms_Emulator.Entities
+﻿namespace Minecraft_Realms_Emulator.Entities
 {
     public class World
     {
@@ -18,8 +16,7 @@ namespace Minecraft_Realms_Emulator.Entities
         public int? MinigameId { get; set; }
         public string? MinigameImage { get; set; }
         public int ActiveSlot { get; set; } = 1;
-        public JsonDocument[] Slots { get; set; } = [];
+        public List<Slot> Slots { get; set; } = [];
         public bool Member { get; set; } = false;
-        public string ActiveVersion { get; set; } = null!;
     }
 }

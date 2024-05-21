@@ -31,8 +31,8 @@ namespace Minecraft_Realms_Emulator.Controllers
             string playerName = cookie.Split(";")[1].Split("=")[1];
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var ownedWorlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID).Include(w => w.Subscription).ToListAsync();
-            var memberWorlds = await _context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Select(p => p.World).ToListAsync();
+            var ownedWorlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).ToListAsync();
+            var memberWorlds = await _context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Select(p => p.World).ToListAsync();
 
             List<WorldResponse> allWorlds = [];
 
@@ -51,8 +51,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     MinigameName = null,
                     MinigameImage = null,
                     ActiveSlot = 1,
-                    Member = false,
-                    ActiveVersion = gameVersion
+                    Member = false
                 };
 
                 ownedWorlds.Add(world);
@@ -63,7 +62,9 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             foreach (var world in ownedWorlds)
             {
-                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.Strict).ComparePrecedenceTo(SemVersion.Parse(world.ActiveVersion, SemVersionStyles.Strict));
+                Slot activeSlot = world.Slots.Find(s => s.SlotId == world.ActiveSlot);
+
+                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.Strict).ComparePrecedenceTo(SemVersion.Parse(activeSlot?.Version ?? gameVersion, SemVersionStyles.Strict));
                 string isCompatible = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
 
                 WorldResponse response = new()
@@ -82,7 +83,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     ActiveSlot = world.ActiveSlot,
                     Member = world.Member,
                     Players = world.Players,
-                    ActiveVersion = world.ActiveVersion,
+                    ActiveVersion = activeSlot?.Version ?? gameVersion,
                     Compatibility = isCompatible
                 };
 
@@ -98,7 +99,9 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             foreach (var world in memberWorlds)
             {
-                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(world.ActiveVersion, SemVersionStyles.OptionalPatch));
+                Slot activeSlot = world.Slots.Find(s => s.SlotId == world.ActiveSlot);
+
+                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(activeSlot.Version, SemVersionStyles.OptionalPatch));
                 string isCompatible = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
 
                 WorldResponse response = new()
@@ -120,7 +123,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     DaysLeft = 0,
                     Expired = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days < 0,
                     ExpiredTrial = false,
-                    ActiveVersion = world.ActiveVersion,
+                    ActiveVersion = activeSlot.Version,
                     Compatibility = isCompatible
                 };
 
@@ -141,12 +144,39 @@ namespace Minecraft_Realms_Emulator.Controllers
             string cookie = Request.Headers.Cookie;
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var world = await _context.Worlds.Include(w => w.Players).Include(w => w.Subscription).FirstOrDefaultAsync(w => w.Id == id);
+            var world = await _context.Worlds.Include(w => w.Players).Include(w => w.Subscription).Include(w => w.Slots).FirstOrDefaultAsync(w => w.Id == id);
 
             if (world?.Subscription == null) return NotFound("World not found");
 
-            int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(world.ActiveVersion, SemVersionStyles.OptionalPatch));
+            Slot activeSlot = world.Slots.Find(s => s.SlotId == world.ActiveSlot);
+
+            int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(activeSlot.Version, SemVersionStyles.OptionalPatch));
             string isCompatible = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
+
+            List<SlotsResponse> slots = [];
+
+            foreach (var slot in world.Slots)
+            {
+                slots.Add(new SlotsResponse()
+                {
+                    SlotId = slot.SlotId,
+                    Options = JsonConvert.SerializeObject(new
+                    {
+                        slotName = slot.SlotName,
+                        gameMode = slot.GameMode,
+                        difficulty = slot.Difficulty,
+                        spawnProtection = slot.SpawnProtection,
+                        forceGameMode = slot.ForceGameMode,
+                        pvp = slot.Pvp,
+                        spawnAnimals = slot.SpawnAnimals,
+                        spawnMonsters = slot.SpawnMonsters,
+                        spawnNPCs = slot.SpawnNPCs,
+                        commandBlocks = slot.CommandBlocks,
+                        version = slot.Version,
+                        compatibility = isCompatible
+                    })
+                });
+            }
 
             WorldResponse response = new()
             {
@@ -162,13 +192,13 @@ namespace Minecraft_Realms_Emulator.Controllers
                 MinigameName = world.MinigameName,
                 MinigameImage = world.MinigameImage,
                 ActiveSlot = world.ActiveSlot,
-                Slots = world.Slots,
+                Slots = slots,
                 Member = world.Member,
                 Players = world.Players,
                 DaysLeft = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days,
                 Expired = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days < 0,
                 ExpiredTrial = false,
-                ActiveVersion = world.ActiveVersion,
+                ActiveVersion = activeSlot.Version,
                 Compatibility = isCompatible
             };
 
@@ -178,6 +208,9 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpPost("{id}/initialize")]
         public async Task<ActionResult<World>> Initialize(int id, WorldCreateRequest body)
         {
+            string cookie = Request.Headers.Cookie;
+            string gameVersion = cookie.Split(";")[2].Split("=")[1];
+
             var worlds = await _context.Worlds.ToListAsync();
 
             var world = worlds.Find(w => w.Id == id);
@@ -204,10 +237,28 @@ namespace Minecraft_Realms_Emulator.Controllers
                 Address = JsonConvert.DeserializeObject(defaultServerAddress.Value)
             };
 
+            Slot slot = new()
+            {
+                World = world,
+                SlotId = 1,
+                SlotName = "",
+                Version = gameVersion,
+                GameMode = 0,
+                Difficulty = 2,
+                SpawnProtection = 0,
+                ForceGameMode = false,
+                Pvp = true,
+                SpawnAnimals = true,
+                SpawnMonsters = true,
+                SpawnNPCs = true,
+                CommandBlocks = false
+            };
+
             _context.Worlds.Update(world);
 
             _context.Subscriptions.Add(subscription);
             _context.Connections.Add(connection);
+            _context.Slots.Add(slot);
 
             _context.SaveChanges();
 
@@ -271,9 +322,31 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpPost("{wId}/slot/{sId}")]
-        public bool U(int wId, int sId, object o)
+        public async Task<ActionResult<bool>> UpdateSlotAsync(int wId, int sId, SlotOptionsRequest body)
         {
-            Console.WriteLine(o);
+            var slots = await _context.Slots.Where(s => s.World.Id == wId).ToListAsync();
+            var slot = slots.Find(s => s.SlotId == sId);
+
+            slot.SlotName = body.SlotName;
+            slot.GameMode = body.GameMode;
+            slot.Difficulty = body.Difficulty;
+            slot.SpawnProtection = body.SpawnProtection;
+            slot.ForceGameMode = body.ForceGameMode;
+            slot.Pvp = body.Pvp;
+            slot.SpawnAnimals = body.SpawnAnimals;
+            slot.SpawnMonsters = body.SpawnMonsters;
+            slot.SpawnNPCs = body.SpawnNPCs;
+            slot.CommandBlocks = body.CommandBlocks;
+
+            _context.SaveChanges();
+            
+            return Ok(true);
+        }
+
+        [HttpPut("{wId}/slot/{sId}")]
+        public bool SwitchSlot(int wId, int sId)
+        {
+            Console.WriteLine($"Switching world {wId} to slot {sId}");
             return true;
         }
 
