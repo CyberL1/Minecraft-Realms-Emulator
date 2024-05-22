@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
+using Minecraft_Realms_Emulator.Helpers;
 using Minecraft_Realms_Emulator.Responses;
-using Newtonsoft.Json;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -19,28 +19,29 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpGet("available")]
-        public bool GetAvailable()
+        public ActionResult<bool> GetAvailable()
         {
-            return true;
+            return Ok(true);
         }
 
         [HttpGet("client/compatible")]
-        public string GetCompatible()
+        public ActionResult<string> GetCompatible()
         {
-            return Compatility.COMPATIBLE.ToString();
+            return Ok("COMPATIBLE");
         }
 
         [HttpGet("v1/news")]
-        public NewsResponse GetNews()
+        public ActionResult<NewsResponse> GetNews()
         {
-            var newsLink = _context.Configuration.FirstOrDefault(s => s.Key == "newsLink");
+            var config = new ConfigHelper(_context);
+            var newsLink = config.GetSetting("newsLink");
 
             var news = new NewsResponse
             {
-                NewsLink = JsonConvert.DeserializeObject(newsLink.Value),
+                NewsLink = newsLink.Value
             };
 
-            return news;
+            return Ok(news);
         }
     }
 }

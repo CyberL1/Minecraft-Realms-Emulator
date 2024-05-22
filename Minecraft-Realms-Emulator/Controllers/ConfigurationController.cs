@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Helpers;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -16,10 +17,12 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpGet]
-        public ActionResult<Configuration> GetConfigurationAsync()
+        public ActionResult<Configuration> GetConfiguration()
         {
-            var configuration = _context.Configuration;
-            return Ok(configuration);
+            var config = new ConfigHelper(_context);
+            var settings = config.GetSettings();
+
+            return Ok(settings);
         }
     }
 }
