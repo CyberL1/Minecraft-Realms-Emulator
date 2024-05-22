@@ -208,16 +208,16 @@ namespace Minecraft_Realms_Emulator.Controllers
             return response;
         }
 
-        [HttpPost("{id}/initialize")]
+        [HttpPost("{wId}/initialize")]
         [CheckRealmOwner]
-        public async Task<ActionResult<World>> Initialize(int id, WorldCreateRequest body)
+        public async Task<ActionResult<World>> Initialize(int wId, WorldCreateRequest body)
         {
             string cookie = Request.Headers.Cookie;
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
             var worlds = await _context.Worlds.ToListAsync();
 
-            var world = worlds.Find(w => w.Id == id);
+            var world = worlds.Find(w => w.Id == wId);
 
             if (world == null) return NotFound("World not found");
             if (world.State != "UNINITIALIZED") return NotFound("World already initialized");
@@ -269,20 +269,21 @@ namespace Minecraft_Realms_Emulator.Controllers
             return Ok(world);
         }
 
-        [HttpPost("{id}/reset")]
+        [HttpPost("{wId}/reset")]
         [CheckRealmOwner]
-        public ActionResult<bool> Reset(int id)
+        public ActionResult<bool> Reset(int wId)
         {
-            Console.WriteLine($"Resetting world {id}");
+            Console.WriteLine($"Resetting world {wId}");
             return Ok(true);
         }
 
-        [HttpPut("{id}/open")]
-        public async Task<ActionResult<bool>> Open(int id)
+        [HttpPut("{wId}/open")]
+        [CheckRealmOwner]
+        public async Task<ActionResult<bool>> Open(int wId)
         {
             var worlds = await _context.Worlds.ToListAsync();
 
-            var world = worlds.Find(w => w.Id == id);
+            var world = worlds.Find(w => w.Id == wId);
 
             if (world == null) return NotFound("World not found");
 
@@ -293,13 +294,13 @@ namespace Minecraft_Realms_Emulator.Controllers
             return Ok(true);
         }
 
-        [HttpPut("{id}/close")]
+        [HttpPut("{wId}/close")]
         [CheckRealmOwner]
-        public async Task<ActionResult<bool>> Close(int id)
+        public async Task<ActionResult<bool>> Close(int wId)
         {
             var worlds = await _context.Worlds.ToListAsync();
 
-            var world = worlds.FirstOrDefault(w => w.Id == id);
+            var world = worlds.FirstOrDefault(w => w.Id == wId);
 
             if (world == null) return NotFound("World not found");
 
@@ -310,13 +311,13 @@ namespace Minecraft_Realms_Emulator.Controllers
             return Ok(true);
         }
 
-        [HttpPost("{id}")]
+        [HttpPost("{wId}")]
         [CheckRealmOwner]
-        public async Task<ActionResult<bool>> UpdateWorld(int id, WorldCreateRequest body)
+        public async Task<ActionResult<bool>> UpdateWorld(int wId, WorldCreateRequest body)
         {
             var worlds = await _context.Worlds.ToListAsync();
 
-            var world = worlds.Find(w => w.Id == id);
+            var world = worlds.Find(w => w.Id == wId);
 
             if (world == null) return NotFound("World not found");
 
@@ -392,11 +393,11 @@ namespace Minecraft_Realms_Emulator.Controllers
             return Ok(true);
         }
 
-        [HttpGet("{Id}/backups")]
+        [HttpGet("{wId}/backups")]
         [CheckRealmOwner]
-        public async Task<ActionResult<BackupsResponse>> GetBackups(int id)
+        public async Task<ActionResult<BackupsResponse>> GetBackups(int wId)
         {
-            var backups = await _context.Backups.Where(b => b.World.Id == id).ToListAsync();
+            var backups = await _context.Backups.Where(b => b.World.Id == wId).ToListAsync();
 
             BackupsResponse worldBackups = new()
             {
