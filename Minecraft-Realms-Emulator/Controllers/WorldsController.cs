@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Helpers;
 using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
 using Newtonsoft.Json;
@@ -233,12 +234,13 @@ namespace Minecraft_Realms_Emulator.Controllers
             world.State = "OPEN";
             world.Subscription = subscription;
 
-            var defaultServerAddress = _context.Configuration.FirstOrDefault(x => x.Key == "defaultServerAddress");
+            var config = new ConfigHelper(_context);
+            var defaultServerAddress = config.GetSetting("defaultServerAddress");
 
             var connection = new Connection
             {
                 World = world,
-                Address = JsonConvert.DeserializeObject(defaultServerAddress.Value)
+                Address = defaultServerAddress.Value
             };
 
             Slot slot = new()

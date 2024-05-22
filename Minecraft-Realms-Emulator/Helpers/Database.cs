@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Helpers.Config;
+using Newtonsoft.Json;
 
 namespace Minecraft_Realms_Emulator.Helpers
 {
@@ -13,37 +15,34 @@ namespace Minecraft_Realms_Emulator.Helpers
 
             db.Database.Migrate();
 
-            if (!db.Configuration.Any(s => s.Key == "newsLink"))
+            var config = new ConfigHelper(db);
+            var settings = new Settings();
+
+            if (config.GetSetting("newsLink") == null)
             {
-                var newsLink = new Configuration
+                db.Configuration.Add(new Configuration
                 {
                     Key = "newsLink",
-                    Value = "\"https://github.com/CyberL1/Minecraft-Realms-Emulator\""
-                };
-
-                db.Configuration.Add(newsLink);
+                    Value = JsonConvert.SerializeObject(settings.NewsLink)
+                });
             }
-
-            if (!db.Configuration.Any(s => s.Key == "defaultServerAddress"))
+            
+            if (config.GetSetting("defaultServerAddress") == null)
             {
-                var defaultServerAddress = new Configuration
+                db.Configuration.Add(new Configuration
                 {
                     Key = "defaultServerAddress",
-                    Value = "\"127.0.0.1\""
-                };
-
-                db.Configuration.Add(defaultServerAddress);
+                    Value = JsonConvert.SerializeObject(settings.DefaultServerAddress)
+                });
             }
 
-            if (!db.Configuration.Any(x => x.Key == "trialMode"))
+            if (config.GetSetting("trialMode") == null)
             {
-                var trialMode = new Configuration
+                db.Configuration.Add(new Configuration
                 {
                     Key = "trialMode",
-                    Value = true
-                };
-
-                db.Configuration.Add(trialMode);
+                    Value = JsonConvert.SerializeObject(settings.TrialMode)
+                });
             }
 
             db.SaveChanges();

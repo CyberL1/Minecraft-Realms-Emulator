@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
+using Minecraft_Realms_Emulator.Helpers;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -16,9 +17,13 @@ namespace Minecraft_Realms_Emulator.Controllers
             _context = context;
         }
 
-        [HttpGet(Name = "GetTrial")]
-        public bool Get() {
-            return bool.Parse(_context.Configuration.FirstOrDefault(x => x.Key == "trialMode").Value);
+        [HttpGet]
+        public ActionResult<bool> GetTrial()
+        {
+            var config = new ConfigHelper(_context);
+            var trialMode = config.GetSetting("trialMode");
+
+            return Ok(trialMode.Value);
         }
     }
 }
