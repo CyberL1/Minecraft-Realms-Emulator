@@ -35,7 +35,7 @@ namespace Minecraft_Realms_Emulator.Modes.External.Controllers
         public ActionResult<NewsResponse> GetNews()
         {
             var config = new ConfigHelper(_context);
-            var newsLink = config.GetSetting(nameof(SettingsEnum.newsLink));
+            var newsLink = config.GetSetting(nameof(SettingsEnum.NewsLink));
 
             var news = new NewsResponse
             {

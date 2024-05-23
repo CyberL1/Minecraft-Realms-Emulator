@@ -2,9 +2,9 @@
 {
     public enum SettingsEnum
     {
-        newsLink,
-        defaultServerAddress,
-        trialMode,
-        workMode
+        NewsLink,
+        DefaultServerAddress,
+        TrialMode,
+        WorkMode
     }
 }

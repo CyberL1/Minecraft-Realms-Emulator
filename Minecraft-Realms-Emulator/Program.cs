@@ -52,7 +52,7 @@ var db = scope.ServiceProvider.GetRequiredService<DataContext>();
 app.MapControllers();
 
 var config = new ConfigHelper(db);
-var mode = config.GetSetting(nameof(SettingsEnum.workMode));
+var mode = config.GetSetting(nameof(SettingsEnum.WorkMode));
 
 if (mode == null)
 {
