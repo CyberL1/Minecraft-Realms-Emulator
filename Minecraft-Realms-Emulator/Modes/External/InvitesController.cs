@@ -6,9 +6,9 @@ using Minecraft_Realms_Emulator.Entities;
 using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
 
-namespace Minecraft_Realms_Emulator.Controllers
+namespace Minecraft_Realms_Emulator.Modes.External.Controllers
 {
-    [Route("[controller]")]
+    [Route("modes/external/[controller]")]
     [ApiController]
     [RequireMinecraftCookie]
     public class InvitesController : ControllerBase

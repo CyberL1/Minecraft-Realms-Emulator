@@ -10,9 +10,9 @@ using Minecraft_Realms_Emulator.Responses;
 using Newtonsoft.Json;
 using Semver;
 
-namespace Minecraft_Realms_Emulator.Controllers
+namespace Minecraft_Realms_Emulator.Modes.External.Controllers
 {
-    [Route("[controller]")]
+    [Route("modes/external/[controller]")]
     [ApiController]
     [RequireMinecraftCookie]
     public class WorldsController : ControllerBase

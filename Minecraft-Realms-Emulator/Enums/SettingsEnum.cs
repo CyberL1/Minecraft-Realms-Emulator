@@ -4,6 +4,7 @@
     {
         newsLink,
         defaultServerAddress,
-        trialMode
+        trialMode,
+        workMode
     }
 }
