@@ -22,7 +22,7 @@ namespace Minecraft_Realms_Emulator.Modes.External.Controllers
         public ActionResult<bool> GetTrial()
         {
             var config = new ConfigHelper(_context);
-            var trialMode = config.GetSetting(nameof(SettingsEnum.trialMode));
+            var trialMode = config.GetSetting(nameof(SettingsEnum.TrialMode));
 
             return Ok(trialMode.Value);
         }
