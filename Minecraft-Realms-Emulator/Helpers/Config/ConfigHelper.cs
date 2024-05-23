@@ -33,7 +33,7 @@ namespace Minecraft_Realms_Emulator.Helpers
 
         public Configuration? GetSetting(string key)
         {
-            var setting = Db.Configuration.Find(FirstCharToLowerCase(key));
+            var setting = Db.Configuration.Find(key);
 
             if (setting == null) return null;
 
@@ -42,14 +42,6 @@ namespace Minecraft_Realms_Emulator.Helpers
                 Key = setting.Key,
                 Value = JsonConvert.DeserializeObject(setting.Value)
             };
-        }
-
-        private static string FirstCharToLowerCase(string str)
-        {
-            if (!string.IsNullOrEmpty(str) && char.IsUpper(str[0]))
-                return str.Length == 1 ? char.ToLower(str[0]).ToString() : char.ToLower(str[0]) + str[1..];
-
-            return str;
         }
     }
 }
