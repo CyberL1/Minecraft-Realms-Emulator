@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
+using Minecraft_Realms_Emulator.Enums;
 using Minecraft_Realms_Emulator.Helpers;
 using Minecraft_Realms_Emulator.Middlewares;
 using Npgsql;
@@ -44,6 +46,28 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<MinecraftCookieMiddleware>();
 app.UseMiddleware<CheckRealmOwnerMiddleware>();
 
+var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+
 app.MapControllers();
 
+var config = new ConfigHelper(db);
+var mode = config.GetSetting(nameof(SettingsEnum.workMode));
+
+if (mode == null)
+{
+    Console.WriteLine("Cannot get server work mode, exiting");
+    Environment.Exit(1);
+}
+
+if (!Enum.IsDefined(typeof(WorkModeEnum), mode.Value))
+{
+    Console.WriteLine("Invalid server work mode, exiting");
+    Environment.Exit(1);
+}
+
+var rewriteOptions = new RewriteOptions().AddRewrite(@"^(?!.*configuration)(.*)$", $"modes/{mode.Value}/$1", true);
+app.UseRewriter(rewriteOptions);
+
+Console.WriteLine($"Running in {mode.Value} mode");
 app.Run();

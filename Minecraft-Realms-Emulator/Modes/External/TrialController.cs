@@ -4,9 +4,9 @@ using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Enums;
 using Minecraft_Realms_Emulator.Helpers;
 
-namespace Minecraft_Realms_Emulator.Controllers
+namespace Minecraft_Realms_Emulator.Modes.External.Controllers
 {
-    [Route("[controller]")]
+    [Route("modes/external/[controller]")]
     [ApiController]
     [RequireMinecraftCookie]
     public class TrialController : ControllerBase
