@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
-using Minecraft_Realms_Emulator.Enums;
 using Minecraft_Realms_Emulator.Helpers.Config;
 using Newtonsoft.Json;
 
@@ -19,31 +18,19 @@ namespace Minecraft_Realms_Emulator.Helpers
             var config = new ConfigHelper(db);
             var settings = new Settings();
 
-            if (config.GetSetting(nameof(SettingsEnum.newsLink)) == null)
+            foreach (var property in settings.GetType().GetProperties())
             {
-                db.Configuration.Add(new Configuration
-                {
-                    Key = nameof(SettingsEnum.newsLink),
-                    Value = JsonConvert.SerializeObject(settings.NewsLink)
-                });
-            }
-            
-            if (config.GetSetting(nameof(SettingsEnum.defaultServerAddress)) == null)
-            {
-                db.Configuration.Add(new Configuration
-                {
-                    Key = nameof(SettingsEnum.defaultServerAddress),
-                    Value = JsonConvert.SerializeObject(settings.DefaultServerAddress)
-                });
-            }
+                var name = property.Name;
+                var value = property.GetValue(settings);
 
-            if (config.GetSetting(nameof(SettingsEnum.trialMode)) == null)
-            {
-                db.Configuration.Add(new Configuration
+                if (config.GetSetting(name) == null)
                 {
-                    Key = nameof(SettingsEnum.trialMode),
-                    Value = JsonConvert.SerializeObject(settings.TrialMode)
-                });
+                    db.Configuration.Add(new Configuration
+                    {
+                        Key = name,
+                        Value = JsonConvert.SerializeObject(value)
+                    });
+                }
             }
 
             db.SaveChanges();
