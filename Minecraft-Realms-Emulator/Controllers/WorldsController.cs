@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Enums;
 using Minecraft_Realms_Emulator.Helpers;
 using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
@@ -45,8 +46,8 @@ namespace Minecraft_Realms_Emulator.Controllers
                     OwnerUUID = playerUUID,
                     Name = null,
                     Motd = null,
-                    State = "UNINITIALIZED",
-                    WorldType = "NORMAL",
+                    State = nameof(StateEnum.UNINITIALIZED),
+                    WorldType = nameof(WorldTypeEnum.NORMAL),
                     MaxPlayers = 10,
                     MinigameId = null,
                     MinigameName = null,
@@ -66,7 +67,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                 Slot activeSlot = world.Slots.Find(s => s.SlotId == world.ActiveSlot);
 
                 int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.Strict).ComparePrecedenceTo(SemVersion.Parse(activeSlot?.Version ?? gameVersion, SemVersionStyles.Strict));
-                string isCompatible = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
+                string isCompatible = versionsCompared == 0 ? nameof(CompatibilityEnum.COMPATIBLE) : versionsCompared < 0 ? nameof(CompatibilityEnum.NEEDS_DOWNGRADE) : nameof(CompatibilityEnum.NEEDS_UPGRADE);
 
                 WorldResponse response = new()
                 {
@@ -103,7 +104,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                 Slot activeSlot = world.Slots.Find(s => s.SlotId == world.ActiveSlot);
 
                 int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(activeSlot.Version, SemVersionStyles.OptionalPatch));
-                string isCompatible = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
+                string isCompatible = versionsCompared == 0 ? nameof(CompatibilityEnum.COMPATIBLE) : versionsCompared < 0 ? nameof(CompatibilityEnum.NEEDS_DOWNGRADE) : nameof(CompatibilityEnum.NEEDS_UPGRADE);
 
                 WorldResponse response = new()
                 {
@@ -157,7 +158,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             foreach (var slot in world.Slots)
             {
                 int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(slot.Version, SemVersionStyles.OptionalPatch));
-                string compatibility = versionsCompared == 0 ? "COMPATIBLE" : versionsCompared < 0 ? "NEEDS_DOWNGRADE" : "NEEDS_UPGRADE";
+                string compatibility = versionsCompared == 0 ? nameof(CompatibilityEnum.COMPATIBLE) : versionsCompared < 0 ? nameof(CompatibilityEnum.NEEDS_DOWNGRADE) : nameof(CompatibilityEnum.NEEDS_UPGRADE);
 
                 slots.Add(new SlotResponse()
                 {
@@ -221,17 +222,17 @@ namespace Minecraft_Realms_Emulator.Controllers
             var world = worlds.Find(w => w.Id == wId);
 
             if (world == null) return NotFound("World not found");
-            if (world.State != "UNINITIALIZED") return NotFound("World already initialized");
+            if (world.State != nameof(StateEnum.UNINITIALIZED)) return NotFound("World already initialized");
 
             var subscription = new Subscription
             {
                 StartDate = DateTime.UtcNow,
-                SubscriptionType = "NORMAL"
+                SubscriptionType = nameof(SubscriptionTypeEnum.NORMAL)
             };
 
             world.Name = body.Name;
             world.Motd = body.Description;
-            world.State = "OPEN";
+            world.State = nameof(StateEnum.OPEN);
             world.Subscription = subscription;
 
             var config = new ConfigHelper(_context);
@@ -289,7 +290,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             if (world == null) return NotFound("World not found");
 
-            world.State = "OPEN";
+            world.State = nameof(StateEnum.OPEN);
 
             _context.SaveChanges();
 
@@ -306,7 +307,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             if (world == null) return NotFound("World not found");
 
-            world.State = "CLOSED";
+            world.State = nameof(StateEnum.CLOSED);
 
             _context.SaveChanges();
 

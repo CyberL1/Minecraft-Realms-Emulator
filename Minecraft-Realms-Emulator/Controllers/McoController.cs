@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
+using Minecraft_Realms_Emulator.Enums;
 using Minecraft_Realms_Emulator.Helpers;
 using Minecraft_Realms_Emulator.Responses;
 
@@ -27,14 +28,14 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet("client/compatible")]
         public ActionResult<string> GetCompatible()
         {
-            return Ok("COMPATIBLE");
+            return Ok(nameof(VersionCompatibilityEnum.COMPATIBLE));
         }
 
         [HttpGet("v1/news")]
         public ActionResult<NewsResponse> GetNews()
         {
             var config = new ConfigHelper(_context);
-            var newsLink = config.GetSetting("newsLink");
+            var newsLink = config.GetSetting(nameof(SettingsEnum.newsLink));
 
             var news = new NewsResponse
             {
