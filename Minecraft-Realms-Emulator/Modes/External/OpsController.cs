@@ -5,7 +5,7 @@ using Minecraft_Realms_Emulator.Responses;
 
 namespace Minecraft_Realms_Emulator.Modes.External.Controllers
 {
-    [Route("modes/exterrnal/[controller]")]
+    [Route("modes/external/[controller]")]
     [ApiController]
     [RequireMinecraftCookie]
     public class OpsController : ControllerBase
