@@ -236,7 +236,7 @@ namespace Minecraft_Realms_Emulator.Modes.External.Controllers
             world.Subscription = subscription;
 
             var config = new ConfigHelper(_context);
-            var defaultServerAddress = config.GetSetting("defaultServerAddress");
+            var defaultServerAddress = config.GetSetting(nameof(SettingsEnum.DefaultServerAddress));
 
             var connection = new Connection
             {
