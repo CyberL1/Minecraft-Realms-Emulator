@@ -6,7 +6,7 @@ using Minecraft_Realms_Emulator.Entities;
 using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
 
-namespace Minecraft_Realms_Emulator.Modes.External.Controllers
+namespace Minecraft_Realms_Emulator.Modes.External
 {
     [Route("modes/external/[controller]")]
     [ApiController]

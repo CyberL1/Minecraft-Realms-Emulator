@@ -10,7 +10,7 @@ using Minecraft_Realms_Emulator.Responses;
 using Newtonsoft.Json;
 using Semver;
 
-namespace Minecraft_Realms_Emulator.Modes.External.Controllers
+namespace Minecraft_Realms_Emulator.Modes.External
 {
     [Route("modes/external/[controller]")]
     [ApiController]
