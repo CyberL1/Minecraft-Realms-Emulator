@@ -43,9 +43,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMiddleware<MinecraftCookieMiddleware>();
-app.UseMiddleware<CheckRealmOwnerMiddleware>();
-
 var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<DataContext>();
 
@@ -68,6 +65,9 @@ if (!Enum.IsDefined(typeof(WorkModeEnum), mode.Value))
 
 var rewriteOptions = new RewriteOptions().AddRewrite(@"^(?!.*configuration)(.*)$", $"modes/{mode.Value}/$1", true);
 app.UseRewriter(rewriteOptions);
+
+app.UseMiddleware<MinecraftCookieMiddleware>();
+app.UseMiddleware<CheckRealmOwnerMiddleware>();
 
 Console.WriteLine($"Running in {mode.Value} mode");
 app.Run();
