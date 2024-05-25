@@ -66,7 +66,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
             {
                 Slot activeSlot = world.Slots.Find(s => s.SlotId == world.ActiveSlot);
 
-                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(activeSlot?.Version ?? gameVersion, SemVersionStyles.Any));
+                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(activeSlot?.Version ?? gameVersion, SemVersionStyles.OptionalPatch));
                 string isCompatible = versionsCompared == 0 ? nameof(CompatibilityEnum.COMPATIBLE) : versionsCompared < 0 ? nameof(CompatibilityEnum.NEEDS_DOWNGRADE) : nameof(CompatibilityEnum.NEEDS_UPGRADE);
 
                 WorldResponse response = new()
