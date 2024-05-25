@@ -95,6 +95,7 @@ app.UseRewriter(rewriteOptions);
 
 app.UseMiddleware<MinecraftCookieMiddleware>();
 app.UseMiddleware<CheckRealmOwnerMiddleware>();
+app.UseMiddleware<ActiveSubscriptionMiddleware>();
 
 Console.WriteLine($"Running in {mode.Value} mode");
 app.Run();
