@@ -5,6 +5,7 @@ using Minecraft_Realms_Emulator.Enums;
 using Minecraft_Realms_Emulator.Helpers;
 using Minecraft_Realms_Emulator.Middlewares;
 using Npgsql;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
@@ -61,6 +62,32 @@ if (!Enum.IsDefined(typeof(WorkModeEnum), mode.Value))
 {
     Console.WriteLine("Invalid server work mode, exiting");
     Environment.Exit(1);
+}
+
+if (mode.Value == nameof(WorkModeEnum.REALMS))
+{
+    var resourceNames = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+
+    foreach (var resourceName in resourceNames)
+    {
+        var path = $"{AppDomain.CurrentDomain.BaseDirectory}{resourceName.Replace("Minecraft_Realms_Emulator.Resources.", "").Replace(".", "/")}";
+        
+        var directory = Path.GetDirectoryName(path);
+        var name = Path.GetFileName(path);
+
+        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
+
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        if (!File.Exists(path))
+        {
+            using var file = new FileStream(path, FileMode.Create);
+            stream.CopyTo(file);
+        }
+    }
 }
 
 var rewriteOptions = new RewriteOptions().AddRewrite(@"^(?!.*configuration)(.*)$", $"modes/{mode.Value}/$1", true);
