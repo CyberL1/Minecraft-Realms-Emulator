@@ -3,7 +3,7 @@ using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Responses;
 
-namespace Minecraft_Realms_Emulator.Modes.Realms
+namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
 {
     [Route("modes/realms/[controller]")]
     [ApiController]

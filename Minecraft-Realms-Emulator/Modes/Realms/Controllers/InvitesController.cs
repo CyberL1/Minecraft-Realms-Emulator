@@ -6,7 +6,7 @@ using Minecraft_Realms_Emulator.Entities;
 using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
 
-namespace Minecraft_Realms_Emulator.Modes.Realms
+namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
 {
     [Route("modes/realms/[controller]")]
     [ApiController]
@@ -29,7 +29,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
             var invites = await _context.Invites.Where(i => i.RecipeintUUID == playerUUID).Include(i => i.World).ToListAsync();
 
             List<InviteResponse> invitesList = [];
-            
+
             foreach (var invite in invites)
             {
                 InviteResponse inv = new()
@@ -38,7 +38,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
                     WorldName = invite.World.Name,
                     WorldOwnerName = invite.World.Owner,
                     WorldOwnerUuid = invite.World.OwnerUUID,
-                    Date = ((DateTimeOffset) invite.Date).ToUnixTimeMilliseconds(),
+                    Date = ((DateTimeOffset)invite.Date).ToUnixTimeMilliseconds(),
                 };
 
                 invitesList.Add(inv);
@@ -78,7 +78,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
             var invite = _context.Invites.Include(i => i.World).FirstOrDefault(i => i.InvitationId == id);
 
             if (invite == null) return NotFound("Invite not found");
-            
+
             _context.Invites.Remove(invite);
 
             string cookie = Request.Headers.Cookie;

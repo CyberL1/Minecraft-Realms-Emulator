@@ -5,6 +5,7 @@ using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
 using Minecraft_Realms_Emulator.Enums;
 using Minecraft_Realms_Emulator.Helpers;
+using Minecraft_Realms_Emulator.Modes.Realms.Helpers;
 using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
 using Newtonsoft.Json;
@@ -13,7 +14,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
-namespace Minecraft_Realms_Emulator.Modes.Realms
+namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
 {
     [Route("modes/realms/[controller]")]
     [ApiController]
@@ -275,15 +276,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
                 CommandBlocks = false
             };
 
-            // Run docker container
-            ProcessStartInfo serverProcessInfo = new();
-
-            serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"run -d --name realm-server-{world.Id} -p {port}:25565 realm-server";
-            
-            Process serverProcess = new();
-            serverProcess.StartInfo = serverProcessInfo;
-            serverProcess.Start();
+            new DockerHelper().CreateServer(world.Id, port);
 
             _context.Worlds.Update(world);
 
@@ -316,15 +309,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
 
             if (world == null) return NotFound("World not found");
 
-            // Start the server
-            ProcessStartInfo serverProcessInfo = new();
-
-            serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container start realm-server-{world.Id}";
-
-            Process serverProcess = new();
-            serverProcess.StartInfo = serverProcessInfo;
-            serverProcess.Start();
+            new DockerHelper().StartServer(wId);
 
             world.State = nameof(StateEnum.OPEN);
 
@@ -400,7 +385,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
             slot.CommandBlocks = body.CommandBlocks;
 
             _context.SaveChanges();
-            
+
             return Ok(true);
         }
 
@@ -476,15 +461,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
 
             if (world == null) return NotFound("World not found");
 
-            // Remove docker container
-            ProcessStartInfo serverProcessInfo = new();
-
-            serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container rm realm-server-{world.Id}";
-
-            Process serverProcess = new();
-            serverProcess.StartInfo = serverProcessInfo;
-            serverProcess.Start();
+            new DockerHelper().DeleteServer(wId);
 
             _context.Worlds.Remove(world);
             _context.SaveChanges();
