@@ -2,6 +2,7 @@
 {
     public enum WorkModeEnum
     {
-        EXTERNAL
+        EXTERNAL,
+        REALMS
     }
 }
