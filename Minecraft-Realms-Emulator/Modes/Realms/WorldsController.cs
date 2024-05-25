@@ -298,6 +298,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
 
         [HttpPost("{wId}/reset")]
         [CheckRealmOwner]
+        [CheckActiveSubscription]
         public ActionResult<bool> Reset(int wId)
         {
             Console.WriteLine($"Resetting world {wId}");
@@ -306,6 +307,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
 
         [HttpPut("{wId}/open")]
         [CheckRealmOwner]
+        [CheckActiveSubscription]
         public async Task<ActionResult<bool>> Open(int wId)
         {
             var worlds = await _context.Worlds.ToListAsync();
@@ -333,6 +335,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
 
         [HttpPut("{wId}/close")]
         [CheckRealmOwner]
+        [CheckActiveSubscription]
         public async Task<ActionResult<bool>> Close(int wId)
         {
             var worlds = await _context.Worlds.ToListAsync();
@@ -360,6 +363,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
 
         [HttpPost("{wId}")]
         [CheckRealmOwner]
+        [CheckActiveSubscription]
         public async Task<ActionResult<bool>> UpdateWorld(int wId, WorldCreateRequest body)
         {
             var worlds = await _context.Worlds.ToListAsync();
@@ -378,6 +382,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
 
         [HttpPost("{wId}/slot/{sId}")]
         [CheckRealmOwner]
+        [CheckActiveSubscription]
         public async Task<ActionResult<bool>> UpdateSlotAsync(int wId, int sId, SlotOptionsRequest body)
         {
             var slots = await _context.Slots.Where(s => s.World.Id == wId).ToListAsync();
@@ -401,6 +406,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
 
         [HttpPut("{wId}/slot/{sId}")]
         [CheckRealmOwner]
+        [CheckActiveSubscription]
         public ActionResult<bool> SwitchSlot(int wId, int sId)
         {
             var world = _context.Worlds.Find(wId);

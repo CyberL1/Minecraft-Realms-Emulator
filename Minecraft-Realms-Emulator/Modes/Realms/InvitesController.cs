@@ -95,6 +95,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
 
         [HttpPost("{wId}")]
         [CheckRealmOwner]
+        [CheckActiveSubscription]
         public async Task<ActionResult<World>> InvitePlayer(int wId, PlayerRequest body)
         {
             string cookie = Request.Headers.Cookie;
@@ -139,6 +140,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
 
         [HttpDelete("{wId}/invite/{uuid}")]
         [CheckRealmOwner]
+        [CheckActiveSubscription]
         public async Task<ActionResult<bool>> DeleteInvite(int wId, string uuid)
         {
             var world = await _context.Worlds.FirstOrDefaultAsync(w => w.Id == wId);

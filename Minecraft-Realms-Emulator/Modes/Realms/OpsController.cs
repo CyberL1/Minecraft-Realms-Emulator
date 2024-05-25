@@ -19,6 +19,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
 
         [HttpPost("{wId}/{uuid}")]
         [CheckRealmOwner]
+        [CheckActiveSubscription]
         public ActionResult<OpsResponse> OpPlayer(int wId, string uuid)
         {
             var ops = _context.Players.Where(p => p.World.Id == wId && p.Operator == true).ToList();
@@ -48,6 +49,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms
 
         [HttpDelete("{wId}/{uuid}")]
         [CheckRealmOwner]
+        [CheckActiveSubscription]
         public ActionResult<OpsResponse> DeopPlayer(int wId, string uuid)
         {
             var ops = _context.Players.Where(p => p.World.Id == wId && p.Operator == true).ToList();
