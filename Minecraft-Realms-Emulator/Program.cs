@@ -90,7 +90,7 @@ if (mode.Value == nameof(WorkModeEnum.REALMS))
     }
 }
 
-var rewriteOptions = new RewriteOptions().AddRewrite(@"^(?!.*configuration)(.*)$", $"modes/{mode.Value}/$1", true);
+var rewriteOptions = new RewriteOptions().AddRewrite(@"^(?!configuration)(.*)$", $"modes/{mode.Value}/$1", true);
 app.UseRewriter(rewriteOptions);
 
 app.UseMiddleware<MinecraftCookieMiddleware>();
