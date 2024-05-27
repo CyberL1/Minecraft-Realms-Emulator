@@ -276,7 +276,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                 CommandBlocks = false
             };
 
-            new DockerHelper().CreateServer(world.Id, port);
+            new DockerHelper(world).CreateServer(port);
 
             _context.Worlds.Update(world);
 
@@ -309,7 +309,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
 
             if (world == null) return NotFound("World not found");
 
-            new DockerHelper().StartServer(wId);
+            new DockerHelper(world).StartServer();
 
             world.State = nameof(StateEnum.OPEN);
 
@@ -461,7 +461,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
 
             if (world == null) return NotFound("World not found");
 
-            new DockerHelper().DeleteServer(wId);
+            new DockerHelper(world).DeleteServer();
 
             _context.Worlds.Remove(world);
             _context.SaveChanges();
