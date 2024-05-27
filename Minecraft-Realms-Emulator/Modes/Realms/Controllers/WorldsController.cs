@@ -329,15 +329,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
 
             if (world == null) return NotFound("World not found");
 
-            // Stop the server
-            ProcessStartInfo serverProcessInfo = new();
-
-            serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container stop realm-server-{world.Id}";
-
-            Process serverProcess = new();
-            serverProcess.StartInfo = serverProcessInfo;
-            serverProcess.Start();
+            new DockerHelper(world).StopServer();
 
             world.State = nameof(StateEnum.CLOSED);
 

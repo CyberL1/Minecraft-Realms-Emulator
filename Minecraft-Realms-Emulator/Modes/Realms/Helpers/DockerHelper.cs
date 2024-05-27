@@ -29,6 +29,17 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
             serverProcess.Start();
         }
 
+        public void StopServer() {
+            ProcessStartInfo serverProcessInfo = new();
+
+            serverProcessInfo.FileName = "docker";
+            serverProcessInfo.Arguments = $"container stop realm-server-{world.Id}";
+
+            Process serverProcess = new();
+            serverProcess.StartInfo = serverProcessInfo;
+            serverProcess.Start();
+        }
+
         public void DeleteServer()
         {
             ProcessStartInfo serverProcessInfo = new();
