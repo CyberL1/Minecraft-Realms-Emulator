@@ -18,7 +18,7 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
         }
 
         [HttpGet]
-        public ActionResult<Configuration> GetConfiguration()
+        public ActionResult<List<World>> GetConfiguration()
         {
             var worlds = _context.Worlds.ToList();
 
