@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
 using Minecraft_Realms_Emulator.Helpers;
 
-namespace Minecraft_Realms_Emulator.Controllers
+namespace Minecraft_Realms_Emulator.Controllers.Admin
 {
-    [Route("[controller]")]
+    [Route("api/admin/[controller]")]
     [ApiController]
+    [RequireAdminKey]
     public class ConfigurationController : ControllerBase
     {
         private readonly DataContext _context;
