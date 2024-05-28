@@ -18,11 +18,18 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
         }
 
         [HttpGet]
-        public ActionResult<List<World>> GetConfiguration()
+        public ActionResult<List<World>> GetWorlds()
         {
             var worlds = _context.Worlds.ToList();
 
             return Ok(worlds);
+        }
+
+        [HttpGet("{wId}")]
+        public ActionResult<World> GetWorld(int wId) {
+            var world = _context.Worlds.ToList().Find(w => w.Id == wId);
+            
+            return Ok(world);
         }
     }
 }
