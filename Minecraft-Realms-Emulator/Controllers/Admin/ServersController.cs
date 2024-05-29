@@ -57,5 +57,29 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
 
             return new EmptyResult();
         }
+
+        [HttpPut("{wId}/open")]
+        public ActionResult<bool> OpenServer(int wId)
+        {
+            var world = _context.Worlds.ToList().Find(w => w.Id == wId);
+
+            if (world == null) return BadRequest("World not found");
+
+            new DockerHelper(world).StartServer();
+
+            return Ok(true);
+        }
+
+        [HttpPut("{wId}/close")]
+        public ActionResult<bool> CloseServer(int wId)
+        {
+            var world = _context.Worlds.ToList().Find(w => w.Id == wId);
+
+            if (world == null) return BadRequest("World not found");
+
+            new DockerHelper(world).StopServer();
+
+            return Ok(true);
+        }
     }
 }
