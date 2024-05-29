@@ -29,7 +29,8 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
             serverProcess.Start();
         }
 
-        public void StopServer() {
+        public void StopServer()
+        {
             ProcessStartInfo serverProcessInfo = new();
 
             serverProcessInfo.FileName = "docker";
@@ -50,6 +51,34 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
             Process serverProcess = new();
             serverProcess.StartInfo = serverProcessInfo;
             serverProcess.Start();
+        }
+
+        public async Task GetServerLogsStreamAsync(Action<string> handler)
+        {
+            ProcessStartInfo serverProcessInfo = new();
+
+            serverProcessInfo.FileName = "docker";
+            serverProcessInfo.Arguments = $"container logs -f realm-server-{world.Id} --tail 100";
+            serverProcessInfo.RedirectStandardOutput = true;
+
+            Process serverProcess = new();
+            serverProcess.StartInfo = serverProcessInfo;
+            serverProcess.Start();
+
+            List<string> logs = [];
+
+            await Task.Run(() =>
+            {
+                while (!serverProcess.StandardOutput.EndOfStream)
+                {
+                    string line = serverProcess.StandardOutput.ReadLine();
+
+                    if (line != null)
+                    {
+                        handler(line);
+                    }
+                }
+            });
         }
     }
 }
