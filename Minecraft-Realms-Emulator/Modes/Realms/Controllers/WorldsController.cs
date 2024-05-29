@@ -10,7 +10,6 @@ using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
 using Newtonsoft.Json;
 using Semver;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
