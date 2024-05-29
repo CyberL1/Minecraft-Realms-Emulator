@@ -1,3 +1,5 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -56,4 +58,29 @@ h1:focus {
 
 .table.clickable tbody tr:hover {
     background-color: #e8e8e8;
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.panel .header {
+    display: flex;
+}
+
+.panel .header .status {
+    flex-grow: 1;
+}
+
+.panel .header .buttons {}
+
+.panel .console {
+    background-color: #000000;
+    color: #ffffff;
+    width: 80%;
+    margin: auto;
+    height: 800px;
+    overflow: auto;
+    padding: 5px;
 }
