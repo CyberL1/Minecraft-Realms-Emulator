@@ -56,7 +56,6 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
                 await HttpContext.Response.Body.FlushAsync();
             });
 
-            if (world.State == nameof(StateEnum.CLOSED)) await HttpContext.Response.WriteAsync("data: closed\n\n");
             return new EmptyResult();
         }
 
