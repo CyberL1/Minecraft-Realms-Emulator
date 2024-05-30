@@ -17,14 +17,20 @@ else
                 @server.State
             </div>
             <div class="buttons">
-                <button class="btn btn-success" @onclick="StartServer">
-                    <i class="bi-caret-right-fill"></i>
-                    Start
-                </button>
-                <button class="btn btn-danger" @onclick="StopServer">
-                    <i class="bi-stop-circle-fill"></i>
-                    Stop
-                </button>
+                @if (server.State == "CLOSED")
+                {
+                    <button class="btn btn-success" @onclick="StartServer">
+                        <i class="bi-caret-right-fill"></i>
+                        Start
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-danger" @onclick="StopServer">
+                        <i class="bi-stop-circle-fill"></i>
+                        Stop
+                    </button>
+                }
             </div>
         </div>
 
@@ -47,6 +53,11 @@ else
     private List<string> logs = [];
 
     protected override async Task OnInitializedAsync()
+    {
+        await GetServer();
+    }
+
+    public async Task GetServer()
     {
         HttpClient httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(Environment.GetEnvironmentVariable("ADMIN_KEY"));
@@ -75,7 +86,9 @@ else
         HttpClient httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(Environment.GetEnvironmentVariable("ADMIN_KEY"));
 
+        await JS.InvokeVoidAsync("serverLogsStream.start", DotNetObjectReference.Create(this), wId);
         await httpClient.PutAsync($"http://localhost:8080/api/admin/servers/{wId}/open", new StringContent(""));
+        await GetServer();
     }
 
     public async Task StopServer()
@@ -84,5 +97,6 @@ else
         httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(Environment.GetEnvironmentVariable("ADMIN_KEY"));
 
         await httpClient.PutAsync($"http://localhost:8080/api/admin/servers/{wId}/close", new StringContent(""));
+        await GetServer();
     }
 }
