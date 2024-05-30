@@ -96,6 +96,7 @@ else
         HttpClient httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(Environment.GetEnvironmentVariable("ADMIN_KEY"));
 
+        await JS.InvokeVoidAsync("serverLogsStream.stop");
         await httpClient.PutAsync($"http://localhost:8080/api/admin/servers/{wId}/close", new StringContent(""));
         await GetServer();
     }
