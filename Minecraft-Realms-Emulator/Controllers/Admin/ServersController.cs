@@ -65,6 +65,9 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
 
             if (world == null) return BadRequest("World not found");
 
+            world.State = "OPEN";
+            _context.SaveChanges();
+
             new DockerHelper(world).StartServer();
 
             return Ok(true);
@@ -76,6 +79,9 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
             var world = _context.Worlds.ToList().Find(w => w.Id == wId);
 
             if (world == null) return BadRequest("World not found");
+
+            world.State = "CLOSED";
+            _context.SaveChanges();
 
             new DockerHelper(world).StopServer();
 
