@@ -39,3 +39,7 @@ Run the server:
 ```sh
 dotnet run
 ```
+
+# Demo
+
+[![Demo](https://img.youtube.com/vi/5pHPsKQhEjI/0.jpg)](https://www.youtu.be/5pHPsKQhEjI)
