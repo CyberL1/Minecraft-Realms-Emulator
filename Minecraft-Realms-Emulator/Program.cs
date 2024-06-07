@@ -4,7 +4,9 @@ using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Enums;
 using Minecraft_Realms_Emulator.Helpers;
 using Minecraft_Realms_Emulator.Middlewares;
+using Minecraft_Realms_Emulator.Modes.Realms.Helpers;
 using Npgsql;
+using System.Diagnostics;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -87,6 +89,32 @@ if (mode.Value == nameof(WorkModeEnum.REALMS))
             using var file = new FileStream(path, FileMode.Create);
             stream.CopyTo(file);
         }
+    }
+
+    // Check if docker is running
+    try
+    {
+        ProcessStartInfo dockerProcessInfo = new();
+        dockerProcessInfo.FileName = "docker";
+        dockerProcessInfo.Arguments = "info";
+
+        Process dockerProcess = new();
+        dockerProcess.StartInfo = dockerProcessInfo;
+        dockerProcess.Start();
+
+        dockerProcess.WaitForExit();
+
+        if (dockerProcess.ExitCode != 0)
+        {
+            Console.WriteLine("Docker is required to run in REALMS work mode, but its daemon is not running.");
+            Environment.Exit(1);
+        }
+    }
+    catch
+    {
+        Console.WriteLine("Docker is required to run in REALMS work mode, but it is not installed");
+        Console.WriteLine("You can install it here: https://docs.docker.com/engine/install");
+        Environment.Exit(1);
     }
 }
 
