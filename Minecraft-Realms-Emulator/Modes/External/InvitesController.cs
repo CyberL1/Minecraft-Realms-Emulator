@@ -94,6 +94,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpPost("{wId}")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public async Task<ActionResult<World>> InvitePlayer(int wId, PlayerRequest body)
         {
@@ -103,8 +104,6 @@ namespace Minecraft_Realms_Emulator.Modes.External
             if (body.Name == playerName) return Forbid("You cannot invite yourself");
 
             var world = await _context.Worlds.Include(w => w.Players).FirstOrDefaultAsync(w => w.Id == wId);
-
-            if (world == null) return NotFound("World not found");
 
             // Get player UUID
             var playerInfo = await new HttpClient().GetFromJsonAsync<MinecraftPlayerInfo>($"https://api.mojang.com/users/profiles/minecraft/{body.Name}");
@@ -138,12 +137,11 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpDelete("{wId}/invite/{uuid}")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public async Task<ActionResult<bool>> DeleteInvite(int wId, string uuid)
         {
             var world = await _context.Worlds.FirstOrDefaultAsync(w => w.Id == wId);
-
-            if (world == null) return NotFound("World not found");
 
             var player = _context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == uuid);
 
@@ -159,14 +157,13 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpDelete("{wId}")]
+        [CheckForWorld]
         public async Task<ActionResult<bool>> LeaveWorld(int wId)
         {
             string cookie = Request.Headers.Cookie;
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
 
             var world = await _context.Worlds.FirstOrDefaultAsync(w => w.Id == wId);
-
-            if (world == null) return NotFound("World not found");
 
             var player = _context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == playerUUID);
 

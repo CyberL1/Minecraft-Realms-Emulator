@@ -27,9 +27,10 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
         }
 
         [HttpGet("{wId}")]
+        [CheckForWorld]
         public ActionResult<World> GetWorld(int wId) {
             var world = _context.Worlds.ToList().Find(w => w.Id == wId);
-            
+
             return Ok(world);
         }
 
@@ -59,12 +60,10 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
         }
 
         [HttpPut("{wId}/open")]
+        [CheckForWorld]
         public ActionResult<bool> OpenServer(int wId)
         {
             var world = _context.Worlds.ToList().Find(w => w.Id == wId);
-
-            if (world == null) return BadRequest("World not found");
-
             world.State = "OPEN";
             _context.SaveChanges();
 
@@ -74,11 +73,10 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
         }
 
         [HttpPut("{wId}/close")]
+        [CheckForWorld]
         public ActionResult<bool> CloseServer(int wId)
         {
             var world = _context.Worlds.ToList().Find(w => w.Id == wId);
-
-            if (world == null) return BadRequest("World not found");
 
             world.State = "CLOSED";
             _context.SaveChanges();

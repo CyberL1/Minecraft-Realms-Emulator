@@ -18,6 +18,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
             _context = context;
         }
         [HttpGet("{wId}")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public async Task<ActionResult<SubscriptionResponse>> Get(int wId)
         {

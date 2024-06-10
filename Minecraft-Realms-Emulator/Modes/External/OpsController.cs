@@ -18,6 +18,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpPost("{wId}/{uuid}")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public ActionResult<OpsResponse> OpPlayer(int wId, string uuid)
         {
@@ -47,6 +48,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpDelete("{wId}/{uuid}")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public ActionResult<OpsResponse> DeopPlayer(int wId, string uuid)
         {

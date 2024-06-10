@@ -18,6 +18,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
         }
 
         [HttpPost("{wId}/{uuid}")]
+        [CheckForWorld]
         [CheckRealmOwner]
         [CheckActiveSubscription]
         public ActionResult<OpsResponse> OpPlayer(int wId, string uuid)
@@ -48,6 +49,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
         }
 
         [HttpDelete("{wId}/{uuid}")]
+        [CheckForWorld]
         [CheckRealmOwner]
         [CheckActiveSubscription]
         public ActionResult<OpsResponse> DeopPlayer(int wId, string uuid)
