@@ -4,7 +4,6 @@ using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Enums;
 using Minecraft_Realms_Emulator.Helpers;
 using Minecraft_Realms_Emulator.Middlewares;
-using Minecraft_Realms_Emulator.Modes.Realms.Helpers;
 using Npgsql;
 using System.Diagnostics;
 using System.Reflection;
@@ -125,6 +124,7 @@ app.UseMiddleware<MinecraftCookieMiddleware>();
 app.UseMiddleware<CheckRealmOwnerMiddleware>();
 app.UseMiddleware<ActiveSubscriptionMiddleware>();
 app.UseMiddleware<AdminKeyMiddleware>();
+app.UseMiddleware<CheckForWorldMiddleware>();
 
 Console.WriteLine($"Running in {mode.Value} mode");
 app.Run();

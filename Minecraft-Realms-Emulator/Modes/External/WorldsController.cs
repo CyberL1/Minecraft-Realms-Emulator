@@ -141,6 +141,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpGet("{wId}")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public async Task<ActionResult<WorldResponse>> GetWorldById(int wId)
         {
@@ -148,8 +149,6 @@ namespace Minecraft_Realms_Emulator.Modes.External
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
             var world = await _context.Worlds.Include(w => w.Players).Include(w => w.Subscription).Include(w => w.Slots).FirstOrDefaultAsync(w => w.Id == wId);
-
-            if (world?.Subscription == null) return NotFound("World not found");
 
             Slot activeSlot = world.Slots.Find(s => s.SlotId == world.ActiveSlot);
 
@@ -211,6 +210,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpPost("{wId}/initialize")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public async Task<ActionResult<World>> Initialize(int wId, WorldCreateRequest body)
         {
@@ -221,8 +221,16 @@ namespace Minecraft_Realms_Emulator.Modes.External
 
             var world = worlds.Find(w => w.Id == wId);
 
-            if (world == null) return NotFound("World not found");
-            if (world.State != nameof(StateEnum.UNINITIALIZED)) return NotFound("World already initialized");
+            if (world.State != nameof(StateEnum.UNINITIALIZED))
+            {
+                ErrorResponse errorResponse = new()
+                {
+                    ErrorCode = 401,
+                    ErrorMsg = "World already initialized",
+                };
+
+                return StatusCode(401, errorResponse);
+            }
 
             var subscription = new Subscription
             {
@@ -273,6 +281,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpPost("{wId}/reset")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public ActionResult<bool> Reset(int wId)
         {
@@ -281,14 +290,13 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpPut("{wId}/open")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public async Task<ActionResult<bool>> Open(int wId)
         {
             var worlds = await _context.Worlds.ToListAsync();
 
             var world = worlds.Find(w => w.Id == wId);
-
-            if (world == null) return NotFound("World not found");
 
             world.State = nameof(StateEnum.OPEN);
 
@@ -298,14 +306,13 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpPut("{wId}/close")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public async Task<ActionResult<bool>> Close(int wId)
         {
             var worlds = await _context.Worlds.ToListAsync();
 
             var world = worlds.FirstOrDefault(w => w.Id == wId);
-
-            if (world == null) return NotFound("World not found");
 
             world.State = nameof(StateEnum.CLOSED);
 
@@ -315,14 +322,13 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpPost("{wId}")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public async Task<ActionResult<bool>> UpdateWorld(int wId, WorldCreateRequest body)
         {
             var worlds = await _context.Worlds.ToListAsync();
 
             var world = worlds.Find(w => w.Id == wId);
-
-            if (world == null) return NotFound("World not found");
 
             world.Name = body.Name;
             world.Motd = body.Description;
@@ -333,6 +339,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpPost("{wId}/slot/{sId}")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public async Task<ActionResult<bool>> UpdateSlotAsync(int wId, int sId, SlotOptionsRequest body)
         {
@@ -356,12 +363,11 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpPut("{wId}/slot/{sId}")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public ActionResult<bool> SwitchSlot(int wId, int sId)
         {
             var world = _context.Worlds.Find(wId);
-
-            if (world == null) return NotFound("World not found");
 
             var slot = _context.Slots.Where(s => s.World.Id == wId).Where(s => s.SlotId == sId).Any();
 
@@ -397,6 +403,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpGet("{wId}/backups")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public async Task<ActionResult<BackupsResponse>> GetBackups(int wId)
         {
@@ -419,12 +426,11 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpDelete("{wId}")]
+        [CheckForWorld]
         [CheckRealmOwner]
         public ActionResult<bool> DeleteRealm(int wId)
         {
             var world = _context.Worlds.Find(wId);
-
-            if (world == null) return NotFound("World not found");
 
             _context.Worlds.Remove(world);
             _context.SaveChanges();
