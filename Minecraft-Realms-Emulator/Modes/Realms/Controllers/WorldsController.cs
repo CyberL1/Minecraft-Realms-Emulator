@@ -347,8 +347,30 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
         [CheckForWorld]
         [CheckRealmOwner]
         [CheckActiveSubscription]
-        public async Task<ActionResult<bool>> UpdateWorld(int wId, WorldCreateRequest body)
+        public async Task<ActionResult<(bool, ErrorResponse)>> UpdateWorld(int wId, WorldCreateRequest body)
         {
+            if (body.Name.Length > 32)
+            {
+                ErrorResponse errorResponse = new()
+                {
+                    ErrorCode = 400,
+                    ErrorMsg = "World name cannot exceed 32 characters"
+                };
+
+                return BadRequest(errorResponse);
+            }
+
+            if (body.Description.Length > 32)
+            {
+                ErrorResponse errorResponse = new()
+                {
+                    ErrorCode = 400,
+                    ErrorMsg = "World description cannot exceed 32 characters"
+                };
+
+                return BadRequest(errorResponse);
+            }
+
             var worlds = await _context.Worlds.ToListAsync();
 
             var world = worlds.Find(w => w.Id == wId);
@@ -365,8 +387,52 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
         [CheckForWorld]
         [CheckRealmOwner]
         [CheckActiveSubscription]
-        public async Task<ActionResult<bool>> UpdateSlotAsync(int wId, int sId, SlotOptionsRequest body)
+        public async Task<ActionResult<(bool, ErrorResponse)>> UpdateSlot(int wId, int sId, SlotOptionsRequest body)
         {
+            if (body.SlotName.Length > 10)
+            {
+                ErrorResponse errorResponse = new()
+                {
+                    ErrorCode = 400,
+                    ErrorMsg = "Slot name cannot exceed 10 characters"
+                };
+
+                return BadRequest(errorResponse);
+            }
+
+            if (body.SpawnProtection < 0 || body.SpawnProtection > 16)
+            {
+                ErrorResponse errorResponse = new()
+                {
+                    ErrorCode = 400,
+                    ErrorMsg = "Spawn protection can only be between 0 and 16"
+                };
+
+                return BadRequest(errorResponse);
+            }
+
+            if (!new List<int>{ 0, 1, 2 }.Contains(body.GameMode))
+            {
+                ErrorResponse errorResponse = new()
+                {
+                    ErrorCode = 400,
+                    ErrorMsg = "Gamemode can only be one of 0, 1, 2"
+                };
+
+                return BadRequest(errorResponse);
+            }
+
+            if (!new List<int> { 0, 1, 2, 3 }.Contains(body.Difficulty))
+            {
+                ErrorResponse errorResponse = new()
+                {
+                    ErrorCode = 400,
+                    ErrorMsg = "Difficulty can only be one of 0, 1, 2, 3"
+                };
+
+                return BadRequest(errorResponse);
+            }
+
             var slots = await _context.Slots.Where(s => s.World.Id == wId).ToListAsync();
             var slot = slots.Find(s => s.SlotId == sId);
 
