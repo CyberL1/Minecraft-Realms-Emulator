@@ -411,7 +411,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                 return BadRequest(errorResponse);
             }
 
-            if (!new List<int>{ 0, 1, 2 }.Contains(body.GameMode))
+            if (!new List<int> { 0, 1, 2 }.Contains(body.GameMode))
             {
                 ErrorResponse errorResponse = new()
                 {
@@ -529,6 +529,23 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
             _context.SaveChanges();
 
             return Ok(true);
+        }
+
+        [HttpGet("templates/{type}")]
+        public ActionResult<TemplatesResponse> GetWorldTemplates(string type, int page, int pageSize)
+        {
+            var totalTemplates = _context.Templates.Where(t => t.Type == type).Count();
+            var templates = _context.Templates.Where(t => t.Type == type).Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            TemplatesResponse templatesResponse = new()
+            {
+                Page = page,
+                Size = pageSize,
+                Total = totalTemplates,
+                Templates = templates
+            };
+
+            return Ok(templatesResponse);
         }
     }
 }
