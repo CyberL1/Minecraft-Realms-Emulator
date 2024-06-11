@@ -13,5 +13,6 @@ namespace Minecraft_Realms_Emulator.Data
         public DbSet<Player> Players { get; set; }
         public DbSet<Configuration> Configuration { get; set; }
         public DbSet<Slot> Slots { get; set; }
+        public DbSet<Template> Templates { get; set; }
     }
 }
