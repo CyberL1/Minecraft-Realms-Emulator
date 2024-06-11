@@ -14,5 +14,6 @@ namespace Minecraft_Realms_Emulator.Data
         public DbSet<Configuration> Configuration { get; set; }
         public DbSet<Slot> Slots { get; set; }
         public DbSet<Template> Templates { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
     }
 }
