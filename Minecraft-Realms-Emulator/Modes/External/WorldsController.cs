@@ -38,7 +38,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
 
             List<WorldResponse> allWorlds = [];
 
-            if (ownedWorlds.ToArray().Length == 0)
+            if (ownedWorlds.ToArray().Length == 0 && new ConfigHelper(_context).GetSetting(nameof(SettingsEnum.AutomaticRealmsCreation)).Value)
             {
                 var world = new World
                 {

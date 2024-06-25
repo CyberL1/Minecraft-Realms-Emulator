@@ -20,8 +20,23 @@ namespace Minecraft_Realms_Emulator.Modes.External
         }
 
         [HttpGet("available")]
-        public ActionResult<bool> GetAvailable()
+        public async Task<ActionResult<bool>> GetAvailable()
         {
+            if (new ConfigHelper(_context).GetSetting(nameof(SettingsEnum.OnlineMode)).Value)
+            {
+                string cookie = Request.Headers.Cookie;
+                string playerUUID = cookie.Split(";")[0].Split(":")[2];
+
+                try
+                {
+                    await new HttpClient().GetFromJsonAsync<MinecraftPlayerInfo>($"https://sessionserver.mojang.com/session/minecraft/profile/{playerUUID}");
+                }
+                catch
+                {
+                    return Unauthorized();
+                }
+            }
+
             return Ok(true);
         }
 
