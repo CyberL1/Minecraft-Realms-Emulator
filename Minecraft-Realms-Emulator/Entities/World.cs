@@ -18,5 +18,6 @@
         public int ActiveSlot { get; set; } = 1;
         public List<Slot> Slots { get; set; } = [];
         public bool Member { get; set; } = false;
+        public World? ParentWorld { get; set; }
     }
 }

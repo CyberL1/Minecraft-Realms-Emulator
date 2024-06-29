@@ -11,5 +11,7 @@ namespace Minecraft_Realms_Emulator.Entities
         public string Compatibility { get; set; } = null!;
         public List<SlotResponse> Slots { get; set; } = null!;
         public string ActiveVersion { get; set; } = null!;
+        public int? ParentWorldId { get; set; }
+        public string? ParentWorldName { get; set; }
     }
 }
