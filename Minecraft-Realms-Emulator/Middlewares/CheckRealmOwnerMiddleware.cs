@@ -1,4 +1,5 @@
-﻿using Minecraft_Realms_Emulator.Attributes;
+﻿using Microsoft.EntityFrameworkCore;
+using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
 
@@ -20,9 +21,9 @@ namespace Minecraft_Realms_Emulator.Middlewares
             }
 
             string playerUUID = httpContext.Request.Headers.Cookie.ToString().Split(";")[0].Split(":")[2];
-            World world = db.Worlds.Find(int.Parse(httpContext.Request.RouteValues["wId"].ToString()));
+            World world = db.Worlds.Include(w => w.ParentWorld).FirstOrDefault(w => w.Id == int.Parse(httpContext.Request.RouteValues["wId"].ToString()));
 
-            if (world != null && !attribute.IsRealmOwner(playerUUID, world.OwnerUUID))
+            if (world != null && !attribute.IsRealmOwner(playerUUID, world.ParentWorld == null ? world.OwnerUUID : world.ParentWorld.OwnerUUID))
             {
                 httpContext.Response.StatusCode = 403;
                 await httpContext.Response.WriteAsync("You don't own this world");

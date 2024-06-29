@@ -22,7 +22,12 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
         [CheckRealmOwner]
         public async Task<ActionResult<SubscriptionResponse>> Get(int wId)
         {
-            var world = await _context.Worlds.Include(w => w.Subscription).FirstOrDefaultAsync(w => w.Id == wId);
+            var world = await _context.Worlds.Include(w => w.Subscription).Include(w => w.ParentWorld.Subscription).FirstOrDefaultAsync(w => w.Id == wId);
+
+            if (world.ParentWorld != null)
+            {
+                world.Subscription = world.ParentWorld.Subscription;
+            }
 
             if (world?.Subscription == null) return NotFound("Subscription not found");
 
