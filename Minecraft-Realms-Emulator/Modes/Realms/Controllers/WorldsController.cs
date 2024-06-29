@@ -9,7 +9,6 @@ using Minecraft_Realms_Emulator.Modes.Realms.Helpers;
 using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
 using Newtonsoft.Json;
-using Semver;
 using System.Net;
 using System.Net.Sockets;
 
@@ -69,7 +68,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
             {
                 Slot activeSlot = world.Slots.Find(s => s.SlotId == world.ActiveSlot);
 
-                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(activeSlot?.Version ?? gameVersion, SemVersionStyles.Any));
+                int versionsCompared = new MinecraftVersionParser.MinecraftVersion(gameVersion).CompareTo(new MinecraftVersionParser.MinecraftVersion(activeSlot?.Version ?? gameVersion));
                 string isCompatible = versionsCompared == 0 ? nameof(CompatibilityEnum.COMPATIBLE) : versionsCompared < 0 ? nameof(CompatibilityEnum.NEEDS_DOWNGRADE) : nameof(CompatibilityEnum.NEEDS_UPGRADE);
 
                 WorldResponse response = new()
@@ -106,7 +105,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
             {
                 Slot activeSlot = world.Slots.Find(s => s.SlotId == world.ActiveSlot);
 
-                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(activeSlot.Version, SemVersionStyles.OptionalPatch));
+                int versionsCompared = new MinecraftVersionParser.MinecraftVersion(gameVersion).CompareTo(new MinecraftVersionParser.MinecraftVersion(activeSlot?.Version ?? gameVersion));
                 string isCompatible = versionsCompared == 0 ? nameof(CompatibilityEnum.COMPATIBLE) : versionsCompared < 0 ? nameof(CompatibilityEnum.NEEDS_DOWNGRADE) : nameof(CompatibilityEnum.NEEDS_UPGRADE);
 
                 WorldResponse response = new()
@@ -159,7 +158,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
 
             foreach (var slot in world.Slots)
             {
-                int versionsCompared = SemVersion.Parse(gameVersion, SemVersionStyles.OptionalPatch).ComparePrecedenceTo(SemVersion.Parse(slot.Version, SemVersionStyles.OptionalPatch));
+                int versionsCompared = new MinecraftVersionParser.MinecraftVersion(gameVersion).CompareTo(new MinecraftVersionParser.MinecraftVersion(activeSlot?.Version ?? gameVersion));
                 string compatibility = versionsCompared == 0 ? nameof(CompatibilityEnum.COMPATIBLE) : versionsCompared < 0 ? nameof(CompatibilityEnum.NEEDS_DOWNGRADE) : nameof(CompatibilityEnum.NEEDS_UPGRADE);
 
                 slots.Add(new SlotResponse()
