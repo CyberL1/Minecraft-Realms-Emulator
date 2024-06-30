@@ -13,5 +13,8 @@ namespace Minecraft_Realms_Emulator.Entities
         public string ActiveVersion { get; set; } = null!;
         public int? ParentWorldId { get; set; }
         public string? ParentWorldName { get; set; }
+        public int? MinigameId { get; set; }
+        public string? MinigameName { get; set; }
+        public string? MinigameImage { get; set; }
     }
 }
