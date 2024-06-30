@@ -125,6 +125,7 @@ app.UseMiddleware<CheckRealmOwnerMiddleware>();
 app.UseMiddleware<ActiveSubscriptionMiddleware>();
 app.UseMiddleware<AdminKeyMiddleware>();
 app.UseMiddleware<CheckForWorldMiddleware>();
+app.UseMiddleware<RouteLoggingMiddleware>();
 
 Console.WriteLine($"Running in {mode.Value} mode");
 app.Run();

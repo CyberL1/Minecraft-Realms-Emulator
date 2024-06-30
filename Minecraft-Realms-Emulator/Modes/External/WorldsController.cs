@@ -784,7 +784,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
         [CheckRealmOwner]
         public async Task<ActionResult<BackupsResponse>> GetBackups(int wId)
         {
-            var backups = await _context.Backups.Where(b => b.World.Id == wId).ToListAsync();
+            var backups = await _context.Backups.Where(b => b.Slot.World.Id == wId).ToListAsync();
 
             BackupsResponse worldBackups = new()
             {
@@ -792,6 +792,34 @@ namespace Minecraft_Realms_Emulator.Modes.External
             };
 
             return Ok(worldBackups);
+        }
+
+        [HttpGet("{wId}/slot/{sId}/download")]
+        [CheckForWorld]
+        [CheckRealmOwner]
+        public ActionResult<BackupDownloadResponse> GetBackup(int wId, int sId)
+        {
+            Backup backup = _context.Backups.Include(b => b.Slot).FirstOrDefault(b => b.Slot.World.Id == wId && b.Slot.Id == sId);
+
+            if (backup == null)
+            {
+                ErrorResponse errorResponse = new()
+                {
+                    ErrorCode = 404,
+                    ErrorMsg = "No backup found"
+                };
+
+                return NotFound(errorResponse);
+            }
+
+            BackupDownloadResponse backupDownloadResponse = new()
+            {
+                DownloadLink = backup.DownloadUrl,
+                ResourcePackUrl = backup.ResourcePackUrl,
+                ResourcePackHash = backup.ResourcePackHash,
+            };
+
+            return Ok(backupDownloadResponse);
         }
 
         [HttpGet("v1/{wId}/join/pc")]
