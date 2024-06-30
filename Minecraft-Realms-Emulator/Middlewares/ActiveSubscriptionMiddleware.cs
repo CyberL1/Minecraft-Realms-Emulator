@@ -1,4 +1,5 @@
-﻿using Minecraft_Realms_Emulator.Attributes;
+﻿using Microsoft.EntityFrameworkCore;
+using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
 
@@ -19,10 +20,15 @@ namespace Minecraft_Realms_Emulator.Middlewares
                 return;
             }
 
-            Subscription subscription = db.Subscriptions.First(s => s.World.Id == int.Parse(httpContext.Request.RouteValues["wId"].ToString()));
-            Console.WriteLine(attribute.IsSubscriptionActive(subscription.StartDate));
+            var wId = int.Parse(httpContext.Request.RouteValues["wId"].ToString());
+            World world = db.Worlds.Include(w => w.Subscription).Include(w => w.ParentWorld.Subscription).FirstOrDefault(w => w.Id == wId);
 
-            if (!attribute.IsSubscriptionActive(subscription.StartDate))
+            if (world.ParentWorld?.Subscription != null)
+            {
+                world = world.ParentWorld;
+            }
+
+            if (!attribute.IsSubscriptionActive(world.Subscription.StartDate))
             {
                 httpContext.Response.StatusCode = 403;
                 await httpContext.Response.WriteAsync("You don't have an active subscription for this world");

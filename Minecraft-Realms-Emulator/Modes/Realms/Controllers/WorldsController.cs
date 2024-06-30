@@ -597,6 +597,8 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                 Address = $"{defaultServerAddress.Value}:{port}"
             };
 
+            new DockerHelper(world).CreateServer(port);
+
             Slot slot = new()
             {
                 World = world,
