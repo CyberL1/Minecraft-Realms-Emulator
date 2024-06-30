@@ -35,8 +35,8 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
             string playerName = cookie.Split(";")[1].Split("=")[1];
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var ownedWorlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).ToListAsync();
-            var memberWorlds = await _context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Select(p => p.World).ToListAsync();
+            var ownedWorlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.Minigame).ToListAsync();
+            var memberWorlds = await _context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Include(p => p.World.Minigame).Select(p => p.World).ToListAsync();
 
             List<WorldResponse> allWorlds = [];
 
@@ -51,9 +51,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     State = nameof(StateEnum.UNINITIALIZED),
                     WorldType = nameof(WorldTypeEnum.NORMAL),
                     MaxPlayers = 10,
-                    MinigameId = null,
-                    MinigameName = null,
-                    MinigameImage = null,
+                    Minigame = null,
                     ActiveSlot = 1,
                     Member = false
                 };
@@ -81,15 +79,19 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     State = world.State,
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
-                    MinigameId = world.MinigameId,
-                    MinigameName = world.MinigameName,
-                    MinigameImage = world.MinigameImage,
                     ActiveSlot = world.ActiveSlot,
                     Member = world.Member,
                     Players = world.Players,
                     ActiveVersion = activeSlot?.Version ?? gameVersion,
                     Compatibility = isCompatible
                 };
+
+                if (world.Minigame != null)
+                {
+                    response.MinigameId = world.Minigame.Id;
+                    response.MinigameName = world.Minigame.Name;
+                    response.MinigameImage = world.Minigame.Image;
+                }
 
                 if (world.Subscription != null)
                 {
@@ -118,9 +120,6 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     State = world.State,
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
-                    MinigameId = world.MinigameId,
-                    MinigameName = world.MinigameName,
-                    MinigameImage = world.MinigameImage,
                     ActiveSlot = world.ActiveSlot,
                     Member = world.Member,
                     Players = world.Players,
@@ -130,6 +129,13 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     ActiveVersion = activeSlot.Version,
                     Compatibility = isCompatible
                 };
+
+                if (world.Minigame != null)
+                {
+                    response.MinigameId = world.Minigame.Id;
+                    response.MinigameName = world.Minigame.Name;
+                    response.MinigameImage = world.Minigame.Image;
+                }
 
                 allWorlds.Add(response);
             }
@@ -173,15 +179,19 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     State = world.State,
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
-                    MinigameId = world.MinigameId,
-                    MinigameName = world.MinigameName,
-                    MinigameImage = world.MinigameImage,
                     ActiveSlot = world.ActiveSlot,
                     Member = world.Member,
                     Players = world.Players,
                     ActiveVersion = activeSlot?.Version ?? gameVersion,
                     Compatibility = isCompatible
                 };
+
+                if (world.Minigame != null)
+                {
+                    response.MinigameId = world.Minigame.Id;
+                    response.MinigameName = world.Minigame.Name;
+                    response.MinigameImage = world.Minigame.Image;
+                }
 
                 if (world.Subscription != null)
                 {
@@ -223,9 +233,6 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     State = world.State,
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
-                    MinigameId = world.MinigameId,
-                    MinigameName = world.MinigameName,
-                    MinigameImage = world.MinigameImage,
                     ActiveSlot = world.ActiveSlot,
                     Member = world.Member,
                     Players = world.Players,
@@ -235,6 +242,13 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     ActiveVersion = activeSlot.Version,
                     Compatibility = isCompatible
                 };
+
+                if (world.Minigame != null)
+                {
+                    response.MinigameId = world.Minigame.Id;
+                    response.MinigameName = world.Minigame.Name;
+                    response.MinigameImage = world.Minigame.Image;
+                }
 
                 if (world.ParentWorld == null)
                 {
@@ -287,9 +301,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                         State = nameof(StateEnum.UNINITIALIZED),
                         WorldType = nameof(WorldTypeEnum.NORMAL),
                         MaxPlayers = 10,
-                        MinigameId = null,
-                        MinigameName = null,
-                        MinigameImage = null,
+                        Minigame = null,
                         ActiveSlot = 1,
                         Member = false,
                         ParentWorld = parentWorld,
@@ -319,9 +331,6 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     State = world.State,
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
-                    MinigameId = world.MinigameId,
-                    MinigameName = world.MinigameName,
-                    MinigameImage = world.MinigameImage,
                     ActiveSlot = world.ActiveSlot,
                     Member = world.Member,
                     Players = world.Players,
@@ -330,6 +339,13 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     ParentWorldId = world.ParentWorld.Id,
                     ParentWorldName = world.ParentWorld.Name,
                 };
+
+                if (world.Minigame != null)
+                {
+                    response.MinigameId = world.Minigame.Id;
+                    response.MinigameName = world.Minigame.Name;
+                    response.MinigameImage = world.Minigame.Image;
+                }
 
                 if (world.Subscription != null)
                 {
@@ -358,9 +374,6 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     State = world.State,
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
-                    MinigameId = world.MinigameId,
-                    MinigameName = world.MinigameName,
-                    MinigameImage = world.MinigameImage,
                     ActiveSlot = world.ActiveSlot,
                     Member = world.Member,
                     Players = world.Players,
@@ -370,6 +383,13 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     ActiveVersion = activeSlot.Version,
                     Compatibility = isCompatible
                 };
+
+                if (world.Minigame != null)
+                {
+                    response.MinigameId = world.Minigame.Id;
+                    response.MinigameName = world.Minigame.Name;
+                    response.MinigameImage = world.Minigame.Image;
+                }
 
                 allWorlds.Add(response);
             }
@@ -439,9 +459,6 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                 State = world.State,
                 WorldType = world.WorldType,
                 MaxPlayers = world.MaxPlayers,
-                MinigameId = world.MinigameId,
-                MinigameName = world.MinigameName,
-                MinigameImage = world.MinigameImage,
                 ActiveSlot = world.ActiveSlot,
                 Slots = slots,
                 Member = world.Member,
@@ -452,6 +469,13 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                 ActiveVersion = activeSlotOptions.Version,
                 Compatibility = activeSlotOptions.Compatibility
             };
+
+            if (world.Minigame != null)
+            {
+                response.MinigameId = world.Minigame.Id;
+                response.MinigameName = world.Minigame.Name;
+                response.MinigameImage = world.Minigame.Image;
+            }
 
             return response;
         }
@@ -789,8 +813,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
         [CheckActiveSubscription]
         public ActionResult<bool> SwitchSlot(int wId, int sId)
         {
-            var world = _context.Worlds.Find(wId);
-
+            var world = _context.Worlds.Include(w => w.Minigame).FirstOrDefault(w => w.Id == wId);
             var slot = _context.Slots.Where(s => s.World.Id == wId).Where(s => s.SlotId == sId).Any();
 
             if (!slot)
@@ -819,6 +842,9 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
             }
 
             world.ActiveSlot = sId;
+            world.Minigame = null;
+            world.WorldType = nameof(WorldTypeEnum.NORMAL);
+
             _context.SaveChanges();
 
             return Ok(true);
@@ -893,6 +919,22 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
             };
 
             return Ok(templatesResponse);
+        }
+
+        [HttpPut("minigames/{mId}/{wId}")]
+        [CheckForWorld]
+        [CheckRealmOwner]
+        public ActionResult<bool> SwitchToMinigame(int mId, int wId)
+        {
+            var world = _context.Worlds.Find(wId);
+            var minigame = _context.Templates.FirstOrDefault(t => t.Type == nameof(WorldTemplateTypeEnum.MINIGAME) && t.Id == mId);
+
+            world.Minigame = minigame;
+            world.WorldType = nameof(WorldTypeEnum.MINIGAME);
+
+            _context.SaveChanges();
+
+            return Ok(true);
         }
     }
 }

@@ -12,9 +12,7 @@
         public string WorldType { get; set; } = "NORMAL";
         public List<Player> Players { get; set; } = [];
         public int MaxPlayers { get; set; } = 10;
-        public string? MinigameName { get; set; }
-        public int? MinigameId { get; set; }
-        public string? MinigameImage { get; set; }
+        public Template? Minigame { get; set; }
         public int ActiveSlot { get; set; } = 1;
         public List<Slot> Slots { get; set; } = [];
         public bool Member { get; set; } = false;
