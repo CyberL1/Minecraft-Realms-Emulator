@@ -80,5 +80,18 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
                 }
             });
         }
+
+        public void ExecuteCommand(string command)
+        {
+            ProcessStartInfo commandProcessInfo = new();
+
+            commandProcessInfo.FileName = "docker";
+            commandProcessInfo.Arguments = $"exec realm-server-{world.Id} rcon-cli {command}";
+
+            Process commandProcess = new();
+            commandProcess.StartInfo = commandProcessInfo;
+
+            commandProcess.Start();
+        }
     }
 }
