@@ -667,32 +667,27 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
         [CheckActiveSubscription]
         public async Task<ActionResult<bool>> Open(int wId)
         {
-            var worlds = await _context.Worlds.ToListAsync();
+                var worlds = await _context.Worlds.ToListAsync();
 
-            var world = worlds.Find(w => w.Id == wId);
+                var world = worlds.Find(w => w.Id == wId);
 
-            new DockerHelper(world).StartServer();
+                new DockerHelper(world).StartServer();
 
-            world.State = nameof(StateEnum.OPEN);
+                world.State = nameof(StateEnum.OPEN);
 
-            _context.SaveChanges();
+                _context.SaveChanges();
 
-            var connection = _context.Connections.FirstOrDefault(c => c.World.Id == wId);
-            var query = new MinecraftServerQuery().Query(connection.Address);
+                var connection = _context.Connections.FirstOrDefault(c => c.World.Id == wId);
+                var query = new MinecraftServerQuery().Query(connection.Address);
 
-            while (query == null)
-            {
-
-                var newQuery = new MinecraftServerQuery().Query(connection.Address);
-
-                if (newQuery != null)
+                while (query == null)
                 {
-                    break;
+                    await Task.Delay(1000);
+                    query = new MinecraftServerQuery().Query(connection.Address);
                 }
-            }
 
-            return Ok(true);
-        }
+                return Ok(true);
+            }
 
         [HttpPut("{wId}/close")]
         [CheckForWorld]
@@ -909,9 +904,19 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
         }
 
         [HttpGet("v1/{wId}/join/pc")]
-        public ActionResult<Connection> Join(int wId)
+        public async Task<ActionResult<Connection>> Join(int wId)
         {
-            var connection = _context.Connections.FirstOrDefault(x => x.World.Id == wId);
+            var connection = _context.Connections.Include(c => c.World).FirstOrDefault(x => x.World.Id == wId);
+
+            var query = new MinecraftServerQuery().Query(connection.Address);
+
+            if (query == null) new DockerHelper(connection.World).StartServer();
+
+            while (query == null)
+            {
+                await Task.Delay(1000);
+                query = new MinecraftServerQuery().Query(connection.Address);
+            }
 
             return Ok(connection);
         }
