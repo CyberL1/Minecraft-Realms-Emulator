@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR.Protocol;
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
@@ -667,27 +666,27 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
         [CheckActiveSubscription]
         public async Task<ActionResult<bool>> Open(int wId)
         {
-                var worlds = await _context.Worlds.ToListAsync();
+            var worlds = await _context.Worlds.ToListAsync();
 
-                var world = worlds.Find(w => w.Id == wId);
+            var world = worlds.Find(w => w.Id == wId);
 
-                new DockerHelper(world).StartServer();
+            new DockerHelper(world).StartServer();
 
-                world.State = nameof(StateEnum.OPEN);
+            world.State = nameof(StateEnum.OPEN);
 
-                _context.SaveChanges();
+            _context.SaveChanges();
 
-                var connection = _context.Connections.FirstOrDefault(c => c.World.Id == wId);
-                var query = new MinecraftServerQuery().Query(connection.Address);
+            var connection = _context.Connections.FirstOrDefault(c => c.World.Id == wId);
+            var query = new MinecraftServerQuery().Query(connection.Address);
 
-                while (query == null)
-                {
-                    await Task.Delay(1000);
-                    query = new MinecraftServerQuery().Query(connection.Address);
-                }
-
-                return Ok(true);
+            while (query == null)
+            {
+                await Task.Delay(1000);
+                query = new MinecraftServerQuery().Query(connection.Address);
             }
+
+            return Ok(true);
+        }
 
         [HttpPut("{wId}/close")]
         [CheckForWorld]
