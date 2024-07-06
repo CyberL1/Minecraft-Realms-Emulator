@@ -17,6 +17,23 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
             serverProcess.Start();
         }
 
+        public bool IsRunning()
+        {
+            ProcessStartInfo containerStateProcessInfo = new();
+            
+            containerStateProcessInfo.FileName = "docker";
+            containerStateProcessInfo.Arguments = $"inspect realm-server-{world.Id} -f {{{{.State.Running}}}}";
+
+            containerStateProcessInfo.RedirectStandardOutput = true;
+
+            Process containerStateProcess = new();
+            containerStateProcess.StartInfo = containerStateProcessInfo;
+            containerStateProcess.Start();
+
+            containerStateProcess.WaitForExit();
+            return bool.Parse(containerStateProcess.StandardOutput.ReadToEnd());
+        }
+
         public void StartServer()
         {
             ProcessStartInfo serverProcessInfo = new();
