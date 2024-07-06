@@ -907,14 +907,26 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
         {
             var connection = _context.Connections.Include(c => c.World).FirstOrDefault(x => x.World.Id == wId);
 
+            var isRunning = new DockerHelper(connection.World).IsRunning();
             var query = new MinecraftServerQuery().Query(connection.Address);
 
-            if (query == null) new DockerHelper(connection.World).StartServer();
+            if (!isRunning)
+            {
+                new DockerHelper(connection.World).StartServer();
+            }
 
             while (query == null)
             {
                 await Task.Delay(1000);
                 query = new MinecraftServerQuery().Query(connection.Address);
+            }
+
+            string cookie = Request.Headers.Cookie;
+            string playerUUID = cookie.Split(";")[0].Split(":")[2];
+
+            if (connection.World.OwnerUUID == playerUUID)
+            {
+                new DockerHelper(connection.World).ExecuteCommand($"op {connection.World.Owner}");
             }
 
             return Ok(connection);
