@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR.Protocol;
 using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
@@ -675,6 +676,20 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
             world.State = nameof(StateEnum.OPEN);
 
             _context.SaveChanges();
+
+            var connection = _context.Connections.FirstOrDefault(c => c.World.Id == wId);
+            var query = new MinecraftServerQuery().Query(connection.Address);
+
+            while (query == null)
+            {
+
+                var newQuery = new MinecraftServerQuery().Query(connection.Address);
+
+                if (newQuery != null)
+                {
+                    break;
+                }
+            }
 
             return Ok(true);
         }
