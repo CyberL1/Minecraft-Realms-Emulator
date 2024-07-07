@@ -657,6 +657,13 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
         public ActionResult<bool> Reset(int wId)
         {
             Console.WriteLine($"Resetting world {wId}");
+
+            var world = _context.Worlds.Find(wId);
+            var server = new DockerHelper(world);
+
+            server.RunCommand("rm -rf world");
+            server.RebootServer();
+
             return Ok(true);
         }
 

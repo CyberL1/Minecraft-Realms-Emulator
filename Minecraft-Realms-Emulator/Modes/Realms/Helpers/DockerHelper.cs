@@ -58,6 +58,18 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
             serverProcess.Start();
         }
 
+        public void RebootServer()
+        {
+            ProcessStartInfo serverProcessInfo = new();
+
+            serverProcessInfo.FileName = "docker";
+            serverProcessInfo.Arguments = $"container restart realm-server-{world.Id}";
+
+            Process serverProcess = new();
+            serverProcess.StartInfo = serverProcessInfo;
+            serverProcess.Start();
+        }
+
         public void DeleteServer()
         {
             ProcessStartInfo serverProcessInfo = new();
@@ -104,6 +116,19 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
 
             commandProcessInfo.FileName = "docker";
             commandProcessInfo.Arguments = $"exec realm-server-{world.Id} rcon-cli {command}";
+
+            Process commandProcess = new();
+            commandProcess.StartInfo = commandProcessInfo;
+
+            commandProcess.Start();
+        }
+
+        public void RunCommand(string command)
+        {
+            ProcessStartInfo commandProcessInfo = new();
+
+            commandProcessInfo.FileName = "docker";
+            commandProcessInfo.Arguments = $"exec realm-server-{world.Id} {command}";
 
             Process commandProcess = new();
             commandProcess.StartInfo = commandProcessInfo;
