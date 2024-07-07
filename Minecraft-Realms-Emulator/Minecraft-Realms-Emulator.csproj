@@ -10,6 +10,7 @@
 
 	<ItemGroup>
 	  <EmbeddedResource Include="Resources\files\template\Dockerfile" />
+	  <EmbeddedResource Include="Resources\files\template\entrypoint" />
 	</ItemGroup>
 
   <ItemGroup>
