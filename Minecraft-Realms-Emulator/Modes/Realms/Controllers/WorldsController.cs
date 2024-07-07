@@ -661,7 +661,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
             var world = _context.Worlds.Find(wId);
             var server = new DockerHelper(world);
 
-            server.RunCommand("rm -rf world");
+            server.RunCommand($"rm -rf slot-{world.ActiveSlot}");
             server.RebootServer();
 
             return Ok(true);
