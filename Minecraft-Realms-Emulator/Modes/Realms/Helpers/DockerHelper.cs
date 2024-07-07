@@ -128,7 +128,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
             ProcessStartInfo commandProcessInfo = new();
 
             commandProcessInfo.FileName = "docker";
-            commandProcessInfo.Arguments = $"exec realm-server-{world.Id} {command}";
+            commandProcessInfo.Arguments = $"exec realm-server-{world.Id} /bin/sh -c \"{command}\"";
 
             Process commandProcess = new();
             commandProcess.StartInfo = commandProcessInfo;

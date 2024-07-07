@@ -857,6 +857,11 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                 _context.SaveChanges();
             }
 
+            var server = new DockerHelper(world);
+            
+            server.RunCommand($"sed -i 's#level-name=slot-{world.ActiveSlot}#level-name=slot-{sId}#' server.properties");
+            server.RebootServer();
+
             world.ActiveSlot = sId;
             world.Minigame = null;
             world.WorldType = nameof(WorldTypeEnum.NORMAL);
