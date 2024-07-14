@@ -517,7 +517,6 @@ namespace Minecraft_Realms_Emulator.Modes.External
             var connection = new Connection
             {
                 World = world,
-                Address = defaultServerAddress.Value
             };
 
             Slot slot = new()
@@ -825,7 +824,10 @@ namespace Minecraft_Realms_Emulator.Modes.External
         [HttpGet("v1/{wId}/join/pc")]
         public ActionResult<Connection> Join(int wId)
         {
-            var connection = _context.Connections.FirstOrDefault(x => x.World.Id == wId);
+            var connection = _context.Connections.Include(c => c.World).FirstOrDefault(x => x.World.Id == wId);
+
+            // Set the server's addrees to its MOTD
+            connection.Address = connection.World.Motd;
 
             return Ok(connection);
         }
