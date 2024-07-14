@@ -731,7 +731,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                 return BadRequest(errorResponse);
             }
 
-            if (body.Description.Length > 32)
+            if (body.Description?.Length > 32)
             {
                 ErrorResponse errorResponse = new()
                 {
