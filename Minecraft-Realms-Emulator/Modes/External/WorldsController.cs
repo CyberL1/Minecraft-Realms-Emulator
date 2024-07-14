@@ -678,7 +678,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
                 return BadRequest(errorResponse);
             }
 
-            if (body.Description.Length > 32)
+            if (body.Description?.Length > 32)
             {
                 ErrorResponse errorResponse = new()
                 {
