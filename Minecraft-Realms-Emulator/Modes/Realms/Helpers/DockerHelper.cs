@@ -48,14 +48,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
 
         public void StopServer()
         {
-            ProcessStartInfo serverProcessInfo = new();
-
-            serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container stop realm-server-{world.Id}";
-
-            Process serverProcess = new();
-            serverProcess.StartInfo = serverProcessInfo;
-            serverProcess.Start();
+            ExecuteCommand("stop");
         }
 
         public void RebootServer()
