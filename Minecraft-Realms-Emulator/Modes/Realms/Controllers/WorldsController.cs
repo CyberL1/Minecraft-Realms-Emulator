@@ -597,56 +597,6 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                 return StatusCode(401, errorResponse);
             }
 
-            world.Name = $"[PRE] {world.ParentWorld.Name}";
-            world.Motd = $"[PRE] {world.ParentWorld.Motd}";
-            world.State = nameof(StateEnum.OPEN);
-
-            var config = new ConfigHelper(_context);
-            var defaultServerAddress = config.GetSetting(nameof(SettingsEnum.DefaultServerAddress));
-
-            static int FindFreeTcpPort()
-            {
-                TcpListener l = new(IPAddress.Loopback, 0);
-                l.Start();
-                int port = ((IPEndPoint)l.LocalEndpoint).Port;
-                l.Stop();
-                return port;
-            }
-
-            var port = FindFreeTcpPort();
-
-            var connection = new Connection
-            {
-                World = world,
-                Address = $"{defaultServerAddress.Value}:{port}"
-            };
-
-            new DockerHelper(world).CreateServer(port);
-
-            Slot slot = new()
-            {
-                World = world,
-                SlotId = 1,
-                SlotName = "",
-                Version = gameVersion,
-                GameMode = 0,
-                Difficulty = 2,
-                SpawnProtection = 0,
-                ForceGameMode = false,
-                Pvp = true,
-                SpawnAnimals = true,
-                SpawnMonsters = true,
-                SpawnNPCs = true,
-                CommandBlocks = false
-            };
-
-            _context.Worlds.Update(world);
-
-            _context.Connections.Add(connection);
-            _context.Slots.Add(slot);
-
-            _context.SaveChanges();
-
             return Ok(world);
         }
 
