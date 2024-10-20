@@ -5,7 +5,9 @@ VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minecraft-Realms-Emulator", "Minecraft-Realms-Emulator\Minecraft-Realms-Emulator.csproj", "{A9A21AAF-EF1B-4723-9407-51FD6B831B98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Panel", "Panel\Panel.csproj", "{DDDF0FE0-736D-47D5-8571-3DD7354B7917}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Panel", "Panel\Panel.csproj", "{DDDF0FE0-736D-47D5-8571-3DD7354B7917}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{AFF83C8C-B6CA-4707-A26E-82002822F820}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{DDDF0FE0-736D-47D5-8571-3DD7354B7917}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDDF0FE0-736D-47D5-8571-3DD7354B7917}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDDF0FE0-736D-47D5-8571-3DD7354B7917}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFF83C8C-B6CA-4707-A26E-82002822F820}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFF83C8C-B6CA-4707-A26E-82002822F820}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFF83C8C-B6CA-4707-A26E-82002822F820}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFF83C8C-B6CA-4707-A26E-82002822F820}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
