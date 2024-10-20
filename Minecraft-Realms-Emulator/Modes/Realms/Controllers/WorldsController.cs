@@ -412,6 +412,17 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
 
             var world = await _context.Worlds.Include(w => w.Players).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.ParentWorld.Subscription).FirstOrDefaultAsync(w => w.Id == wId);
 
+            if (world.State == nameof(StateEnum.UNINITIALIZED))
+            {
+                ErrorResponse error = new()
+                {
+                    ErrorCode = 400,
+                    ErrorMsg = "Initialize the world first"
+                };
+
+                return StatusCode(400, error);
+            }
+
             Slot activeSlot = world.Slots.Find(s => s.SlotId == world.ActiveSlot);
 
             List<SlotResponse> slots = [];
