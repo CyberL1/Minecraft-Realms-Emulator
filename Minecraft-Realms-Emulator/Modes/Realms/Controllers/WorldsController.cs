@@ -8,7 +8,6 @@ using Minecraft_Realms_Emulator.Shared.Data;
 using Minecraft_Realms_Emulator.Shared.Entities;
 using Minecraft_Realms_Emulator.Shared.Requests;
 using Minecraft_Realms_Emulator.Shared.Responses;
-using Newtonsoft.Json;
 using System.Net;
 using System.Net.Sockets;
 
@@ -76,6 +75,8 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     OwnerUUID = world.OwnerUUID,
                     Name = world.Name,
                     Motd = world.Motd,
+                    GameMode = activeSlot.GameMode,
+                    Hardcore = activeSlot.Difficulty == 3,
                     State = world.State,
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -117,6 +118,8 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     OwnerUUID = world.OwnerUUID,
                     Name = world.Name,
                     Motd = world.Motd,
+                    GameMode = activeSlot.GameMode,
+                    Hardcore = activeSlot.Difficulty == 3,
                     State = world.State,
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -176,6 +179,8 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     OwnerUUID = world.OwnerUUID,
                     Name = world.Name,
                     Motd = world.Motd,
+                    GameMode = activeSlot.GameMode,
+                    Hardcore = activeSlot.Difficulty == 3,
                     State = world.State,
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -230,6 +235,8 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     OwnerUUID = world.OwnerUUID,
                     Name = world.Name,
                     Motd = world.Motd,
+                    GameMode = activeSlot.GameMode,
+                    Hardcore = activeSlot.Difficulty == 3,
                     State = world.State,
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -328,6 +335,8 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     OwnerUUID = world.OwnerUUID,
                     Name = world.Name,
                     Motd = world.Motd,
+                    GameMode = activeSlot.GameMode,
+                    Hardcore = activeSlot.Difficulty == 3,
                     State = world.State,
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -371,6 +380,8 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                     OwnerUUID = world.OwnerUUID,
                     Name = world.Name,
                     Motd = world.Motd,
+                    GameMode = activeSlot.GameMode,
+                    Hardcore = activeSlot.Difficulty == 3,
                     State = world.State,
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -435,25 +446,26 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                 slots.Add(new SlotResponse()
                 {
                     SlotId = slot.SlotId,
-                    Options = JsonConvert.SerializeObject(new
+                    Options =
                     {
-                        slotName = slot.SlotName,
-                        gameMode = slot.GameMode,
-                        difficulty = slot.Difficulty,
-                        spawnProtection = slot.SpawnProtection,
-                        forceGameMode = slot.ForceGameMode,
-                        pvp = slot.Pvp,
-                        spawnAnimals = slot.SpawnAnimals,
-                        spawnMonsters = slot.SpawnMonsters,
-                        spawnNPCs = slot.SpawnNPCs,
-                        commandBlocks = slot.CommandBlocks,
-                        version = slot.Version,
-                        compatibility
-                    })
+                        SlotName = slot.SlotName,
+                        GameMode = slot.GameMode,
+                        Hardcore = slot.Difficulty == 3,
+                        Difficulty = slot.Difficulty,
+                        SpawnProtection = slot.SpawnProtection,
+                        ForceGameMode = slot.ForceGameMode,
+                        Pvp = slot.Pvp,
+                        SpawnAnimals = slot.SpawnAnimals,
+                        SpawnMonsters = slot.SpawnMonsters,
+                        SpawnNPCs = slot.SpawnNPCs,
+                        CommandBlocks = slot.CommandBlocks,
+                        Version = slot.Version,
+                        Compatibility = compatibility
+                    }
                 });
             }
 
-            var activeSlotOptions = JsonConvert.DeserializeObject<SlotOptionsResponse>(slots.Find(s => s.SlotId == activeSlot.SlotId).Options);
+            SlotOptionsResponse activeSlotOptions = slots.Find(s => s.SlotId == activeSlot.SlotId).Options;
 
             if (world.ParentWorld != null)
             {
@@ -467,6 +479,8 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                 OwnerUUID = world.OwnerUUID,
                 Name = world.Name,
                 Motd = world.Motd,
+                GameMode = activeSlot.GameMode,
+                Hardcore = activeSlot.Difficulty == 3,
                 State = world.State,
                 WorldType = world.WorldType,
                 MaxPlayers = world.MaxPlayers,
