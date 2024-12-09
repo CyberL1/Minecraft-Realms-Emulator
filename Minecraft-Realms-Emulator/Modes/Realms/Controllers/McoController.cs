@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Minecraft_Realms_Emulator.Attributes;
-using Minecraft_Realms_Emulator.Data;
-using Minecraft_Realms_Emulator.Enums;
-using Minecraft_Realms_Emulator.Helpers;
-using Minecraft_Realms_Emulator.Responses;
+using Minecraft_Realms_Emulator.Shared.Attributes;
+using Minecraft_Realms_Emulator.Shared.Enums;
+using Minecraft_Realms_Emulator.Shared.Helpers;
+using Minecraft_Realms_Emulator.Shared.Data;
+using Minecraft_Realms_Emulator.Shared.Responses;
 
 namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
 {

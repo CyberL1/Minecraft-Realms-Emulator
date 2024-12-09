@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
-using Minecraft_Realms_Emulator.Data;
-using Minecraft_Realms_Emulator.Enums;
-using Minecraft_Realms_Emulator.Helpers;
-using Minecraft_Realms_Emulator.Middlewares;
+using Minecraft_Realms_Emulator.Shared.Enums;
+using Minecraft_Realms_Emulator.Shared.Helpers;
+using Minecraft_Realms_Emulator.Shared.Data;
+using Minecraft_Realms_Emulator.Shared.Middlewares;
 using Npgsql;
 using System.Diagnostics;
 using System.Reflection;

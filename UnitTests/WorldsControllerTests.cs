@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Testing;
-using Minecraft_Realms_Emulator.Entities;
-using Minecraft_Realms_Emulator.Requests;
+using Minecraft_Realms_Emulator.Shared.Requests;
+using Minecraft_Realms_Emulator.Shared.Responses;
 using Newtonsoft.Json;
 using System.Text;
 

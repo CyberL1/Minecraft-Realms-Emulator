@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Minecraft_Realms_Emulator.Attributes;
-using Minecraft_Realms_Emulator.Data;
-using Minecraft_Realms_Emulator.Entities;
-using Minecraft_Realms_Emulator.Requests;
-using Minecraft_Realms_Emulator.Responses;
+using Minecraft_Realms_Emulator.Shared.Attributes;
+using Minecraft_Realms_Emulator.Shared.Data;
+using Minecraft_Realms_Emulator.Shared.Entities;
+using Minecraft_Realms_Emulator.Shared.Requests;
+using Minecraft_Realms_Emulator.Shared.Responses;
 
 namespace Minecraft_Realms_Emulator.Modes.External
 {
