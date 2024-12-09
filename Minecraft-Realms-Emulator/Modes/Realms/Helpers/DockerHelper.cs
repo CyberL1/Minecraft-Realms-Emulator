@@ -1,4 +1,4 @@
-﻿using Minecraft_Realms_Emulator.Entities;
+﻿using Minecraft_Realms_Emulator.Shared.Entities;
 using System.Diagnostics;
 
 namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
