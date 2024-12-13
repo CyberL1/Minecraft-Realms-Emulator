@@ -3,11 +3,12 @@
     public class SlotResponse
     {
         public int SlotId { get; set; }
-        public SlotOptionsResponse Options { get; set; } = null!;
+        public SlotSettingsResponse Settings { get; set; } = null!;
+        public string Options { get; set; } = null!;
 
         public SlotResponse()
         {
-            Options = new SlotOptionsResponse();
+            Settings = new SlotSettingsResponse();
         }
     }
 }
