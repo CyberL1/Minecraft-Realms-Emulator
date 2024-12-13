@@ -161,8 +161,8 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
             string playerName = cookie.Split(";")[1].Split("=")[1];
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var ownedWorlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID || w.ParentWorld.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.ParentWorld).ToListAsync();
-            var memberWorlds = await _context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Include(p => p.World.ParentWorld).Select(p => p.World).ToListAsync();
+            var ownedWorlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID || w.ParentWorld.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.Minigame).Include(w => w.ParentWorld).ToListAsync();
+            var memberWorlds = await _context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Include(p => p.World.ParentWorld).Include(p => p.World.Minigame).Select(p => p.World).ToListAsync();
 
             List<WorldResponse> allWorlds = [];
 
@@ -291,8 +291,8 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
             string playerName = cookie.Split(";")[1].Split("=")[1];
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var ownedWorlds = await _context.Worlds.Where(w => w.ParentWorld != null && w.ParentWorld.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.ParentWorld).ToListAsync();
-            var memberWorlds = await _context.Players.Where(p => p.World.ParentWorld != null && p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Include(p => p.World.ParentWorld).Select(p => p.World).ToListAsync();
+            var ownedWorlds = await _context.Worlds.Where(w => w.ParentWorld != null && w.ParentWorld.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.ParentWorld).Include(w => w.Minigame).ToListAsync();
+            var memberWorlds = await _context.Players.Where(p => p.World.ParentWorld != null && p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Include(p => p.World.ParentWorld).Include(p => p.World.Minigame).Select(p => p.World).ToListAsync();
 
             List<WorldResponse> allWorlds = [];
 
