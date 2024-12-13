@@ -419,7 +419,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
             string cookie = Request.Headers.Cookie;
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var world = await _context.Worlds.Include(w => w.Players).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.ParentWorld.Subscription).FirstOrDefaultAsync(w => w.Id == wId);
+            var world = await _context.Worlds.Include(w => w.Players).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.ParentWorld.Subscription).Include(w => w.Minigame).FirstOrDefaultAsync(w => w.Id == wId);
 
             if (world.State == nameof(StateEnum.UNINITIALIZED))
             {
@@ -721,7 +721,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
             slot.CommandBlocks = body.CommandBlocks;
 
             _context.SaveChanges();
-            
+
             return Ok(true);
         }
 
@@ -854,7 +854,7 @@ namespace Minecraft_Realms_Emulator.Modes.External
             var totalTemplates = _context.Templates.Where(t => t.Type == type).Count();
             var templates = _context.Templates.Where(t => t.Type == type).Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            TemplatesResponse templatesResponse = new()
+        TemplatesResponse templatesResponse = new()
             {
                 Page = page,
                 Size = pageSize,
