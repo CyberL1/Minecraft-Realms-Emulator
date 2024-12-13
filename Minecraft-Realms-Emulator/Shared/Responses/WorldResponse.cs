@@ -5,11 +5,12 @@ namespace Minecraft_Realms_Emulator.Shared.Responses
     public class WorldResponse : World
     {
         public string RemoteSubscriptionId { get; set; } = new Guid().ToString();
-        public bool Hardcore { get; set; }
+        public bool IsHardcore { get; set; } = false;
         public int GameMode { get; set; }
         public int DaysLeft { get; set; } = 30;
         public bool Expired { get; set; } = false;
         public bool ExpiredTrial { get; set; } = false;
+        public bool GracePeriod { get; set; } = false;
         public string Compatibility { get; set; } = null!;
         public List<SlotResponse> Slots { get; set; } = null!;
         public string ActiveVersion { get; set; } = null!;
