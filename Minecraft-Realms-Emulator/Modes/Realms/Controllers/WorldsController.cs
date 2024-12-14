@@ -687,6 +687,15 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
 
             _context.SaveChanges();
 
+            var connection = _context.Connections.FirstOrDefault(c => c.World.Id == wId);
+            var query = new MinecraftServerQuery().Query(connection.Address);
+
+            while (query != null)
+            {
+                await Task.Delay(1000);
+                query = new MinecraftServerQuery().Query(connection.Address);
+            }
+
             return Ok(true);
         }
 
@@ -948,7 +957,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
             _context.Worlds.Remove(world);
             _context.SaveChanges();
 
-            return Ok(true);
+            return Ok(true); // 52.169.109.192:30343
         }
 
         [HttpGet("templates/{type}")]
