@@ -957,7 +957,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
             _context.Worlds.Remove(world);
             _context.SaveChanges();
 
-            return Ok(true); // 52.169.109.192:30343
+            return Ok(true);
         }
 
         [HttpGet("templates/{type}")]
