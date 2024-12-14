@@ -5,7 +5,6 @@
         NewsLink,
         DefaultServerAddress,
         TrialMode,
-        WorkMode,
         OnlineMode,
         AutomaticRealmsCreation
     }

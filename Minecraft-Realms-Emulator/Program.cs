@@ -50,8 +50,7 @@ var db = scope.ServiceProvider.GetRequiredService<DataContext>();
 
 app.MapControllers();
 
-var config = new ConfigHelper(db);
-var mode = config.GetSetting(nameof(SettingsEnum.WorkMode));
+var mode = Environment.GetEnvironmentVariable("WORKMODE");
 
 if (mode == null)
 {
@@ -59,13 +58,13 @@ if (mode == null)
     Environment.Exit(1);
 }
 
-if (!Enum.IsDefined(typeof(WorkModeEnum), mode.Value))
+if (!Enum.IsDefined(typeof(WorkModeEnum), mode))
 {
     Console.WriteLine("Invalid server work mode, exiting");
     Environment.Exit(1);
 }
 
-if (mode.Value == nameof(WorkModeEnum.REALMS))
+if (mode == nameof(WorkModeEnum.REALMS))
 {
     var resourceNames = Assembly.GetExecutingAssembly().GetManifestResourceNames();
 
@@ -117,7 +116,7 @@ if (mode.Value == nameof(WorkModeEnum.REALMS))
     }
 }
 
-var rewriteOptions = new RewriteOptions().AddRewrite(@"^(?!api)(.*)$", $"modes/{mode.Value}/$1", true);
+var rewriteOptions = new RewriteOptions().AddRewrite(@"^(?!api)(.*)$", $"modes/{mode}/$1", true);
 app.UseRewriter(rewriteOptions);
 
 app.UseMiddleware<MinecraftCookieMiddleware>();
@@ -127,5 +126,5 @@ app.UseMiddleware<AdminKeyMiddleware>();
 app.UseMiddleware<CheckForWorldMiddleware>();
 app.UseMiddleware<RouteLoggingMiddleware>();
 
-Console.WriteLine($"Running in {mode.Value} mode");
+Console.WriteLine($"Running in {mode} mode");
 app.Run();
