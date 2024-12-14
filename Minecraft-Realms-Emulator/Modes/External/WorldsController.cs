@@ -610,15 +610,6 @@ namespace Minecraft_Realms_Emulator.Modes.External
             return Ok(world);
         }
 
-        [HttpPost("{wId}/reset")]
-        [CheckForWorld]
-        [CheckRealmOwner]
-        public ActionResult<bool> Reset(int wId)
-        {
-            Console.WriteLine($"Resetting world {wId}");
-            return Ok(true);
-        }
-
         [HttpPut("{wId}/open")]
         [CheckForWorld]
         [CheckRealmOwner]
@@ -690,126 +681,6 @@ namespace Minecraft_Realms_Emulator.Modes.External
             return Ok(true);
         }
 
-        [HttpPost("{wId}/slot/{sId}")]
-        [CheckForWorld]
-        [CheckRealmOwner]
-        public async Task<ActionResult<(bool, ErrorResponse)>> UpdateSlot(int wId, int sId, SlotOptionsRequest body)
-        {
-            if (body.SlotName.Length > 10)
-            {
-                ErrorResponse errorResponse = new()
-                {
-                    ErrorCode = 400,
-                    ErrorMsg = "Slot name cannot exceed 10 characters"
-                };
-
-                return BadRequest(errorResponse);
-            }
-
-            var slots = await _context.Slots.Where(s => s.World.Id == wId).ToListAsync();
-            var slot = slots.Find(s => s.SlotId == sId);
-
-            slot.SlotName = body.SlotName;
-            slot.GameMode = body.GameMode;
-            slot.Difficulty = body.Difficulty;
-            slot.SpawnProtection = body.SpawnProtection;
-            slot.ForceGameMode = body.ForceGameMode;
-            slot.Pvp = body.Pvp;
-            slot.SpawnAnimals = body.SpawnAnimals;
-            slot.SpawnMonsters = body.SpawnMonsters;
-            slot.SpawnNPCs = body.SpawnNPCs;
-            slot.CommandBlocks = body.CommandBlocks;
-
-            _context.SaveChanges();
-
-            return Ok(true);
-        }
-
-        [HttpPut("{wId}/slot/{sId}")]
-        [CheckForWorld]
-        [CheckRealmOwner]
-        public ActionResult<bool> SwitchSlot(int wId, int sId)
-        {
-            var world = _context.Worlds.Include(w => w.Minigame).FirstOrDefault(w => w.Id == wId);
-            var slot = _context.Slots.Where(s => s.World.Id == wId).Where(s => s.SlotId == sId).Any();
-
-            if (!slot)
-            {
-                string cookie = Request.Headers.Cookie;
-                string gameVersion = cookie.Split(";")[2].Split("=")[1];
-
-                _context.Slots.Add(new()
-                {
-                    World = world,
-                    SlotId = sId,
-                    SlotName = "",
-                    Version = gameVersion,
-                    GameMode = 0,
-                    Difficulty = 2,
-                    SpawnProtection = 0,
-                    ForceGameMode = false,
-                    Pvp = true,
-                    SpawnAnimals = true,
-                    SpawnMonsters = true,
-                    SpawnNPCs = true,
-                    CommandBlocks = false
-                });
-
-                _context.SaveChanges();
-            }
-
-            world.ActiveSlot = sId;
-            world.Minigame = null;
-            world.WorldType = nameof(WorldTypeEnum.NORMAL);
-
-            _context.SaveChanges();
-
-            return Ok(true);
-        }
-
-        [HttpGet("{wId}/backups")]
-        [CheckForWorld]
-        [CheckRealmOwner]
-        public async Task<ActionResult<BackupsResponse>> GetBackups(int wId)
-        {
-            var backups = await _context.Backups.Where(b => b.Slot.World.Id == wId).ToListAsync();
-
-            BackupsResponse worldBackups = new()
-            {
-                Backups = backups
-            };
-
-            return Ok(worldBackups);
-        }
-
-        [HttpGet("{wId}/slot/{sId}/download")]
-        [CheckForWorld]
-        [CheckRealmOwner]
-        public ActionResult<BackupDownloadResponse> GetBackup(int wId, int sId)
-        {
-            Backup backup = _context.Backups.Include(b => b.Slot).FirstOrDefault(b => b.Slot.World.Id == wId && b.Slot.Id == sId);
-
-            if (backup == null)
-            {
-                ErrorResponse errorResponse = new()
-                {
-                    ErrorCode = 404,
-                    ErrorMsg = "No backup found"
-                };
-
-                return NotFound(errorResponse);
-            }
-
-            BackupDownloadResponse backupDownloadResponse = new()
-            {
-                DownloadLink = backup.DownloadUrl,
-                ResourcePackUrl = backup.ResourcePackUrl,
-                ResourcePackHash = backup.ResourcePackHash,
-            };
-
-            return Ok(backupDownloadResponse);
-        }
-
         [HttpGet("v1/{wId}/join/pc")]
         public ActionResult<Connection> Join(int wId)
         {
@@ -843,39 +714,6 @@ namespace Minecraft_Realms_Emulator.Modes.External
             }
 
             _context.Worlds.Remove(world);
-            _context.SaveChanges();
-
-            return Ok(true);
-        }
-
-        [HttpGet("templates/{type}")]
-        public ActionResult<TemplatesResponse> GetWorldTemplates(string type, int page, int pageSize)
-        {
-            var totalTemplates = _context.Templates.Where(t => t.Type == type).Count();
-            var templates = _context.Templates.Where(t => t.Type == type).Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-        TemplatesResponse templatesResponse = new()
-            {
-                Page = page,
-                Size = pageSize,
-                Total = totalTemplates,
-                Templates = templates
-            };
-
-            return Ok(templatesResponse);
-        }
-
-        [HttpPut("minigames/{mId}/{wId}")]
-        [CheckForWorld]
-        [CheckRealmOwner]
-        public ActionResult<bool> SwitchToMinigame(int mId, int wId)
-        {
-            var world = _context.Worlds.Find(wId);
-            var minigame = _context.Templates.FirstOrDefault(t => t.Type == nameof(WorldTemplateTypeEnum.MINIGAME) && t.Id == mId);
-
-            world.Minigame = minigame;
-            world.WorldType = nameof(WorldTypeEnum.MINIGAME);
-
             _context.SaveChanges();
 
             return Ok(true);
