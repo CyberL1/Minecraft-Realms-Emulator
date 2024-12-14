@@ -68,7 +68,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
             ProcessStartInfo serverProcessInfo = new();
 
             serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container rm realm-server-{world.Id}";
+            serverProcessInfo.Arguments = $"container rm -f realm-server-{world.Id}";
 
             Process serverProcess = new();
             serverProcess.StartInfo = serverProcessInfo;
