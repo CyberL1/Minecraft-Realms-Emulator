@@ -33,6 +33,14 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseNpgsql(dataSource);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:5192");
+    });
+});
+
 var app = builder.Build();
 
 // Initialize database
@@ -48,6 +56,7 @@ if (app.Environment.IsDevelopment())
 var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<DataContext>();
 
+app.UseCors();
 app.MapControllers();
 
 var mode = Environment.GetEnvironmentVariable("WORKMODE");
