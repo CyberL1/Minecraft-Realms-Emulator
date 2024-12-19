@@ -11,4 +11,12 @@ if [ ! -f server.properties ]; then
   echo "level-name=slot-1" >> server.properties
 fi
 
+# Download latest server.jar
+if [ ! -f .no-update ]; then
+  VERSION_URL=$(curl https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | jq -r '.latest.release as $latest | .versions | to_entries[] | select(.value.id == $latest) | .value.url')
+  SERVER_URL=$(curl $VERSION_URL | jq -r .downloads.server.url)
+
+  wget -O server.jar $SERVER_URL
+fi
+
 java -jar server.jar
