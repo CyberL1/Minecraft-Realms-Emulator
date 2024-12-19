@@ -902,7 +902,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
         [HttpGet("v1/{wId}/join/pc")]
         public async Task<ActionResult<Connection>> Join(int wId)
         {
-            var connection = _context.Connections.Include(c => c.World).FirstOrDefault(x => x.World.Id == wId);
+            var connection = _context.Connections.Include(c => c.World).Include(c => c.World.Slots).FirstOrDefault(x => x.World.Id == wId);
 
             var isRunning = new DockerHelper(connection.World).IsRunning();
             var query = new MinecraftServerQuery().Query(connection.Address);
@@ -918,7 +918,17 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Controllers
                 query = new MinecraftServerQuery().Query(connection.Address);
             }
 
+            Slot activeSlot = connection.World.Slots.Find(s => s.SlotId == connection.World.ActiveSlot);
+
             string cookie = Request.Headers.Cookie;
+            string gameVersion = cookie.Split(";")[2].Split("=")[1];
+
+            if (new MinecraftVersionParser.MinecraftVersion(activeSlot.Version).CompareTo(new MinecraftVersionParser.MinecraftVersion(gameVersion)) < 0 && new DockerHelper(connection.World).RunCommand("! test -f .no-update") == 0)
+            {
+                activeSlot.Version = gameVersion;
+                _context.SaveChanges();
+            }
+
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
 
             if (connection.World.OwnerUUID == playerUUID)
