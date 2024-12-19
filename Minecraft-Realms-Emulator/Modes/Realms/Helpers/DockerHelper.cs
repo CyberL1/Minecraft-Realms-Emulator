@@ -116,7 +116,7 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
             commandProcess.Start();
         }
 
-        public void RunCommand(string command)
+        public int RunCommand(string command)
         {
             ProcessStartInfo commandProcessInfo = new();
 
@@ -127,6 +127,9 @@ namespace Minecraft_Realms_Emulator.Modes.Realms.Helpers
             commandProcess.StartInfo = commandProcessInfo;
 
             commandProcess.Start();
+            commandProcess.WaitForExit();
+
+            return commandProcess.ExitCode;
         }
     }
 }
