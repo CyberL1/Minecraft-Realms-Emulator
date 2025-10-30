@@ -8,23 +8,16 @@ namespace Minecraft_Realms_Emulator.Controllers
     [Route("[controller]")]
     [ApiController]
     [RequireMinecraftCookie]
-    public class OpsController : ControllerBase
+    public class OpsController(DataContext context) : ControllerBase
     {
-        private readonly DataContext _context;
-
-        public OpsController(DataContext context)
-        {
-            _context = context;
-        }
-
         [HttpPost("{wId}/{uuid}")]
         [CheckForWorld]
         [CheckRealmOwner]
         [CheckActiveSubscription]
         public ActionResult<OpsResponse> OpPlayer(int wId, string uuid)
         {
-            var ops = _context.Players.Where(p => p.World.Id == wId && p.Operator == true).ToList();
-            var player = _context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == uuid);
+            var ops = context.Players.Where(p => p.World.Id == wId && p.Operator == true).ToList();
+            var player = context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == uuid);
 
             List<string> opNames = [];
 
@@ -36,7 +29,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             player.Permission = "OPERATOR";
             player.Operator = true;
 
-            _context.SaveChanges();
+            context.SaveChanges();
 
             opNames.Add(player.Name);
 
@@ -54,8 +47,8 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckActiveSubscription]
         public ActionResult<OpsResponse> DeopPlayer(int wId, string uuid)
         {
-            var ops = _context.Players.Where(p => p.World.Id == wId && p.Operator == true).ToList();
-            var player = _context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == uuid);
+            var ops = context.Players.Where(p => p.World.Id == wId && p.Operator == true).ToList();
+            var player = context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == uuid);
 
             List<string> opNames = [];
 
@@ -67,7 +60,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             player.Permission = "MEMBER";
             player.Operator = false;
 
-            _context.SaveChanges();
+            context.SaveChanges();
 
             opNames.Remove(player.Name);
 

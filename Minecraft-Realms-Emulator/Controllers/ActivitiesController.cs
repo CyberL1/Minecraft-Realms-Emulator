@@ -11,15 +11,8 @@ namespace Minecraft_Realms_Emulator.Controllers
     [Route("[controller]")]
     [ApiController]
     [RequireMinecraftCookie]
-    public class ActivitiesController : ControllerBase
+    public class ActivitiesController(DataContext context) : ControllerBase
     {
-        private readonly DataContext _context;
-
-        public ActivitiesController(DataContext context)
-        {
-            _context = context;
-        }
-
         [HttpGet("liveplayerlist")]
         public ActionResult<LivePlayerListsResponse> GetLivePlayerList()
         {
@@ -28,11 +21,11 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             List<LivePlayerList> lists = [];
 
-            var worlds = _context.Worlds.Where(w => w.State == nameof(StateEnum.OPEN) && w.OwnerUUID == playerUUID || w.State == nameof(StateEnum.OPEN) && w.Players.Any(p => p.Uuid == playerUUID && p.Accepted)).ToList();
+            var worlds = context.Worlds.Where(w => w.State == nameof(StateEnum.OPEN) && w.OwnerUUID == playerUUID || w.State == nameof(StateEnum.OPEN) && w.Players.Any(p => p.Uuid == playerUUID && p.Accepted)).ToList();
 
             foreach (var world in worlds)
             {
-                var connection = _context.Connections.Where(c => c.World.Id == world.Id).FirstOrDefault();
+                var connection = context.Connections.Where(c => c.World.Id == world.Id).FirstOrDefault();
                 var query = new MinecraftServerQuery().Query(connection.Address);
 
                 if (query == null) continue;
