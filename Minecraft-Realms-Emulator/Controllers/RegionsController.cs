@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Minecraft_Realms_Emulator.Attributes;
+using Minecraft_Realms_Emulator.Enums;
+using Minecraft_Realms_Emulator.Objects;
+using Minecraft_Realms_Emulator.Responses;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -9,15 +12,27 @@ namespace Minecraft_Realms_Emulator.Controllers
     public class RegionsController : ControllerBase
     {
         [HttpGet("ping/stat")]
-        public ActionResult<string> GetRegionsStat(int wId)
+        public ActionResult GetRegionsStat()
         {
-            return Ok(new List<string>());
+            return NoContent();
         }
 
         [HttpGet("preferredRegions")]
-        public ActionResult<string> GetPreferredRegions(int wId)
+        public ActionResult<string> GetPreferredRegions()
         {
-            return Ok(new List<string>());
+            var response = new RegionDataListResponse();
+
+            foreach (var region in Enum.GetNames<RegionEnum>())
+            {
+                Console.WriteLine(region);
+                response.RegionDataList.Add(new RegionObject
+                {
+                    RegionName = region,
+                    ServiceQuality = RegionServiceQualityEnum.Great
+                });
+            }
+            
+            return Ok(response);
         }
     }
 }
