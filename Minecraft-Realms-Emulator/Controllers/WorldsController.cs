@@ -10,6 +10,7 @@ using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
 using System.Net;
 using System.Net.Sockets;
+using Minecraft_Realms_Emulator.Objects;
 using Newtonsoft.Json;
 
 namespace Minecraft_Realms_Emulator.Controllers
@@ -462,7 +463,13 @@ namespace Minecraft_Realms_Emulator.Controllers
                         commandBlocks = slot.CommandBlocks,
                         version = slot.Version,
                         compatibility
-                    })
+                    }),
+                    Settings = [
+                    new SlotSettingObject
+                    {
+                        Name = "hardcore",
+                        Value = slot.Difficulty == 3
+                    }]
                 });
             }
 
