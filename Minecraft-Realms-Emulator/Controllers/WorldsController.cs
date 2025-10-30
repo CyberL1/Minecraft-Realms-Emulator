@@ -707,13 +707,24 @@ namespace Minecraft_Realms_Emulator.Controllers
             return Ok(true);
         }
 
-        [HttpPost("{wId}")]
+        [HttpPost("{wId}/configuration")]
         [CheckForWorld]
         [CheckRealmOwner]
         [CheckActiveSubscription]
-        public async Task<ActionResult<(bool, ErrorResponse)>> UpdateWorld(int wId, WorldCreateRequest body)
+        public async Task<ActionResult<(bool, ErrorResponse)>> UpdateWorld(int wId, UpdateWorldConfigurationRequest body)
         {
-            if (body.Name.Length > 32)
+            if (body.Description.Name.Trim() == "")
+            {
+                ErrorResponse errorResponse = new()
+                {
+                    ErrorCode = 400,
+                    ErrorMsg = "World name cannot be empty"
+                };
+
+                return BadRequest(errorResponse);
+            }
+            
+            if (body.Description.Name.Length > 32)
             {
                 ErrorResponse errorResponse = new()
                 {
@@ -724,26 +735,24 @@ namespace Minecraft_Realms_Emulator.Controllers
                 return BadRequest(errorResponse);
             }
 
-            if (body.Description?.Length > 32)
+            if (body.Description.Description?.Length > 32)
             {
                 ErrorResponse errorResponse = new()
                 {
                     ErrorCode = 400,
                     ErrorMsg = "World description cannot exceed 32 characters"
                 };
-
+            
                 return BadRequest(errorResponse);
             }
 
-            var worlds = await _context.Worlds.ToListAsync();
+            var world = await _context.Worlds.FindAsync(wId);
 
-            var world = worlds.Find(w => w.Id == wId);
+            world.Name = body.Description.Name.Trim();
+            world.Motd = body.Description.Description.Trim();
+            world.RegionSelectionPreference = body.RegionSelectionPreference;
 
-            world.Name = body.Name;
-            world.Motd = body.Description;
-
-            _context.SaveChanges();
-
+            await _context.SaveChangesAsync();
             return Ok(true);
         }
 
