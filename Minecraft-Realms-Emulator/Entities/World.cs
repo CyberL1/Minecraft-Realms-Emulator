@@ -1,4 +1,8 @@
-﻿namespace Minecraft_Realms_Emulator.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Minecraft_Realms_Emulator.Enums;
+using Minecraft_Realms_Emulator.Objects;
+
+namespace Minecraft_Realms_Emulator.Entities
 {
     public class World
     {
@@ -17,5 +21,6 @@
         public List<Slot> Slots { get; set; } = [];
         public bool Member { get; set; } = false;
         public World? ParentWorld { get; set; }
+        public RegionSelectionPreferenceObject RegionSelectionPreference { get; set; } = new();
     }
 }

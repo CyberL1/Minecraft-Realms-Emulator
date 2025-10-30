@@ -500,7 +500,8 @@ namespace Minecraft_Realms_Emulator.Controllers
                 Expired = ((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days < 0,
                 ExpiredTrial = false,
                 ActiveVersion = activeSlotOptions.Version,
-                Compatibility = activeSlotOptions.Compatibility
+                Compatibility = activeSlotOptions.Compatibility,
+                RegionSelectionPreference = world.RegionSelectionPreference
             };
 
             if (world.Minigame != null)
