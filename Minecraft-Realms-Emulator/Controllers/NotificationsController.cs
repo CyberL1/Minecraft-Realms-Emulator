@@ -9,15 +9,8 @@ namespace Minecraft_Realms_Emulator.Controllers
     [Route("[controller]")]
     [ApiController]
     [RequireMinecraftCookie]
-    public class NotificationsController : ControllerBase
+    public class NotificationsController(DataContext context) : ControllerBase
     {
-        private readonly DataContext _context;
-
-        public NotificationsController(DataContext context)
-        {
-            _context = context;
-        }
-
         [HttpGet]
         public ActionResult<NotificationsResponse> GetNotifications()
         {
@@ -26,9 +19,9 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             List<NotificationResponse> notifications = [];
 
-            foreach (var notification in _context.Notifications.ToList())
+            foreach (var notification in context.Notifications.ToList())
             {
-                var seen = _context.SeenNotifications.Any(n => n.PlayerUUID == playerUUID && n.NotificationUUID == notification.NotificationUuid);
+                var seen = context.SeenNotifications.Any(n => n.PlayerUUID == playerUUID && n.NotificationUUID == notification.NotificationUuid);
 
                 if (seen)
                 {
@@ -84,10 +77,10 @@ namespace Minecraft_Realms_Emulator.Controllers
                     NotificationUUID = notificationId
                 };
 
-                _context.SeenNotifications.Add(notificationSeen);
+                context.SeenNotifications.Add(notificationSeen);
             }
 
-            _context.SaveChanges();
+            context.SaveChanges();
 
             return NoContent();
         }

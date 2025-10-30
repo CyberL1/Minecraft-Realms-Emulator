@@ -9,20 +9,14 @@ namespace Minecraft_Realms_Emulator.Controllers
     [Route("[controller]")]
     [ApiController]
     [RequireMinecraftCookie]
-    public class SubscriptionsController : ControllerBase
+    public class SubscriptionsController(DataContext context) : ControllerBase
     {
-        private readonly DataContext _context;
-
-        public SubscriptionsController(DataContext context)
-        {
-            _context = context;
-        }
         [HttpGet("{wId}")]
         [CheckForWorld]
         [CheckRealmOwner]
         public async Task<ActionResult<SubscriptionResponse>> Get(int wId)
         {
-            var world = await _context.Worlds.Include(w => w.Subscription).Include(w => w.ParentWorld.Subscription).FirstOrDefaultAsync(w => w.Id == wId);
+            var world = await context.Worlds.Include(w => w.Subscription).Include(w => w.ParentWorld.Subscription).FirstOrDefaultAsync(w => w.Id == wId);
 
             if (world.ParentWorld != null)
             {

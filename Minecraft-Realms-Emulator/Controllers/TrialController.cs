@@ -9,19 +9,12 @@ namespace Minecraft_Realms_Emulator.Controllers
     [Route("[controller]")]
     [ApiController]
     [RequireMinecraftCookie]
-    public class TrialController : ControllerBase
+    public class TrialController(DataContext context) : ControllerBase
     {
-        private readonly DataContext _context;
-
-        public TrialController(DataContext context)
-        {
-            _context = context;
-        }
-
         [HttpGet]
         public ActionResult<bool> GetTrial()
         {
-            var config = new ConfigHelper(_context);
+            var config = new ConfigHelper(context);
             var trialMode = config.GetSetting(nameof(SettingsEnum.TrialMode));
 
             return Ok(trialMode.Value);

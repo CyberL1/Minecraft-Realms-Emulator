@@ -18,15 +18,8 @@ namespace Minecraft_Realms_Emulator.Controllers
     [Route("[controller]")]
     [ApiController]
     [RequireMinecraftCookie]
-    public class WorldsController : ControllerBase
+    public class WorldsController(DataContext context) : ControllerBase
     {
-        private readonly DataContext _context;
-
-        public WorldsController(DataContext context)
-        {
-            _context = context;
-        }
-
         [HttpGet]
         public async Task<ActionResult<ServersResponse>> GetWorlds()
         {
@@ -36,12 +29,12 @@ namespace Minecraft_Realms_Emulator.Controllers
             string playerName = cookie.Split(";")[1].Split("=")[1];
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var ownedWorlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.Minigame).ToListAsync();
-            var memberWorlds = await _context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Include(p => p.World.Minigame).Select(p => p.World).ToListAsync();
+            var ownedWorlds = await context.Worlds.Where(w => w.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.Minigame).ToListAsync();
+            var memberWorlds = await context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Include(p => p.World.Minigame).Select(p => p.World).ToListAsync();
 
             List<WorldResponse> allWorlds = [];
 
-            if (ownedWorlds.ToArray().Length == 0 && new ConfigHelper(_context).GetSetting(nameof(SettingsEnum.AutomaticRealmsCreation)).Value)
+            if (ownedWorlds.ToArray().Length == 0 && new ConfigHelper(context).GetSetting(nameof(SettingsEnum.AutomaticRealmsCreation)).Value)
             {
                 var world = new World
                 {
@@ -58,9 +51,9 @@ namespace Minecraft_Realms_Emulator.Controllers
                 };
 
                 ownedWorlds.Add(world);
-                _context.Worlds.Add(world);
+                context.Worlds.Add(world);
 
-                _context.SaveChanges();
+                context.SaveChanges();
             }
 
             foreach (var world in ownedWorlds)
@@ -162,8 +155,8 @@ namespace Minecraft_Realms_Emulator.Controllers
             string playerName = cookie.Split(";")[1].Split("=")[1];
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var ownedWorlds = await _context.Worlds.Where(w => w.OwnerUUID == playerUUID || w.ParentWorld.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.Minigame).Include(w => w.ParentWorld).ToListAsync();
-            var memberWorlds = await _context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Include(p => p.World.ParentWorld).Include(p => p.World.Minigame).Select(p => p.World).ToListAsync();
+            var ownedWorlds = await context.Worlds.Where(w => w.OwnerUUID == playerUUID || w.ParentWorld.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.Minigame).Include(w => w.ParentWorld).ToListAsync();
+            var memberWorlds = await context.Players.Where(p => p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Include(p => p.World.ParentWorld).Include(p => p.World.Minigame).Select(p => p.World).ToListAsync();
 
             List<WorldResponse> allWorlds = [];
 
@@ -292,14 +285,14 @@ namespace Minecraft_Realms_Emulator.Controllers
             string playerName = cookie.Split(";")[1].Split("=")[1];
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var ownedWorlds = await _context.Worlds.Where(w => w.ParentWorld != null && w.ParentWorld.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.ParentWorld).Include(w => w.Minigame).ToListAsync();
-            var memberWorlds = await _context.Players.Where(p => p.World.ParentWorld != null && p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Include(p => p.World.ParentWorld).Include(p => p.World.Minigame).Select(p => p.World).ToListAsync();
+            var ownedWorlds = await context.Worlds.Where(w => w.ParentWorld != null && w.ParentWorld.OwnerUUID == playerUUID).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.ParentWorld).Include(w => w.Minigame).ToListAsync();
+            var memberWorlds = await context.Players.Where(p => p.World.ParentWorld != null && p.Uuid == playerUUID && p.Accepted).Include(p => p.World.Subscription).Include(p => p.World.Slots).Include(p => p.World.ParentWorld).Include(p => p.World.Minigame).Select(p => p.World).ToListAsync();
 
             List<WorldResponse> allWorlds = [];
 
-            if (ownedWorlds.ToArray().Length == 0 && new ConfigHelper(_context).GetSetting(nameof(SettingsEnum.AutomaticRealmsCreation)).Value)
+            if (ownedWorlds.ToArray().Length == 0 && new ConfigHelper(context).GetSetting(nameof(SettingsEnum.AutomaticRealmsCreation)).Value)
             {
-                var parentWorld = _context.Worlds.FirstOrDefault(w => w.OwnerUUID == playerUUID && w.ParentWorld == null);
+                var parentWorld = context.Worlds.FirstOrDefault(w => w.OwnerUUID == playerUUID && w.ParentWorld == null);
 
                 if (parentWorld != null && parentWorld.State != nameof(StateEnum.UNINITIALIZED))
                 {
@@ -317,9 +310,9 @@ namespace Minecraft_Realms_Emulator.Controllers
                     };
 
                     ownedWorlds.Add(world);
-                    _context.Worlds.Add(world);
+                    context.Worlds.Add(world);
 
-                    _context.SaveChanges();
+                    context.SaveChanges();
                 }
             }
 
@@ -423,7 +416,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             string cookie = Request.Headers.Cookie;
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var world = await _context.Worlds.Include(w => w.Players).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.ParentWorld.Subscription).FirstOrDefaultAsync(w => w.Id == wId);
+            var world = await context.Worlds.Include(w => w.Players).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.ParentWorld.Subscription).FirstOrDefaultAsync(w => w.Id == wId);
 
             if (world.State == nameof(StateEnum.UNINITIALIZED))
             {
@@ -522,7 +515,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             string cookie = Request.Headers.Cookie;
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var worlds = await _context.Worlds.ToListAsync();
+            var worlds = await context.Worlds.ToListAsync();
 
             var world = worlds.Find(w => w.Id == wId);
             if (world.State != nameof(StateEnum.UNINITIALIZED))
@@ -547,7 +540,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             world.State = nameof(StateEnum.OPEN);
             world.Subscription = subscription;
 
-            var config = new ConfigHelper(_context);
+            var config = new ConfigHelper(context);
             var defaultServerAddress = config.GetSetting(nameof(SettingsEnum.DefaultServerAddress));
 
             static int FindFreeTcpPort()
@@ -586,13 +579,13 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             new DockerHelper(world).CreateServer(port);
 
-            _context.Worlds.Update(world);
+            context.Worlds.Update(world);
 
-            _context.Subscriptions.Add(subscription);
-            _context.Connections.Add(connection);
-            _context.Slots.Add(slot);
+            context.Subscriptions.Add(subscription);
+            context.Connections.Add(connection);
+            context.Slots.Add(slot);
 
-            _context.SaveChanges();
+            context.SaveChanges();
 
             return Ok(world);
         }
@@ -605,7 +598,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             string cookie = Request.Headers.Cookie;
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            var worlds = await _context.Worlds.ToListAsync();
+            var worlds = await context.Worlds.ToListAsync();
 
             var world = worlds.Find(w => w.Id == wId);
 
@@ -642,7 +635,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         {
             Console.WriteLine($"Resetting world {wId}");
 
-            var world = _context.Worlds.Find(wId);
+            var world = context.Worlds.Find(wId);
             var server = new DockerHelper(world);
 
             server.RunCommand($"rm -rf slot-{world.ActiveSlot}");
@@ -657,7 +650,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckActiveSubscription]
         public async Task<ActionResult<bool>> Open(int wId)
         {
-            var worlds = await _context.Worlds.ToListAsync();
+            var worlds = await context.Worlds.ToListAsync();
 
             var world = worlds.Find(w => w.Id == wId);
 
@@ -665,9 +658,9 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             world.State = nameof(StateEnum.OPEN);
 
-            _context.SaveChanges();
+            context.SaveChanges();
 
-            var connection = _context.Connections.FirstOrDefault(c => c.World.Id == wId);
+            var connection = context.Connections.FirstOrDefault(c => c.World.Id == wId);
             var query = new MinecraftServerQuery().Query(connection.Address);
 
             while (query == null)
@@ -685,7 +678,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckActiveSubscription]
         public async Task<ActionResult<bool>> Close(int wId)
         {
-            var worlds = await _context.Worlds.ToListAsync();
+            var worlds = await context.Worlds.ToListAsync();
 
             var world = worlds.FirstOrDefault(w => w.Id == wId);
 
@@ -693,9 +686,9 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             world.State = nameof(StateEnum.CLOSED);
 
-            _context.SaveChanges();
+            context.SaveChanges();
 
-            var connection = _context.Connections.FirstOrDefault(c => c.World.Id == wId);
+            var connection = context.Connections.FirstOrDefault(c => c.World.Id == wId);
             var query = new MinecraftServerQuery().Query(connection.Address);
 
             while (query != null)
@@ -746,13 +739,13 @@ namespace Minecraft_Realms_Emulator.Controllers
                 return BadRequest(errorResponse);
             }
 
-            var world = await _context.Worlds.FindAsync(wId);
+            var world = await context.Worlds.FindAsync(wId);
 
             world.Name = body.Description.Name.Trim();
             world.Motd = body.Description.Description.Trim();
             world.RegionSelectionPreference = body.RegionSelectionPreference;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return Ok(true);
         }
 
@@ -806,7 +799,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                 return BadRequest(errorResponse);
             }
 
-            var slots = await _context.Slots.Where(s => s.World.Id == wId).ToListAsync();
+            var slots = await context.Slots.Where(s => s.World.Id == wId).ToListAsync();
             var slot = slots.Find(s => s.SlotId == sId);
 
             slot.SlotName = body.SlotName;
@@ -820,7 +813,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             slot.SpawnNPCs = body.SpawnNPCs;
             slot.CommandBlocks = body.CommandBlocks;
 
-            _context.SaveChanges();
+            context.SaveChanges();
 
             return Ok(true);
         }
@@ -831,15 +824,15 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckActiveSubscription]
         public ActionResult<bool> SwitchSlot(int wId, int sId)
         {
-            var world = _context.Worlds.Include(w => w.Minigame).FirstOrDefault(w => w.Id == wId);
-            var slot = _context.Slots.Where(s => s.World.Id == wId).Where(s => s.SlotId == sId).Any();
+            var world = context.Worlds.Include(w => w.Minigame).FirstOrDefault(w => w.Id == wId);
+            var slot = context.Slots.Where(s => s.World.Id == wId).Where(s => s.SlotId == sId).Any();
 
             if (!slot)
             {
                 string cookie = Request.Headers.Cookie;
                 string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-                _context.Slots.Add(new()
+                context.Slots.Add(new()
                 {
                     World = world,
                     SlotId = sId,
@@ -856,7 +849,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     CommandBlocks = false
                 });
 
-                _context.SaveChanges();
+                context.SaveChanges();
             }
 
             var server = new DockerHelper(world);
@@ -868,7 +861,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             world.Minigame = null;
             world.WorldType = nameof(WorldTypeEnum.NORMAL);
 
-            _context.SaveChanges();
+            context.SaveChanges();
 
             return Ok(true);
         }
@@ -878,7 +871,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckRealmOwner]
         public async Task<ActionResult<BackupsResponse>> GetBackups(int wId)
         {
-            var backups = await _context.Backups.Where(b => b.Slot.World.Id == wId).ToListAsync();
+            var backups = await context.Backups.Where(b => b.Slot.World.Id == wId).ToListAsync();
 
             BackupsResponse worldBackups = new()
             {
@@ -893,7 +886,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckRealmOwner]
         public ActionResult<BackupDownloadResponse> GetBackup(int wId, int sId)
         {
-            Backup backup = _context.Backups.Include(b => b.Slot).FirstOrDefault(b => b.Slot.World.Id == wId && b.Slot.Id == sId);
+            Backup backup = context.Backups.Include(b => b.Slot).FirstOrDefault(b => b.Slot.World.Id == wId && b.Slot.Id == sId);
 
             if (backup == null)
             {
@@ -919,7 +912,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet("v1/{wId}/join/pc")]
         public async Task<ActionResult<Connection>> Join(int wId)
         {
-            var connection = _context.Connections.Include(c => c.World).Include(c => c.World.Slots).FirstOrDefault(x => x.World.Id == wId);
+            var connection = context.Connections.Include(c => c.World).Include(c => c.World.Slots).FirstOrDefault(x => x.World.Id == wId);
 
             var isRunning = new DockerHelper(connection.World).IsRunning();
             var query = new MinecraftServerQuery().Query(connection.Address);
@@ -943,7 +936,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             if (new MinecraftVersionParser.MinecraftVersion(activeSlot.Version).CompareTo(new MinecraftVersionParser.MinecraftVersion(gameVersion)) < 0 && new DockerHelper(connection.World).RunCommand("! test -f .no-update") == 0)
             {
                 activeSlot.Version = gameVersion;
-                _context.SaveChanges();
+                context.SaveChanges();
             }
 
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
@@ -961,7 +954,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckRealmOwner]
         public async Task<ActionResult<bool>> DeleteRealm(int wId)
         {
-            var world = await _context.Worlds.Include(w => w.Subscription).Include(w => w.ParentWorld).FirstAsync(w => w.Id == wId);
+            var world = await context.Worlds.Include(w => w.Subscription).Include(w => w.ParentWorld).FirstAsync(w => w.Id == wId);
 
             if (((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days > 0)
             {
@@ -976,24 +969,24 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             if (world.ParentWorld == null)
             {
-                var snapshotWorld = _context.Worlds.FirstOrDefault(w => w.ParentWorld.Id == wId);
+                var snapshotWorld = context.Worlds.FirstOrDefault(w => w.ParentWorld.Id == wId);
 
                 if (snapshotWorld != null)
                 {
                     new DockerHelper(snapshotWorld).DeleteServer();
-                    _context.Worlds.Remove(snapshotWorld);
+                    context.Worlds.Remove(snapshotWorld);
                 }
             }
             else
             {
                 new DockerHelper(world.ParentWorld).DeleteServer();
-                _context.Worlds.Remove(world.ParentWorld);
+                context.Worlds.Remove(world.ParentWorld);
             }
 
             new DockerHelper(world).DeleteServer();
 
-            _context.Worlds.Remove(world);
-            _context.SaveChanges();
+            context.Worlds.Remove(world);
+            context.SaveChanges();
 
             return Ok(true);
         }
@@ -1001,8 +994,8 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet("templates/{type}")]
         public ActionResult<TemplatesResponse> GetWorldTemplates(string type, int page, int pageSize)
         {
-            var totalTemplates = _context.Templates.Where(t => t.Type == type).Count();
-            var templates = _context.Templates.Where(t => t.Type == type).Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var totalTemplates = context.Templates.Where(t => t.Type == type).Count();
+            var templates = context.Templates.Where(t => t.Type == type).Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             TemplatesResponse templatesResponse = new()
             {
@@ -1020,13 +1013,13 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckRealmOwner]
         public ActionResult<bool> SwitchToMinigame(int mId, int wId)
         {
-            var world = _context.Worlds.Find(wId);
-            var minigame = _context.Templates.FirstOrDefault(t => t.Type == nameof(WorldTemplateTypeEnum.MINIGAME) && t.Id == mId);
+            var world = context.Worlds.Find(wId);
+            var minigame = context.Templates.FirstOrDefault(t => t.Type == nameof(WorldTemplateTypeEnum.MINIGAME) && t.Id == mId);
 
             world.Minigame = minigame;
             world.WorldType = nameof(WorldTypeEnum.MINIGAME);
 
-            _context.SaveChanges();
+            context.SaveChanges();
 
             return Ok(true);
         }

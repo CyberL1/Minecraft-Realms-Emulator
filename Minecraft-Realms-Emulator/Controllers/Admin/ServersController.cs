@@ -9,19 +9,12 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
     [Route("api/admin/[controller]")]
     [ApiController]
     [RequireAdminKey]
-    public class ServersController : ControllerBase
+    public class ServersController(DataContext context) : ControllerBase
     {
-        private readonly DataContext _context;
-
-        public ServersController(DataContext context)
-        {
-            _context = context;
-        }
-
         [HttpGet]
         public ActionResult<List<World>> GetWorlds()
         {
-            var worlds = _context.Worlds.ToList();
+            var worlds = context.Worlds.ToList();
 
             return Ok(worlds);
         }
@@ -30,7 +23,7 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
         [CheckForWorld]
         public ActionResult<World> GetWorld(int wId)
         {
-            var world = _context.Worlds.ToList().Find(w => w.Id == wId);
+            var world = context.Worlds.ToList().Find(w => w.Id == wId);
 
             return Ok(world);
         }
@@ -42,7 +35,7 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
             Response.Headers.Add("Cache-Control", "no-cache");
             Response.Headers.Add("X-Accel-Buffering", "no");
 
-            var world = _context.Worlds.ToList().Find(w => w.Id == wId);
+            var world = context.Worlds.ToList().Find(w => w.Id == wId);
 
             if (world == null) return BadRequest("World not found");
 
@@ -64,9 +57,9 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
         [CheckForWorld]
         public ActionResult<bool> OpenServer(int wId)
         {
-            var world = _context.Worlds.ToList().Find(w => w.Id == wId);
+            var world = context.Worlds.ToList().Find(w => w.Id == wId);
             world.State = "OPEN";
-            _context.SaveChanges();
+            context.SaveChanges();
 
             new DockerHelper(world).StartServer();
 
@@ -77,10 +70,10 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
         [CheckForWorld]
         public ActionResult<bool> CloseServer(int wId)
         {
-            var world = _context.Worlds.ToList().Find(w => w.Id == wId);
+            var world = context.Worlds.ToList().Find(w => w.Id == wId);
 
             world.State = "CLOSED";
-            _context.SaveChanges();
+            context.SaveChanges();
 
             new DockerHelper(world).StopServer();
 

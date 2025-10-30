@@ -10,19 +10,12 @@ namespace Minecraft_Realms_Emulator.Controllers
     [Route("[controller]")]
     [ApiController]
     [RequireMinecraftCookie]
-    public class McoController : ControllerBase
+    public class McoController(DataContext context) : ControllerBase
     {
-        private readonly DataContext _context;
-
-        public McoController(DataContext context)
-        {
-            _context = context;
-        }
-
         [HttpGet("available")]
         public async Task<ActionResult<bool>> GetAvailable()
         {
-            if (new ConfigHelper(_context).GetSetting(nameof(SettingsEnum.OnlineMode)).Value)
+            if (new ConfigHelper(context).GetSetting(nameof(SettingsEnum.OnlineMode)).Value)
             {
                 string cookie = Request.Headers.Cookie;
                 string playerUUID = cookie.Split(";")[0].Split(":")[2];
@@ -49,7 +42,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet("v1/news")]
         public ActionResult<NewsResponse> GetNews()
         {
-            var config = new ConfigHelper(_context);
+            var config = new ConfigHelper(context);
             var newsLink = config.GetSetting(nameof(SettingsEnum.NewsLink));
 
             var news = new NewsResponse
