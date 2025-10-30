@@ -959,9 +959,20 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpDelete("{wId}")]
         [CheckForWorld]
         [CheckRealmOwner]
-        public ActionResult<bool> DeleteRealm(int wId)
+        public async Task<ActionResult<bool>> DeleteRealm(int wId)
         {
-            var world = _context.Worlds.Find(wId);
+            var world = await _context.Worlds.Include(w => w.Subscription).Include(w => w.ParentWorld).FirstAsync(w => w.Id == wId);
+
+            if (((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days > 0)
+            {
+                ErrorResponse errorResponse = new()
+                {
+                    ErrorCode = 403,
+                    ErrorMsg = "World is not expired"
+                };
+
+                return StatusCode(403, errorResponse);
+            }
 
             if (world.ParentWorld == null)
             {
