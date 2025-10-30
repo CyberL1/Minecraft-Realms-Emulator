@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
-using Minecraft_Realms_Emulator.Shared.Enums;
-using Minecraft_Realms_Emulator.Shared.Helpers;
-using Minecraft_Realms_Emulator.Shared.Data;
-using Minecraft_Realms_Emulator.Shared.Middlewares;
+using Minecraft_Realms_Emulator.Helpers;
+using Minecraft_Realms_Emulator.Data;
+using Minecraft_Realms_Emulator.Middlewares;
 using Npgsql;
 using System.Diagnostics;
 using System.Reflection;
@@ -53,80 +51,55 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-var scope = app.Services.CreateScope();
-var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-
 app.UseCors();
 app.MapControllers();
 
-var mode = Environment.GetEnvironmentVariable("WORKMODE");
+var resourceNames = Assembly.GetExecutingAssembly().GetManifestResourceNames();
 
-if (mode == null)
+foreach (var resourceName in resourceNames) 
 {
-    Console.WriteLine("Cannot get server work mode, exiting");
-    Environment.Exit(1);
-}
+    var path = $"{AppDomain.CurrentDomain.BaseDirectory}{resourceName.Replace("Minecraft_Realms_Emulator.Resources.", "").Replace(".", "/")}";
+    var directory = Path.GetDirectoryName(path);
 
-if (!Enum.IsDefined(typeof(WorkModeEnum), mode))
-{
-    Console.WriteLine("Invalid server work mode, exiting");
-    Environment.Exit(1);
-}
+    using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
 
-if (mode == nameof(WorkModeEnum.REALMS))
-{
-    var resourceNames = Assembly.GetExecutingAssembly().GetManifestResourceNames();
-
-    foreach (var resourceName in resourceNames)
+    if (!Directory.Exists(directory))
     {
-        var path = $"{AppDomain.CurrentDomain.BaseDirectory}{resourceName.Replace("Minecraft_Realms_Emulator.Resources.", "").Replace(".", "/")}";
-        
-        var directory = Path.GetDirectoryName(path);
-        var name = Path.GetFileName(path);
-
-        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
-
-        if (!Directory.Exists(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
-
-        if (!File.Exists(path))
-        {
-            using var file = new FileStream(path, FileMode.Create);
-            stream.CopyTo(file);
-        }
+        Directory.CreateDirectory(directory);
     }
 
-    // Check if docker is running
-    try
+    if (!File.Exists(path))
     {
-        ProcessStartInfo dockerProcessInfo = new();
-        dockerProcessInfo.FileName = "docker";
-        dockerProcessInfo.Arguments = "info";
-
-        Process dockerProcess = new();
-        dockerProcess.StartInfo = dockerProcessInfo;
-        dockerProcess.Start();
-
-        dockerProcess.WaitForExit();
-
-        if (dockerProcess.ExitCode != 0)
-        {
-            Console.WriteLine("Docker is required to run in REALMS work mode, but its daemon is not running.");
-            Environment.Exit(1);
-        }
+        using var file = new FileStream(path, FileMode.Create);
+        stream.CopyTo(file);
     }
-    catch
+}
+
+// Check if docker is running
+try
+{
+    ProcessStartInfo dockerProcessInfo = new();
+    dockerProcessInfo.FileName = "docker";
+    dockerProcessInfo.Arguments = "info";
+
+    Process dockerProcess = new();
+    dockerProcess.StartInfo = dockerProcessInfo;
+    dockerProcess.Start();
+
+    dockerProcess.WaitForExit();
+
+    if (dockerProcess.ExitCode != 0)
     {
-        Console.WriteLine("Docker is required to run in REALMS work mode, but it is not installed");
-        Console.WriteLine("You can install it here: https://docs.docker.com/engine/install");
+        Console.WriteLine("Docker is required to run, but its daemon is not running.");
         Environment.Exit(1);
     }
 }
-
-var rewriteOptions = new RewriteOptions().AddRewrite(@"^(?!api)(.*)$", $"modes/{mode}/$1", true);
-app.UseRewriter(rewriteOptions);
+catch
+{
+    Console.WriteLine("Docker is required to run, but it is not installed");
+    Console.WriteLine("You can install it here: https://docs.docker.com/engine/install");
+    Environment.Exit(1);
+}
 
 app.UseMiddleware<MinecraftCookieMiddleware>();
 app.UseMiddleware<CheckRealmOwnerMiddleware>();
@@ -135,5 +108,5 @@ app.UseMiddleware<AdminKeyMiddleware>();
 app.UseMiddleware<CheckForWorldMiddleware>();
 app.UseMiddleware<RouteLoggingMiddleware>();
 
-Console.WriteLine($"Running in {mode} mode");
+Console.WriteLine("Running Minecraft Realms Emulator");
 app.Run();
