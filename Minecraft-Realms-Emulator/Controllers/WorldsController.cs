@@ -954,7 +954,8 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckRealmOwner]
         public async Task<ActionResult<bool>> DeleteRealm(int wId)
         {
-            var world = await context.Worlds.Include(w => w.Subscription).Include(w => w.ParentWorld).FirstAsync(w => w.Id == wId);
+            var world = await context.Worlds.Include(w => w.Subscription).Include(w => w.ParentWorld)
+                .FirstAsync(w => w.Id == wId);
 
             if (((DateTimeOffset)world.Subscription.StartDate.AddDays(30) - DateTime.Today).Days > 0)
             {
@@ -986,7 +987,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             new DockerHelper(world).DeleteServer();
 
             context.Worlds.Remove(world);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             return Ok(true);
         }
