@@ -910,9 +910,10 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpGet("v1/{wId}/join/pc")]
+        [CheckActiveSubscription]
         public async Task<ActionResult<Connection>> Join(int wId)
         {
-            var connection = context.Connections.Include(c => c.World).Include(c => c.World.Slots).FirstOrDefault(x => x.World.Id == wId);
+            var connection = context.Connections.Include(c => c.World).Include(c => c.World.Slots).FirstOrDefault(c => c.World.Id == wId);
 
             var isRunning = new DockerHelper(connection.World).IsRunning();
             var query = new MinecraftServerQuery().Query(connection.Address);
