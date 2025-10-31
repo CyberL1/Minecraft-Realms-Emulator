@@ -2,6 +2,7 @@
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Responses;
 
 namespace Minecraft_Realms_Emulator.Middlewares
 {
@@ -30,8 +31,14 @@ namespace Minecraft_Realms_Emulator.Middlewares
 
             if (!attribute.IsSubscriptionActive(world.Subscription.StartDate))
             {
+                var response = new ErrorResponse
+                {
+                    ErrorCode = 403,
+                    ErrorMsg = "World is expired"
+                };
+                
                 httpContext.Response.StatusCode = 403;
-                await httpContext.Response.WriteAsync("You don't have an active subscription for this world");
+                await httpContext.Response.WriteAsJsonAsync(response);
                 return;
             }
 
