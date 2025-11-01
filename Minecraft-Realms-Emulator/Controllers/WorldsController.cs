@@ -540,26 +540,6 @@ namespace Minecraft_Realms_Emulator.Controllers
             world.State = nameof(StateEnum.OPEN);
             world.Subscription = subscription;
 
-            var config = new ConfigHelper(context);
-            var defaultServerAddress = config.GetSetting(nameof(SettingsEnum.DefaultServerAddress));
-
-            static int FindFreeTcpPort()
-            {
-                TcpListener l = new(IPAddress.Loopback, 0);
-                l.Start();
-                int port = ((IPEndPoint)l.LocalEndpoint).Port;
-                l.Stop();
-                return port;
-            }
-
-            var port = FindFreeTcpPort();
-
-            var connection = new Connection
-            {
-                World = world,
-                Address = $"{defaultServerAddress.Value}:{port}"
-            };
-
             Slot slot = new()
             {
                 World = world,
@@ -577,15 +557,13 @@ namespace Minecraft_Realms_Emulator.Controllers
                 CommandBlocks = false
             };
 
-            new DockerHelper(world.Id).CreateServer(port);
-
             context.Worlds.Update(world);
 
             context.Subscriptions.Add(subscription);
-            context.Connections.Add(connection);
             context.Slots.Add(slot);
 
             context.SaveChanges();
+            await new DockerHelper(world.Id).CreateVolume();
 
             return Ok(world);
         }
@@ -941,30 +919,36 @@ namespace Minecraft_Realms_Emulator.Controllers
 
         [HttpGet("v1/{wId}/join/pc")]
         [CheckActiveSubscription]
-        public async Task<ActionResult<Connection>> Join(int wId)
+        public async Task<ActionResult<ConnectionResponse>> Join(int wId)
         {
-            var connection = context.Connections.Include(c => c.World).Include(c => c.World.Slots).FirstOrDefault(c => c.World.Id == wId);
+            var world = context.Worlds.Include(w => w.Slots).FirstOrDefault(w => w.Id == wId);
+            var helper = new DockerHelper(world.Id);
 
-            var isRunning = await new DockerHelper(connection.World.Id).IsRunning();
-            var query = new MinecraftServerQuery().Query(connection.Address);
+            var isRunning = await helper.IsRunning();
+            var serverPort = 0;
 
             if (!isRunning)
             {
-                new DockerHelper(connection.World.Id).StartServer();
+                serverPort = await helper.StartServer();
             }
+
+            var defaultServerAddress= new ConfigHelper(context).GetSetting(nameof(SettingsEnum.DefaultServerAddress));
+            var serverAddress = $"{defaultServerAddress.Value}:{serverPort}";
+            
+            var query = new MinecraftServerQuery().Query(serverAddress);
 
             while (query == null)
             {
                 await Task.Delay(1000);
-                query = new MinecraftServerQuery().Query(connection.Address);
+                query = new MinecraftServerQuery().Query(serverAddress);
             }
 
-            Slot activeSlot = connection.World.Slots.Find(s => s.SlotId == connection.World.ActiveSlot);
+            Slot activeSlot = world.Slots.Find(s => s.SlotId == world.ActiveSlot);
 
             string cookie = Request.Headers.Cookie;
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            if (new MinecraftVersionParser.MinecraftVersion(activeSlot.Version).CompareTo(new MinecraftVersionParser.MinecraftVersion(gameVersion)) < 0 && await new DockerHelper(connection.World.Id).RunCommand("! test -f .no-update") == 0)
+            if (new MinecraftVersionParser.MinecraftVersion(activeSlot.Version).CompareTo(new MinecraftVersionParser.MinecraftVersion(gameVersion)) < 0 && await helper.RunCommand("! test -f .no-update") == 0)
             {
                 activeSlot.Version = gameVersion;
                 context.SaveChanges();
@@ -972,12 +956,18 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
 
-            if (connection.World.OwnerUUID == playerUUID)
+            if (world.OwnerUUID == playerUUID)
             {
-                new DockerHelper(connection.World.Id).ExecuteCommand($"op {connection.World.Owner}");
+                await helper.ExecuteCommand($"op {world.Owner}");
             }
 
-            return Ok(connection);
+            var response = new ConnectionResponse
+            {
+                Address = serverAddress,
+                PendingUpdate = false
+            };
+            
+            return Ok(response);
         }
 
         [HttpDelete("{wId}")]

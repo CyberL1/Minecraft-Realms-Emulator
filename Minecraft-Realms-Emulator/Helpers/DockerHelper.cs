@@ -1,4 +1,6 @@
-﻿using Docker.DotNet;
+﻿using System.Net;
+using System.Net.Sockets;
+using Docker.DotNet;
 using Docker.DotNet.Models;
 
 namespace Minecraft_Realms_Emulator.Helpers
@@ -7,27 +9,44 @@ namespace Minecraft_Realms_Emulator.Helpers
     {
         private readonly DockerClient _dockerClient = new DockerClientConfiguration().CreateClient();
 
-        public async Task CreateServer(int port)
+        public async Task CreateVolume()
         {
+            var parameters = new VolumesCreateParameters
+            {
+                Name = $"realm-server-{worldId}",
+            };
+            
+            await _dockerClient.Volumes.CreateAsync(parameters);
+        }
+        
+
+        private async Task<CreateContainerResponse> CreateContainer()
+        {
+            TcpListener l = new(IPAddress.Loopback, 0);
+            l.Start();
+            var freePort = ((IPEndPoint)l.LocalEndpoint).Port;
+            l.Stop();
+
             var containerConfig = new CreateContainerParameters
             {
                 Name = $"realm-server-{worldId}",
                 Image = "realm-server",
                 ExposedPorts = new Dictionary<string, EmptyStruct>
                 {
-                    { "25565", new EmptyStruct() }
+                    { "25565/tcp", new EmptyStruct() }
                 },
                 HostConfig = new HostConfig
                 {
+                    AutoRemove = true,
                     PortBindings = new Dictionary<string, IList<PortBinding>>
                     {
                         {
-                            "25565", new List<PortBinding>
+                            "25565/tcp", new List<PortBinding>
                             {
                                 new()
                                 {
                                     HostIP = "0.0.0.0",
-                                    HostPort = port.ToString()
+                                    HostPort = freePort.ToString()
                                 }
                             }
                         }
@@ -44,19 +63,29 @@ namespace Minecraft_Realms_Emulator.Helpers
                 }
             };
 
-            await _dockerClient.Containers.CreateContainerAsync(containerConfig);
+            return await _dockerClient.Containers.CreateContainerAsync(containerConfig);
         }
 
         public async Task<bool> IsRunning()
         {
-            var container = await _dockerClient.Containers.InspectContainerAsync($"realm-server-{worldId}");
-            return container.State.Running;
+            try
+            {
+                var container = await _dockerClient.Containers.InspectContainerAsync($"realm-server-{worldId}");
+                return container.State.Running;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        public async Task StartServer()
+        public async Task<int> StartServer()
         {
-            await _dockerClient.Containers.StartContainerAsync($"realm-server-{worldId}",
-                new ContainerStartParameters());
+            var server = await CreateContainer();
+            await _dockerClient.Containers.StartContainerAsync(server.ID, new ContainerStartParameters());
+
+            var containerInspectResponse = await _dockerClient.Containers.InspectContainerAsync(server.ID);
+            return Convert.ToInt32(containerInspectResponse.NetworkSettings.Ports["25565/tcp"][0].HostPort);
         }
 
         public async Task StopServer()
@@ -72,8 +101,16 @@ namespace Minecraft_Realms_Emulator.Helpers
 
         public async Task DeleteServer()
         {
-            await _dockerClient.Containers.RemoveContainerAsync($"realm-server-{worldId}",
-                new ContainerRemoveParameters { Force = true });
+            try
+            {
+                await _dockerClient.Containers.RemoveContainerAsync($"realm-server-{worldId}",
+                    new ContainerRemoveParameters { Force = true });
+            }
+            catch
+            {
+                Console.WriteLine("Container offline, removing only server data");
+            }
+
             await _dockerClient.Volumes.RemoveAsync($"realm-server-{worldId}");
         }
 
