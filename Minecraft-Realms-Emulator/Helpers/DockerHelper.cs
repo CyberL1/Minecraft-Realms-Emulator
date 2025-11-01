@@ -31,6 +31,15 @@ namespace Minecraft_Realms_Emulator.Helpers
                                 }
                             }
                         }
+                    },
+                    Mounts = new List<Mount>
+                    {
+                        new()
+                        {
+                            Type = "volume",
+                            Source = $"realm-server-{worldId}",
+                            Target = "/mc"
+                        }
                     }
                 }
             };
@@ -65,6 +74,7 @@ namespace Minecraft_Realms_Emulator.Helpers
         {
             await _dockerClient.Containers.RemoveContainerAsync($"realm-server-{worldId}",
                 new ContainerRemoveParameters { Force = true });
+            await _dockerClient.Volumes.RemoveAsync($"realm-server-{worldId}");
         }
 
         public async Task GetServerLogsStreamAsync(Action<string> handler)
