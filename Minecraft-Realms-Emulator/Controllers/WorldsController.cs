@@ -895,6 +895,22 @@ namespace Minecraft_Realms_Emulator.Controllers
             return Ok(worldBackups);
         }
 
+        [HttpPut("{wId}/backups/upload")]
+        [CheckForWorld]
+        [CheckRealmOwner]
+        [CheckActiveSubscription]
+        public ActionResult<BackupUploadResponse> UploadBackup(int wId)
+        {
+            var response = new BackupUploadResponse
+            {
+                Token = Guid.NewGuid().ToString(),
+                UploadEndpoint = "127.0.0.1",
+                WorldClosed = true
+            };
+
+            return Ok(response);
+        }
+
         [HttpGet("{wId}/slot/{sId}/download")]
         [CheckForWorld]
         [CheckRealmOwner]
