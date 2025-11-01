@@ -682,7 +682,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var world = worlds.FirstOrDefault(w => w.Id == wId);
 
-            new DockerHelper(world.Id).StopServer();
+            await new DockerHelper(world.Id).StopServer();
 
             world.State = nameof(StateEnum.CLOSED);
 
@@ -929,7 +929,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         {
             var connection = context.Connections.Include(c => c.World).Include(c => c.World.Slots).FirstOrDefault(c => c.World.Id == wId);
 
-            var isRunning = new DockerHelper(connection.World.Id).IsRunning();
+            var isRunning = await new DockerHelper(connection.World.Id).IsRunning();
             var query = new MinecraftServerQuery().Query(connection.Address);
 
             if (!isRunning)
@@ -948,7 +948,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             string cookie = Request.Headers.Cookie;
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            if (new MinecraftVersionParser.MinecraftVersion(activeSlot.Version).CompareTo(new MinecraftVersionParser.MinecraftVersion(gameVersion)) < 0 && new DockerHelper(connection.World.Id).RunCommand("! test -f .no-update") == 0)
+            if (new MinecraftVersionParser.MinecraftVersion(activeSlot.Version).CompareTo(new MinecraftVersionParser.MinecraftVersion(gameVersion)) < 0 && await new DockerHelper(connection.World.Id).RunCommand("! test -f .no-update") == 0)
             {
                 activeSlot.Version = gameVersion;
                 context.SaveChanges();
