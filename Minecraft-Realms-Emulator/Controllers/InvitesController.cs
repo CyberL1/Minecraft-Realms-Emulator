@@ -95,7 +95,16 @@ namespace Minecraft_Realms_Emulator.Controllers
             string cookie = Request.Headers.Cookie;
             string playerName = cookie.Split(";")[1].Split("=")[1];
 
-            if (body.Name == playerName) return Forbid("You cannot invite yourself");
+            if (string.Equals(body.Name, playerName, StringComparison.CurrentCultureIgnoreCase))
+            {
+                var response = new ErrorResponse
+                {
+                    ErrorCode = 500,
+                    ErrorMsg = "You cannot invite yourself"
+                };
+
+                return StatusCode(500, response);
+            }
 
             var world = await context.Worlds.Include(w => w.Players).FirstOrDefaultAsync(w => w.Id == wId);
 
