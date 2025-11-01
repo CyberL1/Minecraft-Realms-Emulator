@@ -617,7 +617,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var server = new DockerHelper(world.Id);
 
             server.RunCommand($"rm -rf slot-{world.ActiveSlot}");
-            server.RebootServer();
+            server.StopServer();
 
             return Ok(true);
         }
@@ -631,7 +631,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var worlds = await context.Worlds.ToListAsync();
             var world = worlds.Find(w => w.Id == wId);
 
-            await new DockerHelper(world.Id).StartServer();
+            await new DockerHelper(world.Id).StartServer(world.ActiveSlot);
             world.State = nameof(StateEnum.OPEN);
 
             await context.SaveChangesAsync();
@@ -821,9 +821,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             }
 
             var server = new DockerHelper(world.Id);
-            
-            server.RunCommand($"sed -i 's#level-name=slot-{world.ActiveSlot}#level-name=slot-{sId}#' server.properties");
-            server.RebootServer();
+            server.StopServer();
 
             world.ActiveSlot = sId;
             world.Minigame = null;
@@ -903,7 +901,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var isRunning = await helper.IsRunning();
             if (!isRunning)
             {
-                await helper.StartServer();
+                await helper.StartServer(world.ActiveSlot);
             }
 
             var serverPort = await helper.GetServerPort();

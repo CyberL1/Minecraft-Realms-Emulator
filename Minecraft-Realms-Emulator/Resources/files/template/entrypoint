@@ -1,15 +1,13 @@
 #!/bin/sh
 
 RCON_PASSWORD="$(openssl rand -hex 20)"
-[ ! -f /root/.rcon-cli.yaml ] && echo "password: $RCON_PASSWORD" > /root/.rcon-cli.yaml
+echo "password: $RCON_PASSWORD" > /root/.rcon-cli.yaml
 
 [ ! -f eula.txt ] && echo "eula=true" > eula.txt
 
-if [ ! -f server.properties ]; then
-  echo "enable-rcon=true" >> server.properties
-  echo "rcon.password=$RCON_PASSWORD" >> server.properties
-  echo "level-name=slot-1" >> server.properties
-fi
+echo "enable-rcon=true" >> server.properties
+echo "rcon.password=$RCON_PASSWORD" >> server.properties
+echo "level-name=slot-$SLOT_ID" >> server.properties
 
 # Download latest server.jar
 if [ ! -f .no-update ]; then

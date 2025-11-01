@@ -20,7 +20,7 @@ namespace Minecraft_Realms_Emulator.Helpers
         }
         
 
-        private async Task<CreateContainerResponse> CreateContainer()
+        private async Task<CreateContainerResponse> CreateContainer(int slotId)
         {
             TcpListener l = new(IPAddress.Loopback, 0);
             l.Start();
@@ -60,7 +60,8 @@ namespace Minecraft_Realms_Emulator.Helpers
                             Target = "/mc"
                         }
                     }
-                }
+                },
+                Env = new List<string>{$"SLOT_ID={slotId}"}
             };
 
             return await _dockerClient.Containers.CreateContainerAsync(containerConfig);
@@ -79,9 +80,9 @@ namespace Minecraft_Realms_Emulator.Helpers
             }
         }
 
-        public async Task StartServer()
+        public async Task StartServer(int slotId)
         {
-            var server = await CreateContainer();
+            var server = await CreateContainer(slotId);
 
             await _dockerClient.Containers.StartContainerAsync(server.ID, new ContainerStartParameters());
             await _dockerClient.Containers.InspectContainerAsync(server.ID);
@@ -96,12 +97,6 @@ namespace Minecraft_Realms_Emulator.Helpers
         public async Task StopServer()
         {
             await ExecuteCommand("stop");
-        }
-
-        public async Task RebootServer()
-        {
-            await _dockerClient.Containers.RestartContainerAsync($"realm-server-{worldId}",
-                new ContainerRestartParameters());
         }
 
         public async Task DeleteServer()
