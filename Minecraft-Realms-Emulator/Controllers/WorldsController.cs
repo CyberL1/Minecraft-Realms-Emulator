@@ -755,12 +755,12 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckActiveSubscription]
         public async Task<ActionResult<(bool, ErrorResponse)>> UpdateSlot(int wId, int sId, SlotOptionsRequest body)
         {
-            if (body.SlotName.Length > 10)
+            if (body.SlotName.Length > 32)
             {
                 ErrorResponse errorResponse = new()
                 {
                     ErrorCode = 400,
-                    ErrorMsg = "Slot name cannot exceed 10 characters"
+                    ErrorMsg = "Slot name cannot exceed 32 characters"
                 };
 
                 return BadRequest(errorResponse);
