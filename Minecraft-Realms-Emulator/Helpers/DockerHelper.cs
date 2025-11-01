@@ -1,16 +1,15 @@
-﻿using Minecraft_Realms_Emulator.Entities;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace Minecraft_Realms_Emulator.Helpers
 {
-    public class DockerHelper(World world)
+    public class DockerHelper(int worldId)
     {
         public void CreateServer(int port)
         {
             ProcessStartInfo serverProcessInfo = new();
 
             serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"run -d --name realm-server-{world.Id} -p {port}:25565 realm-server";
+            serverProcessInfo.Arguments = $"run -d --name realm-server-{worldId} -p {port}:25565 realm-server";
 
             Process serverProcess = new();
             serverProcess.StartInfo = serverProcessInfo;
@@ -22,7 +21,7 @@ namespace Minecraft_Realms_Emulator.Helpers
             ProcessStartInfo containerStateProcessInfo = new();
             
             containerStateProcessInfo.FileName = "docker";
-            containerStateProcessInfo.Arguments = $"inspect realm-server-{world.Id} -f {{{{.State.Running}}}}";
+            containerStateProcessInfo.Arguments = $"inspect realm-server-{worldId} -f {{{{.State.Running}}}}";
 
             containerStateProcessInfo.RedirectStandardOutput = true;
 
@@ -39,7 +38,7 @@ namespace Minecraft_Realms_Emulator.Helpers
             ProcessStartInfo serverProcessInfo = new();
 
             serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container start realm-server-{world.Id}";
+            serverProcessInfo.Arguments = $"container start realm-server-{worldId}";
 
             Process serverProcess = new();
             serverProcess.StartInfo = serverProcessInfo;
@@ -56,7 +55,7 @@ namespace Minecraft_Realms_Emulator.Helpers
             ProcessStartInfo serverProcessInfo = new();
 
             serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container restart realm-server-{world.Id}";
+            serverProcessInfo.Arguments = $"container restart realm-server-{worldId}";
 
             Process serverProcess = new();
             serverProcess.StartInfo = serverProcessInfo;
@@ -68,7 +67,7 @@ namespace Minecraft_Realms_Emulator.Helpers
             ProcessStartInfo serverProcessInfo = new();
 
             serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container rm -f realm-server-{world.Id}";
+            serverProcessInfo.Arguments = $"container rm -f realm-server-{worldId}";
 
             Process serverProcess = new();
             serverProcess.StartInfo = serverProcessInfo;
@@ -80,7 +79,7 @@ namespace Minecraft_Realms_Emulator.Helpers
             ProcessStartInfo serverProcessInfo = new();
 
             serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container logs -f realm-server-{world.Id} --tail 100";
+            serverProcessInfo.Arguments = $"container logs -f realm-server-{worldId} --tail 100";
             serverProcessInfo.RedirectStandardOutput = true;
 
             Process serverProcess = new();
@@ -108,7 +107,7 @@ namespace Minecraft_Realms_Emulator.Helpers
             ProcessStartInfo commandProcessInfo = new();
 
             commandProcessInfo.FileName = "docker";
-            commandProcessInfo.Arguments = $"exec realm-server-{world.Id} rcon-cli {command}";
+            commandProcessInfo.Arguments = $"exec realm-server-{worldId} rcon-cli {command}";
 
             Process commandProcess = new();
             commandProcess.StartInfo = commandProcessInfo;
@@ -121,7 +120,7 @@ namespace Minecraft_Realms_Emulator.Helpers
             ProcessStartInfo commandProcessInfo = new();
 
             commandProcessInfo.FileName = "docker";
-            commandProcessInfo.Arguments = $"exec realm-server-{world.Id} /bin/sh -c \"{command}\"";
+            commandProcessInfo.Arguments = $"exec realm-server-{worldId} /bin/sh -c \"{command}\"";
 
             Process commandProcess = new();
             commandProcess.StartInfo = commandProcessInfo;

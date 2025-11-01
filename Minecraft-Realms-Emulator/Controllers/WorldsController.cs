@@ -577,7 +577,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                 CommandBlocks = false
             };
 
-            new DockerHelper(world).CreateServer(port);
+            new DockerHelper(world.Id).CreateServer(port);
 
             context.Worlds.Update(world);
 
@@ -636,7 +636,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             Console.WriteLine($"Resetting world {wId}");
 
             var world = context.Worlds.Find(wId);
-            var server = new DockerHelper(world);
+            var server = new DockerHelper(world.Id);
 
             server.RunCommand($"rm -rf slot-{world.ActiveSlot}");
             server.RebootServer();
@@ -654,7 +654,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var world = worlds.Find(w => w.Id == wId);
 
-            new DockerHelper(world).StartServer();
+            new DockerHelper(world.Id).StartServer();
 
             world.State = nameof(StateEnum.OPEN);
 
@@ -682,7 +682,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var world = worlds.FirstOrDefault(w => w.Id == wId);
 
-            new DockerHelper(world).StopServer();
+            new DockerHelper(world.Id).StopServer();
 
             world.State = nameof(StateEnum.CLOSED);
 
@@ -866,7 +866,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                 context.SaveChanges();
             }
 
-            var server = new DockerHelper(world);
+            var server = new DockerHelper(world.Id);
             
             server.RunCommand($"sed -i 's#level-name=slot-{world.ActiveSlot}#level-name=slot-{sId}#' server.properties");
             server.RebootServer();
@@ -929,12 +929,12 @@ namespace Minecraft_Realms_Emulator.Controllers
         {
             var connection = context.Connections.Include(c => c.World).Include(c => c.World.Slots).FirstOrDefault(c => c.World.Id == wId);
 
-            var isRunning = new DockerHelper(connection.World).IsRunning();
+            var isRunning = new DockerHelper(connection.World.Id).IsRunning();
             var query = new MinecraftServerQuery().Query(connection.Address);
 
             if (!isRunning)
             {
-                new DockerHelper(connection.World).StartServer();
+                new DockerHelper(connection.World.Id).StartServer();
             }
 
             while (query == null)
@@ -948,7 +948,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             string cookie = Request.Headers.Cookie;
             string gameVersion = cookie.Split(";")[2].Split("=")[1];
 
-            if (new MinecraftVersionParser.MinecraftVersion(activeSlot.Version).CompareTo(new MinecraftVersionParser.MinecraftVersion(gameVersion)) < 0 && new DockerHelper(connection.World).RunCommand("! test -f .no-update") == 0)
+            if (new MinecraftVersionParser.MinecraftVersion(activeSlot.Version).CompareTo(new MinecraftVersionParser.MinecraftVersion(gameVersion)) < 0 && new DockerHelper(connection.World.Id).RunCommand("! test -f .no-update") == 0)
             {
                 activeSlot.Version = gameVersion;
                 context.SaveChanges();
@@ -958,7 +958,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             if (connection.World.OwnerUUID == playerUUID)
             {
-                new DockerHelper(connection.World).ExecuteCommand($"op {connection.World.Owner}");
+                new DockerHelper(connection.World.Id).ExecuteCommand($"op {connection.World.Owner}");
             }
 
             return Ok(connection);
@@ -989,17 +989,17 @@ namespace Minecraft_Realms_Emulator.Controllers
 
                 if (snapshotWorld != null)
                 {
-                    new DockerHelper(snapshotWorld).DeleteServer();
+                    new DockerHelper(snapshotWorld.Id).DeleteServer();
                     context.Worlds.Remove(snapshotWorld);
                 }
             }
             else
             {
-                new DockerHelper(world.ParentWorld).DeleteServer();
+                new DockerHelper(world.ParentWorld.Id).DeleteServer();
                 context.Worlds.Remove(world.ParentWorld);
             }
 
-            new DockerHelper(world).DeleteServer();
+            new DockerHelper(world.Id).DeleteServer();
 
             context.Worlds.Remove(world);
             await context.SaveChangesAsync();

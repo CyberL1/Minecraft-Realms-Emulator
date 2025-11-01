@@ -39,7 +39,7 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
 
             if (world == null) return BadRequest("World not found");
 
-            await new DockerHelper(world).GetServerLogsStreamAsync(async log =>
+            await new DockerHelper(world.Id).GetServerLogsStreamAsync(async log =>
             {
                 if (!HttpContext.Response.Body.CanWrite)
                 {
@@ -61,7 +61,7 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
             world.State = "OPEN";
             context.SaveChanges();
 
-            new DockerHelper(world).StartServer();
+            new DockerHelper(world.Id).StartServer();
 
             return Ok(true);
         }
@@ -75,7 +75,7 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
             world.State = "CLOSED";
             context.SaveChanges();
 
-            new DockerHelper(world).StopServer();
+            new DockerHelper(world.Id).StopServer();
 
             return Ok(true);
         }
