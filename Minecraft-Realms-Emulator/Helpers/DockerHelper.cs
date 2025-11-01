@@ -79,12 +79,17 @@ namespace Minecraft_Realms_Emulator.Helpers
             }
         }
 
-        public async Task<int> StartServer()
+        public async Task StartServer()
         {
             var server = await CreateContainer();
-            await _dockerClient.Containers.StartContainerAsync(server.ID, new ContainerStartParameters());
 
-            var containerInspectResponse = await _dockerClient.Containers.InspectContainerAsync(server.ID);
+            await _dockerClient.Containers.StartContainerAsync(server.ID, new ContainerStartParameters());
+            await _dockerClient.Containers.InspectContainerAsync(server.ID);
+        }
+
+        public async Task<int> GetServerPort()
+        {
+            var containerInspectResponse = await _dockerClient.Containers.InspectContainerAsync($"realm-server-{worldId}");
             return Convert.ToInt32(containerInspectResponse.NetworkSettings.Ports["25565/tcp"][0].HostPort);
         }
 

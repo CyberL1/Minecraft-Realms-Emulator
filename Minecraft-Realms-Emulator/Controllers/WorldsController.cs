@@ -629,24 +629,12 @@ namespace Minecraft_Realms_Emulator.Controllers
         public async Task<ActionResult<bool>> Open(int wId)
         {
             var worlds = await context.Worlds.ToListAsync();
-
             var world = worlds.Find(w => w.Id == wId);
 
-            new DockerHelper(world.Id).StartServer();
-
+            await new DockerHelper(world.Id).StartServer();
             world.State = nameof(StateEnum.OPEN);
 
-            context.SaveChanges();
-
-            var connection = context.Connections.FirstOrDefault(c => c.World.Id == wId);
-            var query = new MinecraftServerQuery().Query(connection.Address);
-
-            while (query == null)
-            {
-                await Task.Delay(1000);
-                query = new MinecraftServerQuery().Query(connection.Address);
-            }
-
+            await context.SaveChangesAsync();
             return Ok(true);
         }
 
@@ -657,24 +645,12 @@ namespace Minecraft_Realms_Emulator.Controllers
         public async Task<ActionResult<bool>> Close(int wId)
         {
             var worlds = await context.Worlds.ToListAsync();
-
             var world = worlds.FirstOrDefault(w => w.Id == wId);
 
             await new DockerHelper(world.Id).StopServer();
-
             world.State = nameof(StateEnum.CLOSED);
 
-            context.SaveChanges();
-
-            var connection = context.Connections.FirstOrDefault(c => c.World.Id == wId);
-            var query = new MinecraftServerQuery().Query(connection.Address);
-
-            while (query != null)
-            {
-                await Task.Delay(1000);
-                query = new MinecraftServerQuery().Query(connection.Address);
-            }
-
+            await context.SaveChangesAsync();
             return Ok(true);
         }
 
@@ -925,12 +901,12 @@ namespace Minecraft_Realms_Emulator.Controllers
             var helper = new DockerHelper(world.Id);
 
             var isRunning = await helper.IsRunning();
-            var serverPort = 0;
-
             if (!isRunning)
             {
-                serverPort = await helper.StartServer();
+                await helper.StartServer();
             }
+
+            var serverPort = await helper.GetServerPort();
 
             var defaultServerAddress= new ConfigHelper(context).GetSetting(nameof(SettingsEnum.DefaultServerAddress));
             var serverAddress = $"{defaultServerAddress.Value}:{serverPort}";
