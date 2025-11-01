@@ -1,134 +1,152 @@
-﻿using System.Diagnostics;
+﻿using Docker.DotNet;
+using Docker.DotNet.Models;
 
 namespace Minecraft_Realms_Emulator.Helpers
 {
     public class DockerHelper(int worldId)
     {
-        public void CreateServer(int port)
+        private readonly DockerClient _dockerClient = new DockerClientConfiguration().CreateClient();
+
+        public async Task CreateServer(int port)
         {
-            ProcessStartInfo serverProcessInfo = new();
+            var containerConfig = new CreateContainerParameters
+            {
+                Name = $"realm-server-{worldId}",
+                Image = "realm-server",
+                ExposedPorts = new Dictionary<string, EmptyStruct>
+                {
+                    { "25565", new EmptyStruct() }
+                },
+                HostConfig = new HostConfig
+                {
+                    PortBindings = new Dictionary<string, IList<PortBinding>>
+                    {
+                        {
+                            "25565", new List<PortBinding>
+                            {
+                                new()
+                                {
+                                    HostIP = "0.0.0.0",
+                                    HostPort = port.ToString()
+                                }
+                            }
+                        }
+                    }
+                }
+            };
 
-            serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"run -d --name realm-server-{worldId} -p {port}:25565 realm-server";
-
-            Process serverProcess = new();
-            serverProcess.StartInfo = serverProcessInfo;
-            serverProcess.Start();
+            await _dockerClient.Containers.CreateContainerAsync(containerConfig);
         }
 
-        public bool IsRunning()
+        public async Task<bool> IsRunning()
         {
-            ProcessStartInfo containerStateProcessInfo = new();
-            
-            containerStateProcessInfo.FileName = "docker";
-            containerStateProcessInfo.Arguments = $"inspect realm-server-{worldId} -f {{{{.State.Running}}}}";
-
-            containerStateProcessInfo.RedirectStandardOutput = true;
-
-            Process containerStateProcess = new();
-            containerStateProcess.StartInfo = containerStateProcessInfo;
-            containerStateProcess.Start();
-
-            containerStateProcess.WaitForExit();
-            return bool.Parse(containerStateProcess.StandardOutput.ReadToEnd());
+            var container = await _dockerClient.Containers.InspectContainerAsync($"realm-server-{worldId}");
+            return container.State.Running;
         }
 
-        public void StartServer()
+        public async Task StartServer()
         {
-            ProcessStartInfo serverProcessInfo = new();
-
-            serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container start realm-server-{worldId}";
-
-            Process serverProcess = new();
-            serverProcess.StartInfo = serverProcessInfo;
-            serverProcess.Start();
+            await _dockerClient.Containers.StartContainerAsync($"realm-server-{worldId}",
+                new ContainerStartParameters());
         }
 
-        public void StopServer()
+        public async Task StopServer()
         {
-            ExecuteCommand("stop");
+            await ExecuteCommand("stop");
         }
 
-        public void RebootServer()
+        public async Task RebootServer()
         {
-            ProcessStartInfo serverProcessInfo = new();
-
-            serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container restart realm-server-{worldId}";
-
-            Process serverProcess = new();
-            serverProcess.StartInfo = serverProcessInfo;
-            serverProcess.Start();
+            await _dockerClient.Containers.RestartContainerAsync($"realm-server-{worldId}",
+                new ContainerRestartParameters());
         }
 
-        public void DeleteServer()
+        public async Task DeleteServer()
         {
-            ProcessStartInfo serverProcessInfo = new();
-
-            serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container rm -f realm-server-{worldId}";
-
-            Process serverProcess = new();
-            serverProcess.StartInfo = serverProcessInfo;
-            serverProcess.Start();
+            await _dockerClient.Containers.RemoveContainerAsync($"realm-server-{worldId}",
+                new ContainerRemoveParameters { Force = true });
         }
 
         public async Task GetServerLogsStreamAsync(Action<string> handler)
         {
-            ProcessStartInfo serverProcessInfo = new();
-
-            serverProcessInfo.FileName = "docker";
-            serverProcessInfo.Arguments = $"container logs -f realm-server-{worldId} --tail 100";
-            serverProcessInfo.RedirectStandardOutput = true;
-
-            Process serverProcess = new();
-            serverProcess.StartInfo = serverProcessInfo;
-            serverProcess.Start();
-
-            List<string> logs = [];
-
-            await Task.Run(() =>
+            var parameters = new ContainerLogsParameters
             {
-                while (!serverProcess.StandardOutput.EndOfStream)
+                ShowStdout = true,
+                ShowStderr = true,
+                Follow = true,
+                Tail = "100"
+            };
+
+            using var stream = await _dockerClient.Containers.GetContainerLogsAsync($"realm-server-{worldId}", false,
+                parameters, CancellationToken.None);
+
+            var buffer = new byte[1024];
+
+            while (true)
+            {
+                var bytesRead = await stream.ReadOutputAsync(buffer, 0, buffer.Length, CancellationToken.None);
+                if (bytesRead.Count == 0) break;
+
+                var text = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead.Count);
+                foreach (var line in text.Split('\n', StringSplitOptions.RemoveEmptyEntries))
                 {
-                    string line = serverProcess.StandardOutput.ReadLine();
-
-                    if (line != null)
-                    {
-                        handler(line);
-                    }
+                    handler(line);
                 }
-            });
+            }
         }
 
-        public void ExecuteCommand(string command)
+        public async Task<long> ExecuteCommand(string command)
         {
-            ProcessStartInfo commandProcessInfo = new();
+            var execCreateResponse = await _dockerClient.Exec.ExecCreateContainerAsync($"realm-server-{worldId}",
+                new ContainerExecCreateParameters
+                {
+                    Cmd = new List<string> { "rcon-cli", command },
+                    AttachStderr = true,
+                    AttachStdout = true
+                });
 
-            commandProcessInfo.FileName = "docker";
-            commandProcessInfo.Arguments = $"exec realm-server-{worldId} rcon-cli {command}";
+            using (var stream =
+                   await _dockerClient.Exec.StartAndAttachContainerExecAsync(execCreateResponse.ID, false))
+            {
+                var buffer = new byte[1024];
+                while (true)
+                {
+                    var result = await stream.ReadOutputAsync(buffer, 0, buffer.Length, CancellationToken.None);
+                    if (result.EOF) break;
+                    var output = System.Text.Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    Console.Write(output);
+                }
+            }
 
-            Process commandProcess = new();
-            commandProcess.StartInfo = commandProcessInfo;
-
-            commandProcess.Start();
+            var execInspect = await _dockerClient.Exec.InspectContainerExecAsync(execCreateResponse.ID);
+            return execInspect.ExitCode;
         }
 
-        public int RunCommand(string command)
+        public async Task<long> RunCommand(string command)
         {
-            ProcessStartInfo commandProcessInfo = new();
+            var execCreateResponse = await _dockerClient.Exec.ExecCreateContainerAsync($"realm-server-{worldId}",
+                new ContainerExecCreateParameters
+                {
+                    Cmd = new List<string> { "/bin/sh", "-c", command },
+                    AttachStderr = true,
+                    AttachStdout = true
+                });
 
-            commandProcessInfo.FileName = "docker";
-            commandProcessInfo.Arguments = $"exec realm-server-{worldId} /bin/sh -c \"{command}\"";
+            using (var stream =
+                   await _dockerClient.Exec.StartAndAttachContainerExecAsync(execCreateResponse.ID, false))
+            {
+                var buffer = new byte[1024];
+                while (true)
+                {
+                    var result = await stream.ReadOutputAsync(buffer, 0, buffer.Length, CancellationToken.None);
+                    if (result.EOF) break;
+                    var output = System.Text.Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    Console.Write(output);
+                }
+            }
 
-            Process commandProcess = new();
-            commandProcess.StartInfo = commandProcessInfo;
-
-            commandProcess.Start();
-            commandProcess.WaitForExit();
-
-            return commandProcess.ExitCode;
+            var execInspect = await _dockerClient.Exec.InspectContainerExecAsync(execCreateResponse.ID);
+            return execInspect.ExitCode;
         }
     }
 }

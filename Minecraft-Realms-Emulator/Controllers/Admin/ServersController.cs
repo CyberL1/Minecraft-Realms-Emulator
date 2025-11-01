@@ -68,15 +68,14 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
 
         [HttpPut("{wId}/close")]
         [CheckForWorld]
-        public ActionResult<bool> CloseServer(int wId)
+        public async Task<ActionResult<bool>> CloseServer(int wId)
         {
             var world = context.Worlds.ToList().Find(w => w.Id == wId);
 
             world.State = "CLOSED";
             context.SaveChanges();
 
-            new DockerHelper(world.Id).StopServer();
-
+            await new DockerHelper(world.Id).StopServer();
             return Ok(true);
         }
     }
