@@ -755,6 +755,9 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckActiveSubscription]
         public async Task<ActionResult<(bool, ErrorResponse)>> UpdateSlot(int wId, int sId, SlotOptionsRequest body)
         {
+            string cookie = Request.Headers.Cookie;
+            var gameVersion = cookie.Split(";")[2].Split("=")[1];
+
             if (body.SlotName.Length > 32)
             {
                 ErrorResponse errorResponse = new()
@@ -800,7 +803,12 @@ namespace Minecraft_Realms_Emulator.Controllers
             }
 
             var slots = await context.Slots.Where(s => s.World.Id == wId).ToListAsync();
-            var slot = slots.Find(s => s.SlotId == sId);
+            var slot = slots.Find(s => s.SlotId == sId) ?? new Slot
+            {
+                SlotId = sId,
+                World = context.Worlds.First(w => w.Id == wId),
+                Version = gameVersion
+            };
 
             slot.SlotName = body.SlotName;
             slot.GameMode = body.GameMode;
@@ -813,6 +821,12 @@ namespace Minecraft_Realms_Emulator.Controllers
             slot.SpawnNPCs = body.SpawnNPCs;
             slot.CommandBlocks = body.CommandBlocks;
 
+            var slotExists = context.Slots.Any(s => s.World.Id == wId && s.SlotId == sId);
+            if (!slotExists)
+            {
+                context.Slots.Add(slot);
+            }
+            
             context.SaveChanges();
 
             return Ok(true);
