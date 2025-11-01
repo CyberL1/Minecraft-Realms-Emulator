@@ -72,7 +72,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Motd = world.Motd,
                     GameMode = activeSlot?.GameMode ?? 0,
                     IsHardcore = activeSlot?.Difficulty == 3,
-                    State = world.State,
+                    State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
                     ActiveSlot = world.ActiveSlot,
@@ -115,7 +115,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Motd = world.Motd,
                     GameMode = activeSlot.GameMode,
                     IsHardcore = activeSlot.Difficulty == 3,
-                    State = world.State,
+                    State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
                     ActiveSlot = world.ActiveSlot,
@@ -176,7 +176,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Motd = world.Motd,
                     GameMode = activeSlot?.GameMode ?? 0,
                     IsHardcore = activeSlot?.Difficulty == 3,
-                    State = world.State,
+                    State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
                     ActiveSlot = world.ActiveSlot,
@@ -232,7 +232,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Motd = world.Motd,
                     GameMode = activeSlot.GameMode,
                     IsHardcore = activeSlot.Difficulty == 3,
-                    State = world.State,
+                    State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
                     ActiveSlot = world.ActiveSlot,
@@ -294,7 +294,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             {
                 var parentWorld = context.Worlds.FirstOrDefault(w => w.OwnerUUID == playerUUID && w.ParentWorld == null);
 
-                if (parentWorld != null && parentWorld.State != nameof(StateEnum.UNINITIALIZED))
+                if (parentWorld != null && parentWorld.Name != null)
                 {
                     var world = new World
                     {
@@ -332,7 +332,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Motd = world.Motd,
                     GameMode = activeSlot?.GameMode ?? 0,
                     IsHardcore = activeSlot?.Difficulty == 3,
-                    State = world.State,
+                    State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
                     ActiveSlot = world.ActiveSlot,
@@ -377,7 +377,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Motd = world.Motd,
                     GameMode = activeSlot.GameMode,
                     IsHardcore = activeSlot.Difficulty == 3,
-                    State = world.State,
+                    State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
                     ActiveSlot = world.ActiveSlot,
@@ -418,7 +418,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var world = await context.Worlds.Include(w => w.Players).Include(w => w.Subscription).Include(w => w.Slots).Include(w => w.ParentWorld.Subscription).FirstOrDefaultAsync(w => w.Id == wId);
 
-            if (world.State == nameof(StateEnum.UNINITIALIZED))
+            if (world.Name == null)
             {
                 ErrorResponse error = new()
                 {
@@ -482,7 +482,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                 Motd = world.Motd,
                 GameMode = activeSlot.GameMode,
                 IsHardcore = activeSlot.Difficulty == 3,
-                State = world.State,
+                State = await new WorldHelper(context, world.Id).GetState(),
                 WorldType = world.WorldType,
                 MaxPlayers = world.MaxPlayers,
                 ActiveSlot = world.ActiveSlot,
@@ -518,7 +518,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var worlds = await context.Worlds.ToListAsync();
 
             var world = worlds.Find(w => w.Id == wId);
-            if (world.State != nameof(StateEnum.UNINITIALIZED))
+            if (world.Name != null)
             {
                 ErrorResponse errorResponse = new()
                 {
@@ -537,7 +537,6 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             world.Name = body.Name;
             world.Motd = body.Description;
-            world.State = nameof(StateEnum.OPEN);
             world.Subscription = subscription;
 
             Slot slot = new()
@@ -580,7 +579,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var world = worlds.Find(w => w.Id == wId);
 
-            if (world.ParentWorld.State == nameof(StateEnum.UNINITIALIZED))
+            if (world.ParentWorld.Name == null)
             {
                 ErrorResponse errorResponse = new()
                 {
@@ -591,7 +590,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                 return StatusCode(401, errorResponse);
             }
 
-            if (world.State != nameof(StateEnum.UNINITIALIZED))
+            if (world.Name != null)
             {
                 ErrorResponse errorResponse = new()
                 {
@@ -632,9 +631,6 @@ namespace Minecraft_Realms_Emulator.Controllers
             var world = worlds.Find(w => w.Id == wId);
 
             await new DockerHelper(world.Id).StartServer(world.ActiveSlot);
-            world.State = nameof(StateEnum.OPEN);
-
-            await context.SaveChangesAsync();
             return Ok(true);
         }
 
@@ -648,9 +644,6 @@ namespace Minecraft_Realms_Emulator.Controllers
             var world = worlds.FirstOrDefault(w => w.Id == wId);
 
             await new DockerHelper(world.Id).StopServer();
-            world.State = nameof(StateEnum.CLOSED);
-
-            await context.SaveChangesAsync();
             return Ok(true);
         }
 
