@@ -3,6 +3,7 @@ using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Enums;
 using Minecraft_Realms_Emulator.Helpers;
 using Minecraft_Realms_Emulator.Data;
+using Minecraft_Realms_Emulator.Helpers.Config;
 using Minecraft_Realms_Emulator.Responses;
 using Newtonsoft.Json;
 
@@ -14,7 +15,7 @@ namespace Minecraft_Realms_Emulator.Controllers
     public class ActivitiesController(DataContext context) : ControllerBase
     {
         [HttpGet("liveplayerlist")]
-        public ActionResult<LivePlayerListsResponse> GetLivePlayerList()
+        public async Task<ActionResult<LivePlayerListsResponse>> GetLivePlayerList()
         {
             string cookie = Request.Headers.Cookie;
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
@@ -22,11 +23,12 @@ namespace Minecraft_Realms_Emulator.Controllers
             List<LivePlayerList> lists = [];
 
             var worlds = context.Worlds.Where(w => w.State == nameof(StateEnum.OPEN) && w.OwnerUUID == playerUUID || w.State == nameof(StateEnum.OPEN) && w.Players.Any(p => p.Uuid == playerUUID && p.Accepted)).ToList();
-
+            var defaultServerAddress = new ConfigHelper(context).GetSetting(nameof(SettingsEnum.DefaultServerAddress));
+            
             foreach (var world in worlds)
             {
-                var connection = context.Connections.Where(c => c.World.Id == world.Id).FirstOrDefault();
-                var query = new MinecraftServerQuery().Query(connection.Address);
+                var port = await new DockerHelper(world.Id).GetServerPort();
+                var query = new MinecraftServerQuery().Query($"{defaultServerAddress.Value}:{port}");
 
                 if (query == null) continue;
 
