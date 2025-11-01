@@ -24,7 +24,6 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             foreach (var region in Enum.GetNames<RegionEnum>())
             {
-                Console.WriteLine(region);
                 response.RegionDataList.Add(new RegionObject
                 {
                     RegionName = region,
