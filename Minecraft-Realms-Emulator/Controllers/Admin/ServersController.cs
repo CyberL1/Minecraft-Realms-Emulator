@@ -61,7 +61,7 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
             world.State = "OPEN";
             context.SaveChanges();
 
-            new DockerHelper(world.Id).StartServer();
+            new DockerHelper(world.Id).StartServer(world.ActiveSlot);
 
             return Ok(true);
         }
