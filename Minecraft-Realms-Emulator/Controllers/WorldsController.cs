@@ -630,7 +630,22 @@ namespace Minecraft_Realms_Emulator.Controllers
             var worlds = await context.Worlds.ToListAsync();
             var world = worlds.Find(w => w.Id == wId);
 
-            await new DockerHelper(world.Id).StartServer(world.ActiveSlot);
+            var server = new DockerHelper(world.Id);
+            await server.StartServer(world.ActiveSlot);
+
+            var defaultServerAddress = new ConfigHelper(context).GetSetting(nameof(SettingsEnum.DefaultServerAddress));
+
+            var serverPort = await server.GetServerPort();
+            var serverAddress = $"{defaultServerAddress.Value}:{serverPort}";
+
+            var query = new MinecraftServerQuery().Query(serverAddress);
+
+            while (query == null)
+            {
+                await Task.Delay(1000);
+                query = new MinecraftServerQuery().Query(serverAddress);
+            }
+
             return Ok(true);
         }
 
@@ -643,7 +658,22 @@ namespace Minecraft_Realms_Emulator.Controllers
             var worlds = await context.Worlds.ToListAsync();
             var world = worlds.FirstOrDefault(w => w.Id == wId);
 
-            await new DockerHelper(world.Id).StopServer();
+            var server = new DockerHelper(world.Id);
+            await server.StopServer();
+
+            var defaultServerAddress = new ConfigHelper(context).GetSetting(nameof(SettingsEnum.DefaultServerAddress));
+
+            var serverPort = await server.GetServerPort();
+            var serverAddress = $"{defaultServerAddress.Value}:{serverPort}";
+
+            var query = new MinecraftServerQuery().Query(serverAddress);
+
+            while (query != null)
+            {
+                await Task.Delay(1000);
+                query = new MinecraftServerQuery().Query(serverAddress);
+            }
+
             return Ok(true);
         }
 
