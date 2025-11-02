@@ -95,9 +95,17 @@ namespace Minecraft_Realms_Emulator.Helpers
             return Convert.ToInt32(containerInspectResponse.NetworkSettings.Ports["25565/tcp"][0].HostPort);
         }
 
-        public async Task StopServer()
+        public async Task StopServer(bool force = false)
         {
-            await ExecuteCommand("stop");
+            if (force)
+            {
+                await _dockerClient.Containers.StopContainerAsync($"realm-server-{worldId}",
+                    new ContainerStopParameters());
+            }
+            else
+            {
+                await ExecuteCommand("stop");
+            }
         }
 
         public async Task DeleteServer()
