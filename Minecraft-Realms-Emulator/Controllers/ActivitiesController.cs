@@ -23,12 +23,12 @@ namespace Minecraft_Realms_Emulator.Controllers
             List<LivePlayerList> lists = [];
 
             var worlds = context.Worlds.Where(w => w.State == nameof(StateEnum.OPEN) && w.OwnerUUID == playerUUID || w.State == nameof(StateEnum.OPEN) && w.Players.Any(p => p.Uuid == playerUUID && p.Accepted)).ToList();
-            var defaultServerAddress = new ConfigHelper(context).GetSetting(nameof(SettingsEnum.DefaultServerAddress));
+            var defaultServerAddress = ConfigHelper.GetSetting(nameof(SettingsEnum.DefaultServerAddress));
             
             foreach (var world in worlds)
             {
                 var port = await new DockerHelper(world.Id).GetServerPort();
-                var query = new MinecraftServerQuery().Query($"{defaultServerAddress.Value}:{port}");
+                var query = new MinecraftServerQuery().Query($"{defaultServerAddress}:{port}");
 
                 if (query == null) continue;
 

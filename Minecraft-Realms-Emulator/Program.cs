@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Minecraft_Realms_Emulator.Helpers;
+using Minecraft_Realms_Emulator.Helpers.Config;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Middlewares;
 using Npgsql;
@@ -42,7 +42,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Initialize database
-Database.Initialize(app);
+ConfigHelper.Initialize(app);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

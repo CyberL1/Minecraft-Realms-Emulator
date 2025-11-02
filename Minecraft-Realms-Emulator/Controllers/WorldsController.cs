@@ -8,8 +8,6 @@ using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
 using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
-using System.Net;
-using System.Net.Sockets;
 using Minecraft_Realms_Emulator.Objects;
 using Newtonsoft.Json;
 
@@ -34,7 +32,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             List<WorldResponse> allWorlds = [];
 
-            if (ownedWorlds.ToArray().Length == 0 && new ConfigHelper(context).GetSetting(nameof(SettingsEnum.AutomaticRealmsCreation)).Value)
+            if (ownedWorlds.ToArray().Length == 0 && ConfigHelper.GetSetting(nameof(SettingsEnum.AutomaticRealmsCreation)))
             {
                 var world = new World
                 {
@@ -290,7 +288,7 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             List<WorldResponse> allWorlds = [];
 
-            if (ownedWorlds.ToArray().Length == 0 && new ConfigHelper(context).GetSetting(nameof(SettingsEnum.AutomaticRealmsCreation)).Value)
+            if (ownedWorlds.ToArray().Length == 0 && ConfigHelper.GetSetting(nameof(SettingsEnum.AutomaticRealmsCreation)))
             {
                 var parentWorld = context.Worlds.FirstOrDefault(w => w.OwnerUUID == playerUUID && w.ParentWorld == null);
 
@@ -633,10 +631,10 @@ namespace Minecraft_Realms_Emulator.Controllers
             var server = new DockerHelper(world.Id);
             await server.StartServer(world.ActiveSlot);
 
-            var defaultServerAddress = new ConfigHelper(context).GetSetting(nameof(SettingsEnum.DefaultServerAddress));
+            var defaultServerAddress = ConfigHelper.GetSetting(nameof(SettingsEnum.DefaultServerAddress));
 
             var serverPort = await server.GetServerPort();
-            var serverAddress = $"{defaultServerAddress.Value}:{serverPort}";
+            var serverAddress = $"{defaultServerAddress}:{serverPort}";
 
             var query = new MinecraftServerQuery().Query(serverAddress);
 
@@ -661,10 +659,10 @@ namespace Minecraft_Realms_Emulator.Controllers
             var server = new DockerHelper(world.Id);
             await server.StopServer();
 
-            var defaultServerAddress = new ConfigHelper(context).GetSetting(nameof(SettingsEnum.DefaultServerAddress));
+            var defaultServerAddress = ConfigHelper.GetSetting(nameof(SettingsEnum.DefaultServerAddress));
 
             var serverPort = await server.GetServerPort();
-            var serverAddress = $"{defaultServerAddress.Value}:{serverPort}";
+            var serverAddress = $"{defaultServerAddress}:{serverPort}";
 
             var query = new MinecraftServerQuery().Query(serverAddress);
 
@@ -929,8 +927,8 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var serverPort = await helper.GetServerPort();
 
-            var defaultServerAddress= new ConfigHelper(context).GetSetting(nameof(SettingsEnum.DefaultServerAddress));
-            var serverAddress = $"{defaultServerAddress.Value}:{serverPort}";
+            var defaultServerAddress = ConfigHelper.GetSetting(nameof(SettingsEnum.DefaultServerAddress));
+            var serverAddress = $"{defaultServerAddress}:{serverPort}";
             
             var query = new MinecraftServerQuery().Query(serverAddress);
 

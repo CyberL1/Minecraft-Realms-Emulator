@@ -14,10 +14,8 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet]
         public ActionResult<bool> GetTrial()
         {
-            var config = new ConfigHelper(context);
-            var trialMode = config.GetSetting(nameof(SettingsEnum.TrialMode));
-
-            return Ok(trialMode.Value);
+            var trialMode = ConfigHelper.GetSetting(nameof(SettingsEnum.TrialMode));
+            return Ok(trialMode);
         }
     }
 }
