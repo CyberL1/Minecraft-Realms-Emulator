@@ -11,9 +11,9 @@ echo "level-name=slot-$SLOT_ID" >> server.properties
 
 # Download latest server.jar
 if [ ! -f .no-update ]; then
-  VERSION_URL=$(curl https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | jq -r '.latest.release as $latest | .versions | to_entries[] | select(.value.id == $latest) | .value.url')
-  SERVER_URL=$(curl $VERSION_URL | jq -r .downloads.server.url)
-  SERVER_SHA=$(curl $VERSION_URL | jq -r .downloads.server.sha1)
+  VERSION_URL=$(curl -sS https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | jq -r '.latest.release as $latest | .versions | to_entries[] | select(.value.id == $latest) | .value.url')
+  SERVER_URL=$(curl -sS $VERSION_URL | jq -r .downloads.server.url)
+  SERVER_SHA=$(curl -sS $VERSION_URL | jq -r .downloads.server.sha1)
 
   if [ ! "$(sha1sum server.jar | awk '{print $1}')" = "$SERVER_SHA" ]; then
     wget -O server.jar $SERVER_URL
