@@ -583,17 +583,23 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckForWorld]
         [CheckRealmOwner]
         [CheckActiveSubscription]
-        public ActionResult<bool> Reset(int wId)
+        public async Task<ActionResult<BackupUploadResponse>> ResetWorld(int wId)
         {
-            Console.WriteLine($"Resetting world {wId}");
+            var container = new DockerHelper(wId);
 
-            var world = context.Worlds.Find(wId);
-            var server = new DockerHelper(world.Id);
+            if (!await container.IsRunning())
+            {
+                await container.StartServer(1);
+            }
 
-            server.RunCommand($"rm -rf slot-{world.ActiveSlot}");
-            server.StopServer();
+            var response = new BackupUploadResponse
+            {
+                Token = Guid.NewGuid().ToString(),
+                UploadEndpoint = "127.0.0.1",
+                WorldClosed = true
+            };
 
-            return Ok(true);
+            return Ok(response);
         }
 
         [HttpPut("{wId}/open")]
@@ -842,8 +848,15 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckForWorld]
         [CheckRealmOwner]
         [CheckActiveSubscription]
-        public ActionResult<BackupUploadResponse> UploadBackup(int wId)
+        public async Task<ActionResult<BackupUploadResponse>> UploadBackup(int wId)
         {
+            var container = new DockerHelper(wId);
+            
+            if (!await container.IsRunning())
+            {
+                await container.StartServer(1);
+            }
+            
             var response = new BackupUploadResponse
             {
                 Token = Guid.NewGuid().ToString(),
