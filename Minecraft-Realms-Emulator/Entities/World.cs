@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Minecraft_Realms_Emulator.Enums;
-using Minecraft_Realms_Emulator.Objects;
+﻿using Minecraft_Realms_Emulator.Objects;
 
 namespace Minecraft_Realms_Emulator.Entities
 {
@@ -12,7 +10,6 @@ namespace Minecraft_Realms_Emulator.Entities
         public string? OwnerUUID { get; set; }
         public string? Name { get; set; }
         public string? Motd { get; set; }
-        public string State { get; set; } = "OPEN";
         public string WorldType { get; set; } = "NORMAL";
         public List<Player> Players { get; set; } = [];
         public int MaxPlayers { get; set; } = 10;

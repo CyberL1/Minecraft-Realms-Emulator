@@ -58,9 +58,6 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
         public ActionResult<bool> OpenServer(int wId)
         {
             var world = context.Worlds.ToList().Find(w => w.Id == wId);
-            world.State = "OPEN";
-            context.SaveChanges();
-
             new DockerHelper(world.Id).StartServer(world.ActiveSlot);
 
             return Ok(true);
@@ -70,12 +67,7 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
         [CheckForWorld]
         public async Task<ActionResult<bool>> CloseServer(int wId)
         {
-            var world = context.Worlds.ToList().Find(w => w.Id == wId);
-
-            world.State = "CLOSED";
-            context.SaveChanges();
-
-            await new DockerHelper(world.Id).StopServer();
+            await new DockerHelper(wId).StopServer();
             return Ok(true);
         }
     }

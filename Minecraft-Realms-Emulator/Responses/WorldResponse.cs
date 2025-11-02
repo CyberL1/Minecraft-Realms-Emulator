@@ -19,5 +19,6 @@ namespace Minecraft_Realms_Emulator.Responses
         public int? MinigameId { get; set; }
         public string? MinigameName { get; set; }
         public string? MinigameImage { get; set; }
+        public required string State { get; set; }
     }
 }
