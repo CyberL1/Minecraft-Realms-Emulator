@@ -67,7 +67,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Name = world.Name,
                     Motd = world.Motd,
                     GameMode = world.ActiveSlot?.GameMode ?? GamemodeEnum.Survival,
-                    IsHardcore = world.ActiveSlot?.Difficulty == DifficultyEnum.Hard,
+                    IsHardcore = world.ActiveSlot?.GameMode == GamemodeEnum.Hardcore,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -108,7 +108,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Name = world.Name,
                     Motd = world.Motd,
                     GameMode = world.ActiveSlot.GameMode,
-                    IsHardcore = world.ActiveSlot.Difficulty == DifficultyEnum.Hard,
+                    IsHardcore = world.ActiveSlot.GameMode == GamemodeEnum.Hardcore,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -167,7 +167,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Name = world.Name,
                     Motd = world.Motd,
                     GameMode = world.ActiveSlot?.GameMode ?? GamemodeEnum.Survival,
-                    IsHardcore = world.ActiveSlot?.Difficulty == DifficultyEnum.Hard,
+                    IsHardcore = world.ActiveSlot?.GameMode == GamemodeEnum.Hardcore,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -221,7 +221,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Name = world.Name,
                     Motd = world.Motd,
                     GameMode = world.ActiveSlot.GameMode,
-                    IsHardcore = world.ActiveSlot.Difficulty == DifficultyEnum.Hard,
+                    IsHardcore = world.ActiveSlot.GameMode == GamemodeEnum.Hardcore,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -318,7 +318,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Name = world.Name,
                     Motd = world.Motd,
                     GameMode = world.ActiveSlot?.GameMode ?? 0,
-                    IsHardcore = world.ActiveSlot?.Difficulty == DifficultyEnum.Hard,
+                    IsHardcore = world.ActiveSlot?.GameMode == GamemodeEnum.Hardcore,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -361,7 +361,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Name = world.Name,
                     Motd = world.Motd,
                     GameMode = world.ActiveSlot.GameMode,
-                    IsHardcore = world.ActiveSlot.Difficulty == DifficultyEnum.Hard,
+                    IsHardcore = world.ActiveSlot.GameMode == GamemodeEnum.Hardcore,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -428,7 +428,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     {
                         slotName = slot.SlotName,
                         gameMode = slot.GameMode,
-                        hardcore = slot.Difficulty == DifficultyEnum.Hard,
+                        hardcore = slot.GameMode == GamemodeEnum.Hardcore,
                         difficulty = slot.Difficulty,
                         spawnProection = slot.SpawnProtection,
                         forceGameMode = slot.ForceGameMode,
@@ -439,7 +439,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     new SlotSettingObject
                     {
                         Name = "hardcore",
-                        Value = slot.Difficulty == DifficultyEnum.Hard
+                        Value = slot.GameMode == GamemodeEnum.Hardcore
                     }]
                 });
             }
@@ -459,7 +459,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                 Name = world.Name,
                 Motd = world.Motd,
                 GameMode = world.ActiveSlot.GameMode,
-                IsHardcore = world.ActiveSlot.Difficulty == DifficultyEnum.Hard,
+                IsHardcore = world.ActiveSlot.GameMode == GamemodeEnum.Hardcore,
                 State = await new WorldHelper(context, world.Id).GetState(),
                 WorldType = world.WorldType,
                 MaxPlayers = world.MaxPlayers,
