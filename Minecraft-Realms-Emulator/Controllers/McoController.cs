@@ -2,7 +2,6 @@
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Enums;
 using Minecraft_Realms_Emulator.Helpers.Config;
-using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Responses;
 
 namespace Minecraft_Realms_Emulator.Controllers
@@ -10,7 +9,7 @@ namespace Minecraft_Realms_Emulator.Controllers
     [Route("[controller]")]
     [ApiController]
     [RequireMinecraftCookie]
-    public class McoController(DataContext context) : ControllerBase
+    public class McoController : ControllerBase
     {
         [HttpGet("available")]
         public async Task<ActionResult<bool>> GetAvailable()
