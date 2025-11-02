@@ -10,5 +10,6 @@ namespace Minecraft_Realms_Emulator.Requests
         public GamemodeEnum GameMode { get; set; }
         public bool ForceGameMode { get; set; }
         public int SpawnProtection { get; set; }
+        public bool Hardcore { get; set; }
     }
 }
