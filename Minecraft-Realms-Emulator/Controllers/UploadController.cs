@@ -35,6 +35,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             }
 
             await container.RunCommand($"mv world slot-{sId}");
+            await container.StopServer(true);
 
             return Ok(true);
         }
