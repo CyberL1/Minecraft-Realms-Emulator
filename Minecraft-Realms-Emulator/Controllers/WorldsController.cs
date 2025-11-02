@@ -611,11 +611,10 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckActiveSubscription]
         public async Task<ActionResult<bool>> Open(int wId)
         {
-            var worlds = await context.Worlds.ToListAsync();
-            var world = worlds.Find(w => w.Id == wId);
+            var world = await context.Worlds.Include(w => w.ActiveSlot).FirstAsync(w => w.Id == wId);
 
             var server = new DockerHelper(world.Id);
-            await server.StartServer(world.ActiveSlot.Id);
+            await server.StartServer(world.ActiveSlot.SlotId);
 
             var defaultServerAddress = ConfigHelper.GetSetting(nameof(SettingsEnum.DefaultServerAddress));
 
@@ -639,8 +638,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckActiveSubscription]
         public async Task<ActionResult<bool>> Close(int wId)
         {
-            var worlds = await context.Worlds.ToListAsync();
-            var world = worlds.FirstOrDefault(w => w.Id == wId);
+            var world = await context.Worlds.FindAsync(wId);
 
             var server = new DockerHelper(world.Id);
             await server.StopServer();
@@ -911,7 +909,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var isRunning = await helper.IsRunning();
             if (!isRunning)
             {
-                await helper.StartServer(world.ActiveSlot.Id);
+                await helper.StartServer(world.ActiveSlot.SlotId);
             }
 
             var serverPort = await helper.GetServerPort();
