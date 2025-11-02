@@ -40,7 +40,6 @@ namespace Minecraft_Realms_Emulator.Controllers
                     OwnerUUID = playerUUID,
                     Name = null,
                     Motd = null,
-                    State = nameof(StateEnum.UNINITIALIZED),
                     WorldType = nameof(WorldTypeEnum.NORMAL),
                     MaxPlayers = 10,
                     Minigame = null,
@@ -298,7 +297,6 @@ namespace Minecraft_Realms_Emulator.Controllers
                     {
                         Name = parentWorld.Name,
                         Motd = null,
-                        State = nameof(StateEnum.UNINITIALIZED),
                         WorldType = nameof(WorldTypeEnum.NORMAL),
                         MaxPlayers = 10,
                         Minigame = null,

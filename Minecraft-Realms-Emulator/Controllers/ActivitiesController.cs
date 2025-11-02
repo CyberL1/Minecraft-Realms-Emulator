@@ -22,11 +22,17 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             List<LivePlayerList> lists = [];
 
-            var worlds = context.Worlds.Where(w => w.State == nameof(StateEnum.OPEN) && w.OwnerUUID == playerUUID || w.State == nameof(StateEnum.OPEN) && w.Players.Any(p => p.Uuid == playerUUID && p.Accepted)).ToList();
+            var worlds = context.Worlds.Where(w =>
+                w.OwnerUUID == playerUUID || w.Players.Any(p => p.Uuid == playerUUID && p.Accepted)).ToList();
             var defaultServerAddress = ConfigHelper.GetSetting(nameof(SettingsEnum.DefaultServerAddress));
-            
+
             foreach (var world in worlds)
             {
+                if (!await new DockerHelper(world.Id).IsRunning())
+                {
+                    continue;
+                }
+
                 var port = await new DockerHelper(world.Id).GetServerPort();
                 var query = new MinecraftServerQuery().Query($"{defaultServerAddress}:{port}");
 
@@ -51,7 +57,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                 };
 
                 lists.Add(list);
-            };
+            }
 
             LivePlayerListsResponse response = new()
             {
