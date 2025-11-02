@@ -1,7 +1,6 @@
-using System.IO.Compression;
-using ICSharpCode.SharpZipLib.Tar;
 using Microsoft.AspNetCore.Mvc;
 using Minecraft_Realms_Emulator.Attributes;
+using Minecraft_Realms_Emulator.Helpers;
 
 namespace Minecraft_Realms_Emulator.Controllers
 {
@@ -20,27 +19,22 @@ namespace Minecraft_Realms_Emulator.Controllers
             Directory.CreateDirectory(worldPath);
 
             var gzipPath = Path.Combine(worldPath, $"slot-{sId}.tar.gz");
-            var tarPath = Path.Combine(worldPath, $"slot-{sId}.tar");
 
             await using (var stream = new FileStream(gzipPath, FileMode.Create, FileAccess.Write))
             {
                 await Request.Body.CopyToAsync(stream);
             }
 
-            await using (var originalFileStream = System.IO.File.OpenRead(gzipPath))
-            await using (var decompressionStream = new GZipStream(originalFileStream, CompressionMode.Decompress))
-            await using (var tarFileStream = System.IO.File.Create(tarPath))
+            var container = new DockerHelper(wId);
+
+            await container.RunCommand($"rm -rf slot-{sId}");
+
+            await using (var gzipStream = System.IO.File.OpenRead(gzipPath))
             {
-                await decompressionStream.CopyToAsync(tarFileStream);
+                await container.Copy(gzipStream);
             }
 
-            await using (var tarStream = System.IO.File.OpenRead(tarPath))
-            using (var tarArchive = TarArchive.CreateInputTarArchive(tarStream))
-            {
-                tarArchive.ExtractContents(worldPath);
-            }
-
-            // TODO: actually upload the world to server
+            await container.RunCommand($"mv world slot-{sId}");
 
             return Ok(true);
         }

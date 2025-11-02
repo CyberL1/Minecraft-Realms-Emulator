@@ -15,10 +15,10 @@ namespace Minecraft_Realms_Emulator.Helpers
             {
                 Name = $"realm-server-{worldId}",
             };
-            
+
             await _dockerClient.Volumes.CreateAsync(parameters);
         }
-        
+
 
         private async Task<CreateContainerResponse> CreateContainer(int slotId)
         {
@@ -61,7 +61,7 @@ namespace Minecraft_Realms_Emulator.Helpers
                         }
                     }
                 },
-                Env = new List<string>{$"SLOT_ID={slotId}"}
+                Env = new List<string> { $"SLOT_ID={slotId}" }
             };
 
             return await _dockerClient.Containers.CreateContainerAsync(containerConfig);
@@ -90,7 +90,8 @@ namespace Minecraft_Realms_Emulator.Helpers
 
         public async Task<int> GetServerPort()
         {
-            var containerInspectResponse = await _dockerClient.Containers.InspectContainerAsync($"realm-server-{worldId}");
+            var containerInspectResponse =
+                await _dockerClient.Containers.InspectContainerAsync($"realm-server-{worldId}");
             return Convert.ToInt32(containerInspectResponse.NetworkSettings.Ports["25565/tcp"][0].HostPort);
         }
 
@@ -194,6 +195,15 @@ namespace Minecraft_Realms_Emulator.Helpers
 
             var execInspect = await _dockerClient.Exec.InspectContainerExecAsync(execCreateResponse.ID);
             return execInspect.ExitCode;
+        }
+
+        public async Task Copy(FileStream tarStream)
+        {
+            await _dockerClient.Containers.ExtractArchiveToContainerAsync($"realm-server-{worldId}",
+                new ContainerPathStatParameters
+                {
+                    Path = "/mc"
+                }, tarStream);
         }
     }
 }
