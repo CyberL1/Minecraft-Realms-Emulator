@@ -65,8 +65,8 @@ namespace Minecraft_Realms_Emulator.Controllers
                     OwnerUUID = world.OwnerUUID,
                     Name = world.Name,
                     Motd = world.Motd,
-                    GameMode = world.ActiveSlot?.GameMode ?? 0,
-                    IsHardcore = world.ActiveSlot?.Difficulty == 3,
+                    GameMode = world.ActiveSlot?.GameMode ?? GamemodeEnum.Survival,
+                    IsHardcore = world.ActiveSlot?.Difficulty == DifficultyEnum.Hard,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -107,7 +107,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Name = world.Name,
                     Motd = world.Motd,
                     GameMode = world.ActiveSlot.GameMode,
-                    IsHardcore = world.ActiveSlot.Difficulty == 3,
+                    IsHardcore = world.ActiveSlot.Difficulty == DifficultyEnum.Hard,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -166,7 +166,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Name = world.Name,
                     Motd = world.Motd,
                     GameMode = world.ActiveSlot?.GameMode ?? 0,
-                    IsHardcore = world.ActiveSlot?.Difficulty == 3,
+                    IsHardcore = world.ActiveSlot?.Difficulty == DifficultyEnum.Hard,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -220,7 +220,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Name = world.Name,
                     Motd = world.Motd,
                     GameMode = world.ActiveSlot.GameMode,
-                    IsHardcore = world.ActiveSlot.Difficulty == 3,
+                    IsHardcore = world.ActiveSlot.Difficulty == DifficultyEnum.Hard,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -317,7 +317,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Name = world.Name,
                     Motd = world.Motd,
                     GameMode = world.ActiveSlot?.GameMode ?? 0,
-                    IsHardcore = world.ActiveSlot?.Difficulty == 3,
+                    IsHardcore = world.ActiveSlot?.Difficulty == DifficultyEnum.Hard,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -360,7 +360,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     Name = world.Name,
                     Motd = world.Motd,
                     GameMode = world.ActiveSlot.GameMode,
-                    IsHardcore = world.ActiveSlot.Difficulty == 3,
+                    IsHardcore = world.ActiveSlot.Difficulty == DifficultyEnum.Hard,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
@@ -420,22 +420,17 @@ namespace Minecraft_Realms_Emulator.Controllers
                 int versionsCompared = new MinecraftVersionParser.MinecraftVersion(gameVersion).CompareTo(new MinecraftVersionParser.MinecraftVersion(world.ActiveSlot.Version));
                 string compatibility = versionsCompared == 0 ? nameof(CompatibilityEnum.COMPATIBLE) : versionsCompared < 0 ? nameof(CompatibilityEnum.NEEDS_DOWNGRADE) : nameof(CompatibilityEnum.NEEDS_UPGRADE);
 
-                slots.Add(new SlotResponse()
+                slots.Add(new SlotResponse
                 {
                     SlotId = slot.SlotId,
                     Options = JsonConvert.SerializeObject(new
                     {
                         slotName = slot.SlotName,
                         gameMode = slot.GameMode,
-                        hardcore = slot.Difficulty == 3,
+                        hardcore = slot.Difficulty == DifficultyEnum.Hard,
                         difficulty = slot.Difficulty,
                         spawnProection = slot.SpawnProtection,
                         forceGameMode = slot.ForceGameMode,
-                        pvp = slot.Pvp,
-                        spawnAnimals = slot.SpawnAnimals,
-                        spawnMonsters = slot.SpawnMonsters,
-                        spawnNPCs = slot.SpawnNPCs,
-                        commandBlocks = slot.CommandBlocks,
                         version = slot.Version,
                         compatibility
                     }),
@@ -443,7 +438,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                     new SlotSettingObject
                     {
                         Name = "hardcore",
-                        Value = slot.Difficulty == 3
+                        Value = slot.Difficulty == DifficultyEnum.Hard
                     }]
                 });
             }
@@ -463,7 +458,7 @@ namespace Minecraft_Realms_Emulator.Controllers
                 Name = world.Name,
                 Motd = world.Motd,
                 GameMode = world.ActiveSlot.GameMode,
-                IsHardcore = world.ActiveSlot.Difficulty == 3,
+                IsHardcore = world.ActiveSlot.Difficulty == DifficultyEnum.Hard,
                 State = await new WorldHelper(context, world.Id).GetState(),
                 WorldType = world.WorldType,
                 MaxPlayers = world.MaxPlayers,
@@ -528,14 +523,9 @@ namespace Minecraft_Realms_Emulator.Controllers
                 SlotName = "",
                 Version = gameVersion,
                 GameMode = 0,
-                Difficulty = 2,
+                Difficulty = DifficultyEnum.Normal,
                 SpawnProtection = 0,
-                ForceGameMode = false,
-                Pvp = true,
-                SpawnAnimals = true,
-                SpawnMonsters = true,
-                SpawnNPCs = true,
-                CommandBlocks = false
+                ForceGameMode = false
             };
 
 
@@ -739,7 +729,8 @@ namespace Minecraft_Realms_Emulator.Controllers
                 return BadRequest(errorResponse);
             }
 
-            if (!new List<int> { 0, 1, 2 }.Contains(body.GameMode))
+            if (!new List<GamemodeEnum> { GamemodeEnum.Survival, GamemodeEnum.Creative, GamemodeEnum.Adventure }
+                    .Contains(body.GameMode))
             {
                 ErrorResponse errorResponse = new()
                 {
@@ -750,7 +741,9 @@ namespace Minecraft_Realms_Emulator.Controllers
                 return BadRequest(errorResponse);
             }
 
-            if (!new List<int> { 0, 1, 2, 3 }.Contains(body.Difficulty))
+            if (!new List<DifficultyEnum>
+                        { DifficultyEnum.Peaceful, DifficultyEnum.Easy, DifficultyEnum.Normal, DifficultyEnum.Hard }
+                    .Contains(body.Difficulty))
             {
                 ErrorResponse errorResponse = new()
                 {
@@ -774,18 +767,13 @@ namespace Minecraft_Realms_Emulator.Controllers
             slot.Difficulty = body.Difficulty;
             slot.SpawnProtection = body.SpawnProtection;
             slot.ForceGameMode = body.ForceGameMode;
-            slot.Pvp = body.Pvp;
-            slot.SpawnAnimals = body.SpawnAnimals;
-            slot.SpawnMonsters = body.SpawnMonsters;
-            slot.SpawnNPCs = body.SpawnNPCs;
-            slot.CommandBlocks = body.CommandBlocks;
 
             var slotExists = context.Slots.Any(s => s.World.Id == wId && s.SlotId == sId);
             if (!slotExists)
             {
                 context.Slots.Add(slot);
             }
-            
+
             context.SaveChanges();
 
             return Ok(true);
@@ -811,15 +799,9 @@ namespace Minecraft_Realms_Emulator.Controllers
                     SlotId = sId,
                     SlotName = "",
                     Version = gameVersion,
-                    GameMode = 0,
-                    Difficulty = 2,
-                    SpawnProtection = 0,
-                    ForceGameMode = false,
-                    Pvp = true,
-                    SpawnAnimals = true,
-                    SpawnMonsters = true,
-                    SpawnNPCs = true,
-                    CommandBlocks = false
+                    GameMode = GamemodeEnum.Survival,
+                    Difficulty = DifficultyEnum.Normal,
+                    SpawnProtection = 0
                 };
 
                 context.Slots.Add(slot);

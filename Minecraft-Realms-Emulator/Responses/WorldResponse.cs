@@ -1,4 +1,5 @@
 ﻿using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Enums;
 
 namespace Minecraft_Realms_Emulator.Responses
 {
@@ -6,7 +7,7 @@ namespace Minecraft_Realms_Emulator.Responses
     {
         public string RemoteSubscriptionId { get; set; } = new Guid().ToString();
         public bool IsHardcore { get; set; } = false;
-        public int GameMode { get; set; }
+        public GamemodeEnum GameMode { get; set; }
         public int DaysLeft { get; set; } = 30;
         public bool Expired { get; set; } = false;
         public bool ExpiredTrial { get; set; } = false;
