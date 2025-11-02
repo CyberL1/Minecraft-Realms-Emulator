@@ -12,7 +12,8 @@ namespace Minecraft_Realms_Emulator.Responses
         public bool ExpiredTrial { get; set; } = false;
         public bool GracePeriod { get; set; } = false;
         public string Compatibility { get; set; } = null!;
-        public List<SlotResponse> Slots { get; set; } = null!;
+        public new int ActiveSlot { get; set; }
+        public new List<SlotResponse> Slots { get; set; } = null!;
         public string ActiveVersion { get; set; } = null!;
         public int? ParentWorldId { get; set; }
         public string? ParentWorldName { get; set; }

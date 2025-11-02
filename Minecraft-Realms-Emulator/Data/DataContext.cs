@@ -15,10 +15,14 @@ namespace Minecraft_Realms_Emulator.Data
         public DbSet<Template> Templates { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<SeenNotification> SeenNotifications { get; set; }
-        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<World>().OwnsOne(w => w.RegionSelectionPreference, b => b.ToJson());
+
+            modelBuilder.Entity<Slot>()
+                .HasOne(s => s.World)
+                .WithMany(w => w.Slots);
         }
     }
 }

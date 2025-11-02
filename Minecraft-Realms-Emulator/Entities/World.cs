@@ -1,4 +1,5 @@
-﻿using Minecraft_Realms_Emulator.Objects;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Minecraft_Realms_Emulator.Objects;
 
 namespace Minecraft_Realms_Emulator.Entities
 {
@@ -14,7 +15,7 @@ namespace Minecraft_Realms_Emulator.Entities
         public List<Player> Players { get; set; } = [];
         public int MaxPlayers { get; set; } = 10;
         public Template? Minigame { get; set; }
-        public int ActiveSlot { get; set; } = 1;
+        public Slot? ActiveSlot { get; set; }
         public List<Slot> Slots { get; set; } = [];
         public bool Member { get; set; } = false;
         public World? ParentWorld { get; set; }
