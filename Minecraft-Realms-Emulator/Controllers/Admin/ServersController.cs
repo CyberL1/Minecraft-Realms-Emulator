@@ -58,7 +58,7 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
         public ActionResult<bool> OpenServer(int wId)
         {
             var world = context.Worlds.ToList().Find(w => w.Id == wId);
-            new DockerHelper(world.Id).StartServer(world.ActiveSlot);
+            new DockerHelper(world.Id).StartServer(world.ActiveSlot.Id);
 
             return Ok(true);
         }
