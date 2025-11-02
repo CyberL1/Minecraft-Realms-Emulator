@@ -15,7 +15,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet("available")]
         public async Task<ActionResult<bool>> GetAvailable()
         {
-            if (new ConfigHelper(context).GetSetting(nameof(SettingsEnum.OnlineMode)).Value)
+            if (ConfigHelper.GetSetting(nameof(SettingsEnum.OnlineMode)))
             {
                 string cookie = Request.Headers.Cookie;
                 string playerUUID = cookie.Split(";")[0].Split(":")[2];
@@ -42,12 +42,11 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet("v1/news")]
         public ActionResult<NewsResponse> GetNews()
         {
-            var config = new ConfigHelper(context);
-            var newsLink = config.GetSetting(nameof(SettingsEnum.NewsLink));
+            var newsLink = ConfigHelper.GetSetting(nameof(SettingsEnum.NewsLink));
 
             var news = new NewsResponse
             {
-                NewsLink = newsLink.Value
+                NewsLink = newsLink
             };
 
             return Ok(news);

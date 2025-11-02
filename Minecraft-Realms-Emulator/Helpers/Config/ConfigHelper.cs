@@ -1,47 +1,54 @@
-﻿using Minecraft_Realms_Emulator.Data;
+﻿using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Data;
 using Newtonsoft.Json;
 
 namespace Minecraft_Realms_Emulator.Helpers.Config
 {
-    public class ConfigHelper
+    public abstract class ConfigHelper
     {
-        private readonly DataContext Db;
+        private static readonly Dictionary<string, dynamic> ConfigCache = new();
 
-        public ConfigHelper(DataContext db)
+        public static void Initialize(WebApplication app)
         {
-            Db = db;
-        }
+            using var scope = app.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<DataContext>();
 
-        public List<Configuration> GetSettings()
-        {
-            List<Configuration> settings = [];
+            db.Database.Migrate();
+            var settings = new Settings();
 
-            foreach (var setting in Db.Configuration)
+
+            foreach (var property in settings.GetType().GetProperties())
             {
-                Configuration settingTyped = new()
-                {
-                    Key = setting.Key,
-                    Value = JsonConvert.DeserializeObject(setting.Value)
-                };
+                var name = property.Name;
+                var value = property.GetValue(settings);
 
-                settings.Add(settingTyped);
+                if (db.Configuration.Find(name) == null)
+                {
+                    db.Configuration.Add(new Configuration
+                    {
+                        Key = name,
+                        Value = JsonConvert.SerializeObject(value)
+                    });
+                }
             }
 
-            return settings;
+            db.SaveChanges();
+
+            foreach (var setting in db.Configuration)
+            {
+                ConfigCache[setting.Key] = JsonConvert.DeserializeObject(setting.Value);
+            }
         }
 
-        public Configuration? GetSetting(string key)
+        public static Dictionary<string, dynamic> GetConfig()
         {
-            var setting = Db.Configuration.Find(key);
+            return ConfigCache;
+        }
 
-            if (setting == null) return null;
-
-            return new()
-            {
-                Key = setting.Key,
-                Value = JsonConvert.DeserializeObject(setting.Value)
-            };
+        public static dynamic GetSetting(string key)
+        {
+            return ConfigCache[key];
         }
     }
 }
