@@ -19,7 +19,7 @@ namespace Minecraft_Realms_Emulator.Controllers
     public class WorldsController(DataContext context) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<ServersResponse>> GetWorlds()
+        public async Task<ActionResult<ServersResponse>> GetStableWorlds()
         {
             string cookie = Request.Headers.Cookie;
 
@@ -32,7 +32,8 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             List<WorldResponse> allWorlds = [];
 
-            if (ownedWorlds.ToArray().Length == 0 && ConfigHelper.GetSetting(nameof(SettingsEnum.AutomaticRealmsCreation)))
+            if (ownedWorlds.ToArray().Length == 0 &&
+                ConfigHelper.GetSetting(nameof(SettingsEnum.AutomaticRealmsCreation)))
             {
                 var world = new World
                 {
@@ -140,7 +141,7 @@ namespace Minecraft_Realms_Emulator.Controllers
         }
 
         [HttpGet("listUserWorldsOfType/any")]
-        public async Task<ActionResult<ServersResponse>> GetWorldsSnapshot()
+        public async Task<ActionResult<ServersResponse>> GetAllWorlds()
         {
             string cookie = Request.Headers.Cookie;
 
@@ -165,12 +166,12 @@ namespace Minecraft_Realms_Emulator.Controllers
                     OwnerUUID = world.OwnerUUID,
                     Name = world.Name,
                     Motd = world.Motd,
-                    GameMode = world.ActiveSlot?.GameMode ?? 0,
+                    GameMode = world.ActiveSlot?.GameMode ?? GamemodeEnum.Survival,
                     IsHardcore = world.ActiveSlot?.Difficulty == DifficultyEnum.Hard,
                     State = await new WorldHelper(context, world.Id).GetState(),
                     WorldType = world.WorldType,
                     MaxPlayers = world.MaxPlayers,
-                    ActiveSlot = world.ActiveSlot.SlotId,
+                    ActiveSlot = world.ActiveSlot?.SlotId ?? 1,
                     Member = world.Member,
                     Players = world.Players,
                     ActiveVersion = world.ActiveSlot?.Version ?? gameVersion,
