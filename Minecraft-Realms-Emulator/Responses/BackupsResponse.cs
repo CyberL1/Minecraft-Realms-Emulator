@@ -1,9 +1,7 @@
-﻿using Minecraft_Realms_Emulator.Entities;
-
-namespace Minecraft_Realms_Emulator.Responses
+﻿namespace Minecraft_Realms_Emulator.Responses
 {
     public class BackupsResponse
     {
-        public List<Backup> Backups { get; set; }
+        public List<BackupResponse> Backups { get; set; }
     }
 }
