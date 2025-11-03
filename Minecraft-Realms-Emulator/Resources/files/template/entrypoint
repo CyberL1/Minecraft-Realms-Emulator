@@ -5,9 +5,13 @@ echo "password: $RCON_PASSWORD" > /root/.rcon-cli.yaml
 
 [ ! -f eula.txt ] && echo "eula=true" > eula.txt
 
+# Ensure RCON is enabled
 echo "enable-rcon=true" >> server.properties
 echo "rcon.password=$RCON_PASSWORD" >> server.properties
-echo "level-name=slot-$SLOT_ID" >> server.properties
+
+# Ensure whitelist is enabled
+echo "white-list=true" >> server.properties
+echo "enforce-whitelist=true" >> server.properties
 
 # Download latest server.jar
 if [ ! -f .no-update ]; then
