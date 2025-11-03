@@ -835,14 +835,26 @@ namespace Minecraft_Realms_Emulator.Controllers
         [CheckRealmOwner]
         public async Task<ActionResult<BackupsResponse>> GetBackups(int wId)
         {
-            var backups = await context.Backups.Where(b => b.Slot.World.Id == wId).ToListAsync();
+            var backups = await context.Backups.Where(b => b.Slot.World.Id == wId).Include(b => b.Slot).ToListAsync();
+            List<BackupResponse> backupsFormatted = [];
 
-            BackupsResponse worldBackups = new()
+            backupsFormatted.AddRange(backups.Select(backup => new BackupResponse
             {
-                Backups = backups
+                LastModifiedDate = ((DateTimeOffset)backup.LastModifiedDate).ToUnixTimeMilliseconds(),
+                DownloadUrl = backup.DownloadUrl,
+                Metadata = backup.Metadata,
+                ResourcePackHash = backup.ResourcePackHash,
+                ResourcePackUrl = backup.ResourcePackUrl,
+                Size = backup.Size,
+                SlotId = backup.Slot.Id
+            }));
+
+            BackupsResponse response = new()
+            {
+                Backups = backupsFormatted
             };
 
-            return Ok(worldBackups);
+            return Ok(response);
         }
 
         [HttpPut("{wId}/backups/upload")]
