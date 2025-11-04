@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using Docker.DotNet;
 using Docker.DotNet.Models;
+using Minecraft_Realms_Emulator.Responses;
 
 namespace Minecraft_Realms_Emulator.Helpers
 {
@@ -212,6 +213,51 @@ namespace Minecraft_Realms_Emulator.Helpers
                 {
                     Path = "/mc"
                 }, tarStream);
+        }
+
+        public async Task AddPlayerToWhitelist(string playerName)
+        {
+            var runningPrior = await IsRunning();
+
+            if (!runningPrior)
+            {
+                await StartServer(1);
+            }
+
+            var playerInfo = await new HttpClient().GetFromJsonAsync<MinecraftPlayerInfo>(
+                $"https://api.mojang.com/users/profiles/minecraft/{playerName}");
+
+            await RunCommand($"jq '. += [{{\"uuid\":\"{Guid.Parse(playerInfo.Id).ToString("D")}\",\"name\":\"{playerInfo.Name}\"}}]' whitelist.json > tmp && mv tmp whitelist.json");
+
+            if (!runningPrior)
+            {
+                await StopServer(true);
+            }
+            else
+            {
+                await ExecuteCommand("whitelist reload");
+            }
+        }
+
+        public async Task RemovePlayerFromWhitelist(string playerName)
+        {
+            var runningPrior = await IsRunning();
+
+            if (!runningPrior)
+            {
+                await StartServer(1);
+            }
+
+            await RunCommand($"jq 'map(select((.name | ascii_downcase) != \"{playerName}\"))' whitelist.json > tmp && mv tmp whitelist.json");
+
+            if (!runningPrior)
+            {
+                await StopServer(true);
+            }
+            else
+            {
+                await ExecuteCommand("whitelist reload");
+            }
         }
     }
 }
