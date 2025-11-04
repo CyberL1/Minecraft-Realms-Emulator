@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Helpers;
 using Minecraft_Realms_Emulator.Requests;
 using Minecraft_Realms_Emulator.Responses;
 
@@ -19,7 +20,8 @@ namespace Minecraft_Realms_Emulator.Controllers
             string cookie = Request.Headers.Cookie;
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
 
-            var invites = await context.Invites.Where(i => i.RecipeintUUID == playerUUID).Include(i => i.World).ToListAsync();
+            var invites = await context.Invites.Where(i => i.RecipeintUUID == playerUUID).Include(i => i.World)
+                .ToListAsync();
 
             List<InviteResponse> invitesList = [];
 
@@ -37,15 +39,16 @@ namespace Minecraft_Realms_Emulator.Controllers
                 invitesList.Add(inv);
             }
 
-            InviteList inviteListRespone = new()
+            InviteList inviteListResponse = new()
             {
                 Invites = invitesList
             };
 
-            return Ok(inviteListRespone);
+            return Ok(inviteListResponse);
         }
+
         [HttpPut("accept/{id}")]
-        public ActionResult<bool> AcceptInvite(string id)
+        public async Task<ActionResult<bool>> AcceptInvite(string id)
         {
             string cookie = Request.Headers.Cookie;
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
@@ -54,19 +57,19 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             if (invite == null) return NotFound("Invite not found");
 
-            var player = context.Players.Where(p => p.World.Id == invite.World.Id).FirstOrDefault(p => p.Uuid == playerUUID);
+            var player = context.Players.Where(p => p.World.Id == invite.World.Id)
+                .FirstOrDefault(p => p.Uuid == playerUUID);
 
             player.Accepted = true;
 
             context.Invites.Remove(invite);
-
             context.SaveChanges();
 
             return Ok(true);
         }
 
         [HttpPut("reject/{id}")]
-        public ActionResult<bool> RejectInvite(string id)
+        public async Task<ActionResult<bool>> RejectInvite(string id)
         {
             var invite = context.Invites.Include(i => i.World).FirstOrDefault(i => i.InvitationId == id);
 
@@ -77,10 +80,10 @@ namespace Minecraft_Realms_Emulator.Controllers
             string cookie = Request.Headers.Cookie;
             string playerUUID = cookie.Split(";")[0].Split(":")[2];
 
-            var player = context.Players.Where(p => p.World.Id == invite.World.Id).FirstOrDefault(p => p.Uuid == playerUUID);
+            var player = context.Players.Where(p => p.World.Id == invite.World.Id)
+                .FirstOrDefault(p => p.Uuid == playerUUID);
 
             context.Players.Remove(player);
-
             context.SaveChanges();
 
             return Ok(true);
@@ -108,12 +111,24 @@ namespace Minecraft_Realms_Emulator.Controllers
 
             var world = await context.Worlds.Include(w => w.Players).FirstOrDefaultAsync(w => w.Id == wId);
 
-            if (world == null) return NotFound("World not found");
+            if (world == null)
+            {
+                var response = new ErrorResponse
+                {
+                    ErrorCode = 404,
+                    ErrorMsg = "World not found"
+                };
+
+                return NotFound(response);
+            }
 
             // Get player UUID
-            var playerInfo = await new HttpClient().GetFromJsonAsync<MinecraftPlayerInfo>($"https://api.mojang.com/users/profiles/minecraft/{body.Name}");
+            var playerInfo =
+                await new HttpClient().GetFromJsonAsync<MinecraftPlayerInfo>(
+                    $"https://api.mojang.com/users/profiles/minecraft/{body.Name}");
 
-            var playerInDB = await context.Players.Where(p => p.World.Id == wId).FirstOrDefaultAsync(p => p.Uuid == playerInfo.Id);
+            var playerInDB = await context.Players.Where(p => p.World.Id == wId)
+                .FirstOrDefaultAsync(p => p.Uuid == playerInfo.Id);
 
             if (playerInDB?.Uuid == playerInfo.Id) return BadRequest("Player already invited");
 
@@ -135,6 +150,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             };
 
             context.Invites.Add(invite);
+            await new DockerHelper(invite.World.Id).AddPlayerToWhitelist(player.Name);
 
             context.SaveChanges();
 
@@ -149,15 +165,36 @@ namespace Minecraft_Realms_Emulator.Controllers
         {
             var world = await context.Worlds.FirstOrDefaultAsync(w => w.Id == wId);
 
-            if (world == null) return NotFound("World not found");
+            if (world == null)
+            {
+                var response = new ErrorResponse
+                {
+                    ErrorCode = 404,
+                    ErrorMsg = "World not found"
+                };
+
+                return NotFound(response);
+            }
 
             var player = context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == uuid);
-
             context.Players.Remove(player);
 
             var invite = await context.Invites.FirstOrDefaultAsync(i => i.RecipeintUUID == uuid);
 
-            if (invite != null) context.Invites.Remove(invite);
+            if (invite == null)
+            {
+                var response = new ErrorResponse
+                {
+                    ErrorCode = 404,
+                    ErrorMsg = "Invite not found"
+                };
+
+                return NotFound(response);
+            }
+
+
+            context.Invites.Remove(invite);
+            await new DockerHelper(world.Id).RemovePlayerFromWhitelist(player.Name);
 
             context.SaveChanges();
 
@@ -178,6 +215,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var player = context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == playerUUID);
 
             context.Players.Remove(player);
+            await new DockerHelper(world.Id).RemovePlayerFromWhitelist(player.Name);
 
             context.SaveChanges();
 
