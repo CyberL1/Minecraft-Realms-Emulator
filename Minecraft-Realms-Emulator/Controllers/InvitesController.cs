@@ -20,7 +20,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var cookie = Request.Headers.Cookie.ToString();
             var playerUuid = cookie.Split(";")[0].Split(":")[2];
 
-            var invites = await context.Invites.Where(i => i.RecipeintUUID == playerUuid).Include(i => i.World)
+            var invites = await context.Invites.Where(i => i.RecipientUuid == playerUuid).Include(i => i.World)
                 .ToListAsync();
 
             List<InviteResponse> invitesList = [];
@@ -156,7 +156,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             {
                 InvitationId = Guid.NewGuid().ToString(),
                 World = world,
-                RecipeintUUID = playerInfo.Id,
+                RecipientUuid = playerInfo.Id,
                 Date = DateTime.UtcNow,
             };
 
@@ -190,7 +190,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             var player = context.Players.Where(p => p.World.Id == wId).FirstOrDefault(p => p.Uuid == uuid);
             if (player != null) context.Players.Remove(player);
 
-            var invite = await context.Invites.FirstOrDefaultAsync(i => i.RecipeintUUID == uuid);
+            var invite = await context.Invites.FirstOrDefaultAsync(i => i.RecipientUuid == uuid);
 
             if (invite == null)
             {
