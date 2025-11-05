@@ -4,7 +4,7 @@ namespace Minecraft_Realms_Emulator.Responses
 {
     public class SlotOptionsResponse : SlotOptionsRequest
     {
-        public string Compatibility { get; set; } = null!;
-        public bool Hardcore { get; set; }
+        public required string Compatibility { get; set; }
+        public new bool Hardcore { get; set; }
     }
 }

@@ -4,11 +4,11 @@
     {
         public int Id { get; set; }
         public string? Owner { get; set; }
-        public string? OwnerUUID { get; set; }
+        public string? OwnerUuid { get; set; }
         public string? Name { get; set; }
         public string? Motd { get; set; }
-        public string State { get; set; } = null!;
-        public string WorldType { get; set; } = null!;
+        public required string State { get; set; }
+        public required string WorldType { get; set; }
         public int MaxPlayers { get; set; }
         public string? MinigameName { get; set; }
         public int? MinigameId { get; set; }

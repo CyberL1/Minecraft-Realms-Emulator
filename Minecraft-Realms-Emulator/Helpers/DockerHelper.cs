@@ -227,7 +227,11 @@ namespace Minecraft_Realms_Emulator.Helpers
             var playerInfo = await new HttpClient().GetFromJsonAsync<MinecraftPlayerInfo>(
                 $"https://api.mojang.com/users/profiles/minecraft/{playerName}");
 
-            await RunCommand($"jq '. += [{{\"uuid\":\"{Guid.Parse(playerInfo.Id).ToString("D")}\",\"name\":\"{playerInfo.Name}\"}}]' whitelist.json > tmp && mv tmp whitelist.json");
+            if (playerInfo != null)
+            {
+                await RunCommand(
+                    $"jq '. += [{{\"uuid\":\"{Guid.Parse(playerInfo.Id):D}\",\"name\":\"{playerInfo.Name}\"}}]' whitelist.json > tmp && mv tmp whitelist.json");
+            }
 
             if (!runningPrior)
             {
@@ -248,7 +252,8 @@ namespace Minecraft_Realms_Emulator.Helpers
                 await StartServer(1);
             }
 
-            await RunCommand($"jq 'map(select((.name | ascii_downcase) != \"{playerName}\"))' whitelist.json > tmp && mv tmp whitelist.json");
+            await RunCommand(
+                $"jq 'map(select((.name | ascii_downcase) != \"{playerName}\"))' whitelist.json > tmp && mv tmp whitelist.json");
 
             if (!runningPrior)
             {

@@ -2,7 +2,7 @@
 {
     public class InviteList
     {
-        public List<InviteResponse> Invites { get; set; }
+        public required List<InviteResponse> Invites { get; set; }
     }
 
     public class InviteResponse

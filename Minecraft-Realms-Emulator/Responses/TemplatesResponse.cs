@@ -4,7 +4,7 @@ namespace Minecraft_Realms_Emulator.Responses
 {
     public class TemplatesResponse
     {
-        public List<Template> Templates { get; set; } = null!;
+        public required List<Template> Templates { get; set; }
         public int Page { get; set; }
         public int Size { get; set; }
         public int Total { get; set; }

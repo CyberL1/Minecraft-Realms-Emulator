@@ -4,7 +4,7 @@ namespace Minecraft_Realms_Emulator.Responses
 {
     public class NotificationsResponse
     {
-        public List<NotificationResponse> Notifications { get; set; } = null!;
+        public required List<NotificationResponse> Notifications { get; set; }
     }
 
     public class NotificationResponse : Notification

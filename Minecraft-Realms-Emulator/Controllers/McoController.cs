@@ -16,12 +16,12 @@ namespace Minecraft_Realms_Emulator.Controllers
         {
             if (ConfigHelper.GetSetting(nameof(SettingsEnum.OnlineMode)))
             {
-                string cookie = Request.Headers.Cookie;
-                string playerUUID = cookie.Split(";")[0].Split(":")[2];
+                var cookie = Request.Headers.Cookie.ToString();
+                var playerUuid = cookie.Split(";")[0].Split(":")[2];
 
                 try
                 {
-                    await new HttpClient().GetFromJsonAsync<MinecraftPlayerInfo>($"https://sessionserver.mojang.com/session/minecraft/profile/{playerUUID}");
+                    await new HttpClient().GetFromJsonAsync<MinecraftPlayerInfo>($"https://sessionserver.mojang.com/session/minecraft/profile/{playerUuid}");
                 }
                 catch
                 {

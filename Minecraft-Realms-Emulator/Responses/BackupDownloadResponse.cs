@@ -2,7 +2,7 @@
 {
     public class BackupDownloadResponse
     {
-        public string DownloadLink { get; set; } = null!;
+        public required string DownloadLink { get; set; }
         public string? ResourcePackUrl { get; set; }
         public string? ResourcePackHash { get; set; }
     }

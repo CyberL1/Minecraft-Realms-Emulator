@@ -5,17 +5,17 @@ namespace Minecraft_Realms_Emulator.Responses
 {
     public class WorldResponse : World
     {
-        public string RemoteSubscriptionId { get; set; } = new Guid().ToString();
+        public string? RemoteSubscriptionId { get; set; }
         public bool IsHardcore { get; set; } = false;
         public GamemodeEnum GameMode { get; set; }
         public int DaysLeft { get; set; } = 30;
         public bool Expired { get; set; } = false;
         public bool ExpiredTrial { get; set; } = false;
         public bool GracePeriod { get; set; } = false;
-        public string Compatibility { get; set; } = null!;
+        public required string Compatibility { get; set; }
         public new int ActiveSlot { get; set; }
-        public new List<SlotResponse> Slots { get; set; } = null!;
-        public string ActiveVersion { get; set; } = null!;
+        public new List<SlotResponse>? Slots { get; set; }
+        public required string ActiveVersion { get; set; }
         public int? ParentWorldId { get; set; }
         public string? ParentWorldName { get; set; }
         public int? MinigameId { get; set; }

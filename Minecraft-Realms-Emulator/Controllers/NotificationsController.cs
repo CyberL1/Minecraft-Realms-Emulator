@@ -14,14 +14,14 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet]
         public ActionResult<NotificationsResponse> GetNotifications()
         {
-            string cookie = Request.Headers.Cookie;
-            string playerUUID = cookie.Split(";")[0].Split(":")[2];
+            var cookie = Request.Headers.Cookie.ToString();
+            var playerUuid = cookie.Split(";")[0].Split(":")[2];
 
             List<NotificationResponse> notifications = [];
 
             foreach (var notification in context.Notifications.ToList())
             {
-                var seen = context.SeenNotifications.Any(n => n.PlayerUUID == playerUUID && n.NotificationUUID == notification.NotificationUuid);
+                var seen = context.SeenNotifications.Any(n => n.PlayerUUID == playerUuid && n.NotificationUUID == notification.NotificationUuid);
 
                 if (seen)
                 {
@@ -56,8 +56,8 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpPost("seen")]
         public ActionResult Seen(string[] notificationIds)
         {
-            string cookie = Request.Headers.Cookie;
-            string playerUUID = cookie.Split(";")[0].Split(":")[2];
+            var cookie = Request.Headers.Cookie.ToString();
+            var playerUuid = cookie.Split(";")[0].Split(":")[2];
 
             if (notificationIds.Length == 0) {
                 ErrorResponse errorResponse = new()
@@ -73,7 +73,7 @@ namespace Minecraft_Realms_Emulator.Controllers
             {
                 SeenNotification notificationSeen = new()
                 {
-                    PlayerUUID = playerUUID,
+                    PlayerUUID = playerUuid,
                     NotificationUUID = notificationId
                 };
 

@@ -6,6 +6,6 @@ namespace Minecraft_Realms_Emulator.Responses
     {
         public int SlotId { get; set; }
         public List<SlotSettingObject> Settings { get; set; } = [];
-        public string Options { get; set; } = null!;
+        public required string Options { get; set; }
     }
 }
