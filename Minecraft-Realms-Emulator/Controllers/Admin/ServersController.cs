@@ -4,6 +4,7 @@ using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Helpers;
 using Minecraft_Realms_Emulator.Data;
 using Minecraft_Realms_Emulator.Entities;
+using Minecraft_Realms_Emulator.Responses;
 
 namespace Minecraft_Realms_Emulator.Controllers.Admin
 {
@@ -13,11 +14,30 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
     public class ServersController(DataContext context) : ControllerBase
     {
         [HttpGet]
-        public ActionResult<List<World>> GetWorlds()
+        public async Task<ActionResult<List<WorldResponse>>> GetWorlds()
         {
-            var worlds = context.Worlds.ToList();
+            var worlds = context.Worlds.Include(world => world.ActiveSlot).ToList();
+            var response = new List<WorldResponse>();
 
-            return Ok(worlds);
+            foreach (var world in worlds)
+            {
+                if (world.ActiveSlot == null)
+                {
+                    throw new NullReferenceException("world.ActiveSlot is null");
+                }
+                
+                response.Add(new WorldResponse
+                {
+                    ActiveVersion = world.ActiveSlot.Version,
+                    Compatibility = "COMPATIBLE",
+                    State = await new WorldHelper(context, world.Id).GetState(),
+                    Id = world.Id,
+                    Name = world.Name
+                });
+            }
+
+
+            return Ok(response);
         }
 
         [HttpGet("{wId:int}")]
