@@ -17,13 +17,13 @@ namespace Minecraft_Realms_Emulator.Controllers
         [HttpGet("liveplayerlist")]
         public async Task<ActionResult<LivePlayerListsResponse>> GetLivePlayerList()
         {
-            string cookie = Request.Headers.Cookie;
-            string playerUUID = cookie.Split(";")[0].Split(":")[2];
+            string cookie = Request.Headers.Cookie.ToString();
+            string playerUuid = cookie.Split(";")[0].Split(":")[2];
 
             List<LivePlayerList> lists = [];
 
             var worlds = context.Worlds.Where(w =>
-                w.OwnerUUID == playerUUID || w.Players.Any(p => p.Uuid == playerUUID && p.Accepted)).ToList();
+                w.OwnerUUID == playerUuid || w.Players.Any(p => p.Uuid == playerUuid && p.Accepted)).ToList();
             var defaultServerAddress = ConfigHelper.GetSetting(nameof(SettingsEnum.DefaultServerAddress));
 
             foreach (var world in worlds)
@@ -39,8 +39,6 @@ namespace Minecraft_Realms_Emulator.Controllers
                 if (query == null) continue;
 
                 List<object> players = [];
-
-                if (query.Players.Sample == null) continue;
 
                 foreach (var player in query.Players.Sample)
                 {

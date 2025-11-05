@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Helpers;
 using Minecraft_Realms_Emulator.Data;
@@ -19,7 +20,7 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
             return Ok(worlds);
         }
 
-        [HttpGet("{wId}")]
+        [HttpGet("{wId:int}")]
         [CheckForWorld]
         public ActionResult<World> GetWorld(int wId)
         {
@@ -28,12 +29,12 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
             return Ok(world);
         }
 
-        [HttpGet("{wId}/logs")]
+        [HttpGet("{wId:int}/logs")]
         public async Task<ActionResult> GetLogs(int wId)
         {
             Response.ContentType = "text/event-stream";
-            Response.Headers.Add("Cache-Control", "no-cache");
-            Response.Headers.Add("X-Accel-Buffering", "no");
+            Response.Headers.Append("Cache-Control", "no-cache");
+            Response.Headers.Append("X-Accel-Buffering", "no");
 
             var world = context.Worlds.ToList().Find(w => w.Id == wId);
 
@@ -53,17 +54,20 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
             return new EmptyResult();
         }
 
-        [HttpPut("{wId}/open")]
+        [HttpPut("{wId:int}/open")]
         [CheckForWorld]
-        public ActionResult<bool> OpenServer(int wId)
+        public async Task<ActionResult<bool>> OpenServer(int wId)
         {
-            var world = context.Worlds.ToList().Find(w => w.Id == wId);
-            new DockerHelper(world.Id).StartServer(world.ActiveSlot.Id);
+            var world = context.Worlds.Include(world => world.ActiveSlot).ToList().Find(w => w.Id == wId);
+            if (world is { ActiveSlot: not null })
+            {
+                await new DockerHelper(world.Id).StartServer(world.ActiveSlot.Id);
+            }
 
             return Ok(true);
         }
 
-        [HttpPut("{wId}/close")]
+        [HttpPut("{wId:int}/close")]
         [CheckForWorld]
         public async Task<ActionResult<bool>> CloseServer(int wId)
         {

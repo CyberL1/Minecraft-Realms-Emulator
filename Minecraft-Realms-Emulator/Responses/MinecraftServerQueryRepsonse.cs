@@ -2,28 +2,28 @@
 {
     public class MinecraftServerQueryRepsonse
     {
-        public MinecraftServerQueryVersionObject Version { get; set; } = null!;
+        public required MinecraftServerQueryVersionObject Version { get; set; }
         public bool EnforcesSecureChat { get; set; }
-        public string Description { get; set; } = null!;
-        public MinecraftServerQueryPlayersObject Players { get; set; } = null!;
+        public required string Description { get; set; }
+        public required MinecraftServerQueryPlayersObject Players { get; set; }
     }
 
     public class MinecraftServerQueryVersionObject
     {
-        public string Name { get; set; } = null!;
-        public string Protocol { get; set; } = null!;
+        public required string Name { get; set; }
+        public required string Protocol { get; set; }
     }
 
     public class MinecraftServerQueryPlayersObject
     {
         public int Max { get; set; }
         public int Online { get; set; }
-        public List<MinecraftServerQueryPlayersSampleObject> Sample { get; set; } = null!;
+        public required List<MinecraftServerQueryPlayersSampleObject> Sample { get; set; }
     }
 
     public class MinecraftServerQueryPlayersSampleObject
     {
-        public string Id { get; set; } = null!;
-        public string Name { get; set; } = null!;
+        public required string Id { get; set; }
+        public required string Name { get; set; }
     }
 }

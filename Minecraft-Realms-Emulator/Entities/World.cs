@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Minecraft_Realms_Emulator.Objects;
+﻿using Minecraft_Realms_Emulator.Objects;
 
 namespace Minecraft_Realms_Emulator.Entities
 {

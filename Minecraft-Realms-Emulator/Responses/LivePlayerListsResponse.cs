@@ -8,6 +8,6 @@
     public class LivePlayerList
     {
         public int ServerId { get; set; }
-        public string PlayerList { get; set; } = null!;
+        public required string PlayerList { get; set; }
     }
 }

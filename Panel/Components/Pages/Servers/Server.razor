@@ -1,10 +1,10 @@
 ﻿@page "/servers/{wId:int}"
-@inject IJSRuntime JS
+@inject IJSRuntime Js
 @rendermode InteractiveServer
 
-<PageTitle>Server #@wId</PageTitle>
+<PageTitle>Server #@WId</PageTitle>
 
-@if (server == null)
+@if (_server == null)
 {
  <p><em>Loading...</em></p>
 }
@@ -13,11 +13,11 @@ else
     <div class="panel">
         <div class="header">
             <div class="status">
-                @server.Name
-                @server.State
+                @_server.Name
+                @_server.State
             </div>
             <div class="buttons">
-                @if (server.State == "CLOSED")
+                @if (_server.State == "CLOSED")
                 {
                     <button class="btn btn-success" @onclick="StartServer">
                         <i class="bi-caret-right-fill"></i>
@@ -36,7 +36,7 @@ else
 
         <div class="console">
             <pre class="output">
-                @foreach (var log in logs)
+                @foreach (var log in _logs)
                 {
                     @log<br />
                 }
@@ -46,58 +46,57 @@ else
 }
 
 @code {
-    [Parameter]
-    public int wId { get; set; }
+    [Parameter] public int WId { get; set; }
 
-    private World? server;
-    private List<string> logs = [];
+    private World? _server;
+    private readonly List<string> _logs = [];
 
     protected override async Task OnInitializedAsync()
     {
         await GetServer();
     }
 
-    public async Task GetServer()
+    private async Task GetServer()
     {
-        HttpClient httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(Environment.GetEnvironmentVariable("ADMIN_KEY"));
+        var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(Environment.GetEnvironmentVariable("ADMIN_KEY") ?? string.Empty);
 
-        server = await httpClient.GetFromJsonAsync<World>($"http://localhost:8080/api/admin/servers/{wId}");
+        _server = await httpClient.GetFromJsonAsync<World>($"http://localhost:8080/api/admin/servers/{WId}");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await JS.InvokeVoidAsync("serverLogsStream.start", DotNetObjectReference.Create(this), wId);
+            await Js.InvokeVoidAsync("serverLogsStream.start", DotNetObjectReference.Create(this), WId);
         }
     }
 
     [JSInvokable]
     public Task ReceiveLog(string log)
     {
-        logs.Add(log);
+        _logs.Add(log);
         InvokeAsync(StateHasChanged);
         return Task.CompletedTask;
     }
 
-    public async Task StartServer()
+    private async Task StartServer()
     {
-        HttpClient httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(Environment.GetEnvironmentVariable("ADMIN_KEY"));
+        var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(Environment.GetEnvironmentVariable("ADMIN_KEY") ?? string.Empty);
 
-        await JS.InvokeVoidAsync("serverLogsStream.start", DotNetObjectReference.Create(this), wId);
-        await httpClient.PutAsync($"http://localhost:8080/api/admin/servers/{wId}/open", new StringContent(""));
+        await Js.InvokeVoidAsync("serverLogsStream.start", DotNetObjectReference.Create(this), WId);
+        await httpClient.PutAsync($"http://localhost:8080/api/admin/servers/{WId}/open", new StringContent(""));
         await GetServer();
     }
 
-    public async Task StopServer()
+    private async Task StopServer()
     {
-        HttpClient httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(Environment.GetEnvironmentVariable("ADMIN_KEY"));
+        var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(Environment.GetEnvironmentVariable("ADMIN_KEY") ?? string.Empty);
 
-        await JS.InvokeVoidAsync("serverLogsStream.stop");
-        await httpClient.PutAsync($"http://localhost:8080/api/admin/servers/{wId}/close", new StringContent(""));
+        await Js.InvokeVoidAsync("serverLogsStream.stop");
+        await httpClient.PutAsync($"http://localhost:8080/api/admin/servers/{WId}/close", new StringContent(""));
         await GetServer();
     }
 }

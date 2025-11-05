@@ -1,14 +1,11 @@
 ﻿using Minecraft_Realms_Emulator.Attributes;
 using Minecraft_Realms_Emulator.Data;
-using Minecraft_Realms_Emulator.Entities;
 using Minecraft_Realms_Emulator.Responses;
 
 namespace Minecraft_Realms_Emulator.Middlewares
 {
     public class CheckForWorldMiddleware(RequestDelegate next)
     {
-        private readonly RequestDelegate _next = next;
-
         public async Task Invoke(HttpContext httpContext, DataContext db)
         {
             var endpoint = httpContext.GetEndpoint();
@@ -16,11 +13,12 @@ namespace Minecraft_Realms_Emulator.Middlewares
 
             if (attribute == null)
             {
-                await _next(httpContext);
+                await next(httpContext);
                 return;
             }
 
-            World world = db.Worlds.FirstOrDefault(w => w.Id == int.Parse(httpContext.Request.RouteValues["wId"].ToString()));
+            var worldId = httpContext.Request.RouteValues["wId"]?.ToString();
+            var world = db.Worlds.FirstOrDefault(w => worldId != null && w.Id == int.Parse(worldId));
 
             if (!attribute.WorldExists(world))
             {
@@ -35,7 +33,7 @@ namespace Minecraft_Realms_Emulator.Middlewares
                 return;
             }
 
-            await _next(httpContext);
+            await next(httpContext);
         }
     }
 }

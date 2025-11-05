@@ -63,7 +63,7 @@ foreach (var resourceName in resourceNames)
 
     using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
 
-    if (!Directory.Exists(directory))
+    if (directory != null && !Directory.Exists(directory))
     {
         Directory.CreateDirectory(directory);
     }
@@ -71,7 +71,7 @@ foreach (var resourceName in resourceNames)
     if (!File.Exists(path))
     {
         using var file = new FileStream(path, FileMode.Create);
-        stream.CopyTo(file);
+        stream?.CopyTo(file);
     }
 }
 

@@ -3,9 +3,9 @@
     [AttributeUsage(AttributeTargets.Method)]
     public class CheckRealmOwnerAttribute : Attribute
     {
-        public bool IsRealmOwner(string playerUUID, string ownerUUID)
+        public bool IsRealmOwner(string playerUuid, string ownerUuid)
         {
-            return playerUUID == ownerUUID;
+            return playerUuid == ownerUuid;
         }
     }
 }

@@ -18,12 +18,32 @@ namespace Minecraft_Realms_Emulator.Controllers
         {
             var world = await context.Worlds.Include(w => w.Subscription).Include(w => w.ParentWorld.Subscription).FirstOrDefaultAsync(w => w.Id == wId);
 
+            if (world == null)
+            {
+                var response = new ErrorResponse
+                {
+                    ErrorCode = 404,
+                    ErrorMsg = "World not found"
+                };
+
+                return StatusCode(404, response);
+            }
+            
             if (world.ParentWorld != null)
             {
                 world.Subscription = world.ParentWorld.Subscription;
             }
 
-            if (world?.Subscription == null) return NotFound("Subscription not found");
+            if (world.Subscription == null)
+            {
+                var response = new ErrorResponse
+                {
+                    ErrorCode = 404,
+                    ErrorMsg = "Subscription not found"
+                };
+
+                return StatusCode(404, response);
+            }
 
             var sub = new SubscriptionResponse
             {

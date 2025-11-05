@@ -62,7 +62,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasIndex("SlotId");
 
-                    b.ToTable("Backups");
+                    b.ToTable("Backups", (string)null);
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Configuration", b =>
@@ -76,7 +76,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("Configuration");
+                    b.ToTable("Configuration", (string)null);
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Invite", b =>
@@ -105,7 +105,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasIndex("WorldId");
 
-                    b.ToTable("Invites");
+                    b.ToTable("Invites", (string)null);
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Notification", b =>
@@ -148,7 +148,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Player", b =>
@@ -187,7 +187,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasIndex("WorldId");
 
-                    b.ToTable("Players");
+                    b.ToTable("Players", (string)null);
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.SeenNotification", b =>
@@ -208,7 +208,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SeenNotifications");
+                    b.ToTable("SeenNotifications", (string)null);
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Slot", b =>
@@ -252,7 +252,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasIndex("WorldId");
 
-                    b.ToTable("Slots");
+                    b.ToTable("Slots", (string)null);
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Subscription", b =>
@@ -278,7 +278,7 @@ namespace Minecraft_Realms_Emulator.Migrations
                     b.HasIndex("WorldId")
                         .IsUnique();
 
-                    b.ToTable("Subscriptions");
+                    b.ToTable("Subscriptions", (string)null);
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Template", b =>
@@ -322,7 +322,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Templates");
+                    b.ToTable("Templates", (string)null);
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.World", b =>
@@ -372,7 +372,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                     b.HasIndex("ParentWorldId");
 
-                    b.ToTable("Worlds");
+                    b.ToTable("Worlds", (string)null);
                 });
 
             modelBuilder.Entity("Minecraft_Realms_Emulator.Entities.Backup", b =>
@@ -457,7 +457,7 @@ namespace Minecraft_Realms_Emulator.Migrations
 
                             b1.HasKey("WorldId");
 
-                            b1.ToTable("Worlds");
+                            b1.ToTable("Worlds", (string)null);
 
                             b1.ToJson("RegionSelectionPreference");
 

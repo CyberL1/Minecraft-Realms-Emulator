@@ -2,6 +2,6 @@
 {
     public class BackupsResponse
     {
-        public List<BackupResponse> Backups { get; set; }
+        public required List<BackupResponse> Backups { get; set; }
     }
 }
