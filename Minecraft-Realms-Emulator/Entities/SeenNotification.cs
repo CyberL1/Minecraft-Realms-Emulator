@@ -3,7 +3,7 @@
     public class SeenNotification
     {
         public int Id { get; set; }
-        public string PlayerUUID { get; set; } = null!;
-        public string NotificationUUID { get; set; } = null!;
+        public required string PlayerUUID { get; set; }
+        public required string NotificationUUID { get; set; }
     }
 }

@@ -9,6 +9,6 @@
         public bool Accepted { get; set; }
         public bool Online { get; set; }
         public string Permission { get; set; } = "MEMBER";
-        public World World { get; set; }
+        public required World World { get; set; }
     }
 }

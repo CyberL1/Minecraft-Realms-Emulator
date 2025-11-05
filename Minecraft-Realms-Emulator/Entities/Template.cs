@@ -10,6 +10,6 @@
         public string? Image { get; set; }
         public string Trailer { get; set; } = string.Empty;
         public string RecommendedPlayers { get; set; } = string.Empty;
-        public string Type { get; set; } = null!;
+        public required string Type { get; set; }
     }
 }
