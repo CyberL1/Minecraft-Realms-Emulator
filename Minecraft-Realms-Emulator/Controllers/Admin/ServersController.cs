@@ -36,17 +36,35 @@ namespace Minecraft_Realms_Emulator.Controllers.Admin
                 });
             }
 
-
             return Ok(response);
         }
 
         [HttpGet("{wId:int}")]
         [CheckForWorld]
-        public ActionResult<World> GetWorld(int wId)
+        public async Task<ActionResult<World>> GetWorld(int wId)
         {
-            var world = context.Worlds.ToList().Find(w => w.Id == wId);
+            var world = context.Worlds.Include(world => world.ActiveSlot).ToList().FirstOrDefault(w => w.Id == wId);
 
-            return Ok(world);
+            if (world == null)
+            {
+                throw new NullReferenceException("World not found");
+            }
+
+            if (world.ActiveSlot == null)
+            {
+                throw new NullReferenceException("world.ActiveSlot is null");
+            }
+
+            var response = new WorldResponse
+            {
+                ActiveVersion = world.ActiveSlot.Version,
+                Compatibility = "COMPATIBLE",
+                State = await new WorldHelper(context, world.Id).GetState(),
+                Id = world.Id,
+                Name = world.Name
+            };
+            
+            return Ok(response);
         }
 
         [HttpGet("{wId:int}/logs")]
