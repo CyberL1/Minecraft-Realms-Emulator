@@ -4,8 +4,8 @@
     {
         public int Id { get; set; }
         public int WorldId { get; set; }
-        public World World { get; set; } = null!;
-        public DateTime StartDate { get; set; } = DateTime.Now;
-        public string SubscriptionType { get; set; } = "NORMAL";
+        public World World { get; set; } = null!; // Temp?
+        public DateTime StartDate { get; set; }
+        public required string SubscriptionType { get; set; }
     }
 }
