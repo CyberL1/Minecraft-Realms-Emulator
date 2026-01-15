@@ -1,11 +1,10 @@
-﻿using Minecraft_Realms_Emulator.Attributes;
+﻿using Microsoft.Extensions.Options;
+using Minecraft_Realms_Emulator.Attributes;
 
 namespace Minecraft_Realms_Emulator.Middlewares
 {
-    public class AdminKeyMiddleware(RequestDelegate next)
+    public class AdminKeyMiddleware(RequestDelegate next, IOptions<AppSettings.AppSettings> appSettings)
     {
-        private readonly RequestDelegate _next = next;
-
         public async Task Invoke(HttpContext httpContext)
         {
             var endpoint = httpContext.GetEndpoint();
@@ -13,18 +12,20 @@ namespace Minecraft_Realms_Emulator.Middlewares
 
             if (attribute == null)
             {
-                await _next(httpContext);
+                await next(httpContext);
                 return;
             }
 
-            if (!attribute.HasAdminKey(httpContext.Request.Headers.Authorization))
+            var authorization = httpContext.Request.Headers.Authorization.ToString();
+
+            if (string.IsNullOrEmpty(authorization) || authorization != appSettings.Value.AdminKey)
             {
                 httpContext.Response.StatusCode = 403;
                 await httpContext.Response.WriteAsync("You don't have access to this resource");
                 return;
             }
 
-            await _next(httpContext);
+            await next(httpContext);
         }
     }
 }

@@ -5,31 +5,18 @@ using Minecraft_Realms_Emulator.Middlewares;
 using Npgsql;
 using System.Diagnostics;
 using System.Reflection;
+using Microsoft.Extensions.Options;
+using Minecraft_Realms_Emulator.AppSettings;
 
 var builder = WebApplication.CreateBuilder(args);
-DotNetEnv.Env.Load();
-
-if (Environment.GetEnvironmentVariable("CONNECTION_STRING") == null)
-{
-    Console.WriteLine("CONNECTION_STRING environment variable missing");
-    return;
-}
 
 // Add services to the container.
-
+builder.Services.Configure<AppSettings>(builder.Configuration.GetRequiredSection("Server"));
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-var dataSourceBuilder = new NpgsqlDataSourceBuilder(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
-dataSourceBuilder.EnableDynamicJson();
-var dataSource = dataSourceBuilder.Build();
-
-builder.Services.AddDbContext<DataContext>(options =>
-{
-    options.UseNpgsql(dataSource);
-});
 
 builder.Services.AddCors(options =>
 {
@@ -37,6 +24,23 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:5192");
     });
+});
+
+builder.Services.AddDbContext<DataContext>((serviceProvider, options) =>
+{
+    var appSettings = serviceProvider.GetRequiredService<IOptions<AppSettings>>().Value;
+
+    if (string.IsNullOrEmpty(appSettings.Database))
+    {
+        Console.WriteLine("Database is missing in Server section of appsettings.json file or is empty");
+        Environment.Exit(1);
+    }
+
+    var dataSourceBuilder = new NpgsqlDataSourceBuilder(appSettings.Database);
+    dataSourceBuilder.EnableDynamicJson();
+
+    var dataSource = dataSourceBuilder.Build();
+    options.UseNpgsql(dataSource);
 });
 
 var app = builder.Build();
