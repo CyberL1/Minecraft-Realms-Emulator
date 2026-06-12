@@ -1,3 +1,5 @@
+using AuthorizationMiddleware = Core.Middlewares.AuthorizationMiddleware;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -13,7 +15,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseMiddleware<AuthorizationMiddleware>();
 
 app.MapControllers();
 
