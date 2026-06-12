@@ -1,4 +1,5 @@
 using Core.Enums;
+using Core.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Core.Controllers;
@@ -23,5 +24,12 @@ public class McoController : Controller
     public ActionResult PostTosAgreed()
     {
         return Ok();
+    }
+
+    [HttpGet("v1/news")]
+    public ActionResult GetNews()
+    {
+        var newsResponse = new News { NewsLink = "https://github.com/CyberL1/Minecraft-Realms-Emulator" };
+        return Ok(newsResponse);
     }
 }
