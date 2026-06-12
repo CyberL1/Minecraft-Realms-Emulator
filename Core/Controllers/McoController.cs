@@ -20,8 +20,8 @@ public class McoController : Controller
     }
 
     [HttpPost("tos/agreed")]
-    public ActionResult<bool> PostTosAgreed()
+    public ActionResult PostTosAgreed()
     {
-        return Ok(true);
+        return Ok();
     }
 }
