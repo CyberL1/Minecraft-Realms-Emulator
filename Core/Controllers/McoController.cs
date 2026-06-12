@@ -18,4 +18,10 @@ public class McoController : Controller
     {
         return Ok(nameof(CompatibleVersionResponse.COMPATIBLE));
     }
+
+    [HttpPost("tos/agreed")]
+    public ActionResult<bool> PostTosAgreed()
+    {
+        return Ok(true);
+    }
 }
