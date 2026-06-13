@@ -1,3 +1,4 @@
+using Core.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Core.Controllers;
@@ -9,6 +10,6 @@ public class TrialController : Controller
     [HttpGet]
     public ActionResult GetTrial()
     {
-        return Ok(true);
+        return Ok(AppConfig.Trial);
     }
 }

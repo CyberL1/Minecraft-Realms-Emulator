@@ -1,4 +1,5 @@
 using Core.Enums;
+using Core.Models;
 using Core.Responses;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,7 +30,7 @@ public class McoController : Controller
     [HttpGet("v1/news")]
     public ActionResult GetNews()
     {
-        var newsResponse = new News { NewsLink = "https://github.com/CyberL1/Minecraft-Realms-Emulator" };
+        var newsResponse = new News { NewsLink = AppConfig.NewsLink };
         return Ok(newsResponse);
     }
 }
