@@ -2,6 +2,7 @@
 using Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Core.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260614143145_Realms_Init")]
+    partial class Realms_Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,13 +127,7 @@ namespace Core.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("OptionsId")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("RealmId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SettingsId")
                         .HasColumnType("integer");
 
                     b.Property<int>("SlotId")
@@ -138,46 +135,9 @@ namespace Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OptionsId");
-
                     b.HasIndex("RealmId");
 
-                    b.HasIndex("SettingsId");
-
-                    b.ToTable("Slots");
-                });
-
-            modelBuilder.Entity("Core.Entities.SlotOptions", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Difficulty")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("ForceGamemode")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("Gamemode")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SlotName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("SpawnProtection")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Version")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SlotOptions");
+                    b.ToTable("Slot");
                 });
 
             modelBuilder.Entity("Core.Entities.Subscription", b =>
@@ -197,23 +157,7 @@ namespace Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Subscriptions");
-                });
-
-            modelBuilder.Entity("Core.Entities.WorldSettings", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Hardcore")
-                        .HasColumnType("boolean");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WorldSettings");
+                    b.ToTable("Subscription");
                 });
 
             modelBuilder.Entity("Core.Entities.Player", b =>
@@ -258,25 +202,9 @@ namespace Core.Migrations
 
             modelBuilder.Entity("Core.Entities.Slot", b =>
                 {
-                    b.HasOne("Core.Entities.SlotOptions", "Options")
-                        .WithMany()
-                        .HasForeignKey("OptionsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Core.Entities.Realm", null)
                         .WithMany("Slots")
                         .HasForeignKey("RealmId");
-
-                    b.HasOne("Core.Entities.WorldSettings", "Settings")
-                        .WithMany()
-                        .HasForeignKey("SettingsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Options");
-
-                    b.Navigation("Settings");
                 });
 
             modelBuilder.Entity("Core.Entities.Realm", b =>
