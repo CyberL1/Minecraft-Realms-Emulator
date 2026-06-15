@@ -29,5 +29,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
         modelBuilder.Entity<Slot>().HasOne(slot => slot.Options).WithOne(options => options.Slot)
             .HasForeignKey<SlotOptions>(options => options.SlotId).OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<Slot>().HasOne(slot => slot.Settings).WithOne(settings => settings.Slot)
+            .HasForeignKey<WorldSettings>(settings => settings.SlotId).OnDelete(DeleteBehavior.Cascade);
     }
 }
