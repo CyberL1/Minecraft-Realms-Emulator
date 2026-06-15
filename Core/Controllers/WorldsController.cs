@@ -4,6 +4,8 @@ using Core.Models;
 using Core.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AppConfig = Core.Models.AppConfig;
+using Realm = Core.Models.Realm;
 
 namespace Core.Controllers;
 
@@ -14,9 +16,10 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
     [HttpGet]
     public ActionResult<RealmsList> GetReleasedRealms()
     {
-        var realms = context.Realms.Include(realm => realm.Owner).Include(realm => realm.Subscription)
+        var realms = context.Realms.Include(realm => realm.Subscription)
             .Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Settings)
-            .Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Options).ToList();
+            .Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Options).Include(realm => realm.Players)
+            .ToList();
 
         var servers = new RealmsList { Servers = [] };
 
@@ -29,8 +32,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 Name = realm.Name,
                 Motd = realm.Description,
                 State = realm.State,
-                Owner = realm.Owner.Name,
-                OwnerUUID = realm.Owner.Uuid.Replace("-", ""),
+                Owner = realm.Players.First().Name,
+                OwnerUUID = realm.Players.First().Uuid.Replace("-", ""),
                 Expired = realm.Subscription.Ended,
                 ExpiredTrial = false,
                 DaysLeft = realm.Subscription.Ended ? -1 : 0,
