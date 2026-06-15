@@ -3,6 +3,7 @@ namespace Core.Entities;
 public class Realm
 {
     public int Id { get; set; }
+    public int SubscriptionId { get; set; }
     public required Subscription Subscription { get; set; }
     public required string Name { get; set; }
     public required string Description { get; set; }

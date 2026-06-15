@@ -12,4 +12,10 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<SlotOptions> SlotOptions { get; set; }
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<WorldSettings> WorldSettings { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Realm>().HasOne(realm => realm.Subscription).WithOne(subscription => subscription.Realm)
+            .HasForeignKey<Subscription>(subscription => subscription.RealmId).OnDelete(DeleteBehavior.Cascade);
+    }
 }
