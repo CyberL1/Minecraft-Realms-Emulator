@@ -9,4 +9,6 @@ public class SlotOptions
     public int Gamemode { get; set; }
     public required string SlotName { get; set; }
     public required string Version { get; set; }
+    public required int SlotId { get; set; }
+    public Slot Slot { get; set; } = null!;
 }

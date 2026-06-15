@@ -26,5 +26,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
         modelBuilder.Entity<Realm>().HasOne(realm => realm.ActiveSlot).WithOne()
             .HasForeignKey<Realm>(realm => realm.ActiveSlotId).OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Slot>().HasOne(slot => slot.Options).WithOne(options => options.Slot)
+            .HasForeignKey<SlotOptions>(options => options.SlotId).OnDelete(DeleteBehavior.Cascade);
     }
 }
