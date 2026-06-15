@@ -17,5 +17,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     {
         modelBuilder.Entity<Realm>().HasOne(realm => realm.Subscription).WithOne(subscription => subscription.Realm)
             .HasForeignKey<Subscription>(subscription => subscription.RealmId).OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Player>().HasOne(player => player.Realm).WithMany(realm => realm.Players)
+            .HasForeignKey(player => player.RealmId).OnDelete(DeleteBehavior.Cascade);
     }
 }
