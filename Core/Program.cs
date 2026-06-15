@@ -1,9 +1,12 @@
 using Core.Data;
-using Core.Helpers;
 using Core.Middlewares;
+using Core.Models;
 using Microsoft.EntityFrameworkCore;
+using AppConfig = Core.Helpers.AppConfig;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<CookiePlayerData>();
 
 builder.Services.AddControllers();
 

@@ -1,8 +1,10 @@
+using Core.Models;
+
 namespace Core.Middlewares;
 
 public class AuthorizationMiddleware(RequestDelegate next)
 {
-    public Task Invoke(HttpContext httpContext)
+    public Task Invoke(HttpContext httpContext, CookiePlayerData playerData)
     {
         var cookieHeader = httpContext.Request.Headers.Cookie.ToString();
 
@@ -21,6 +23,10 @@ public class AuthorizationMiddleware(RequestDelegate next)
             httpContext.Response.StatusCode = 401;
             return Task.CompletedTask;
         }
+
+        playerData.Uuid = httpContext.Request.Cookies["sid"]!.Split(":")[2];
+        playerData.Name = httpContext.Request.Cookies["user"]!;
+        playerData.Version = httpContext.Request.Cookies["version"]!;
 
         return next(httpContext);
     }
