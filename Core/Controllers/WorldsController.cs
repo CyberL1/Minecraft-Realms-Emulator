@@ -45,7 +45,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             {
                 server.ExpiredTrial = AppConfig.Trial && realm.Subscription.Ended;
                 server.DaysLeft = realm.Subscription.DaysLeft;
-                server.ActiveSlot = realm.ActiveSlot.Id;
+                server.ActiveSlot = realm.ActiveSlot.SlotId;
             }
 
             // TOOO: Improve this
