@@ -6,4 +6,6 @@ public class Slot
     public required int SlotId { get; set; }
     public required SlotOptions Options { get; set; }
     public required WorldSettings Settings { get; set; }
+    public int? RealmId { get; set; }
+    public Realm Realm { get; set; } = null!;
 }

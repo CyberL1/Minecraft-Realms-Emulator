@@ -11,6 +11,7 @@ public class Realm
     public required List<Player> Players { get; set; }
     public required List<Slot> Slots { get; set; }
     public required string WorldType { get; set; }
+    public required int ActiveSlotId { get; set; }
     public required Slot ActiveSlot { get; set; }
     public Realm? ParentWorld { get; set; }
 }

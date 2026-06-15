@@ -20,5 +20,11 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
         modelBuilder.Entity<Player>().HasOne(player => player.Realm).WithMany(realm => realm.Players)
             .HasForeignKey(player => player.RealmId).OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Slot>().HasOne(slot => slot.Realm).WithMany(realm => realm.Slots)
+            .HasForeignKey(slot => slot.RealmId).OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Realm>().HasOne(realm => realm.ActiveSlot).WithOne()
+            .HasForeignKey<Realm>(realm => realm.ActiveSlotId).OnDelete(DeleteBehavior.Restrict);
     }
 }
