@@ -1,4 +1,5 @@
 using Core.Data;
+using Core.Entities;
 using Core.Enums;
 using Core.Models;
 using Core.Responses;
@@ -14,14 +15,87 @@ namespace Core.Controllers;
 public class WorldsController(DataContext context, CookiePlayerData playerData) : ControllerBase
 {
     [HttpGet]
-    public ActionResult<RealmsList> GetReleasedRealms()
+    public async Task<ActionResult<RealmsList>> GetReleasedRealms()
     {
-        var realms = context.Realms.Include(realm => realm.Subscription)
+        var realms = await context.Realms.Include(realm => realm.Subscription)
             .Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Settings)
             .Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Options).Include(realm => realm.Players)
-            .ToList();
+            .ToListAsync();
 
         var servers = new RealmsList { Servers = [] };
+
+        if (realms.All(realm => realm.Players.First().Uuid != playerData.Uuid))
+        {
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            var subscription = new Subscription
+            {
+                SubscriptionId = Guid.NewGuid().ToString(),
+                DaysLeft = 30
+            };
+
+            context.Subscriptions.Add(subscription);
+            await context.SaveChangesAsync();
+
+            var owner = new Player
+            {
+                Uuid = playerData.Uuid,
+                Name = playerData.Name,
+                Operator = false,
+                Accepted = false
+            };
+
+            context.Players.Add(owner);
+            await context.SaveChangesAsync();
+
+            var primarySlot = new Slot
+            {
+                SlotId = 1
+            };
+
+            context.Slots.Add(primarySlot);
+            await context.SaveChangesAsync();
+
+            var primarySlotOptions = new SlotOptions
+            {
+                SlotId = primarySlot.Id,
+                SlotName = "Slot #1",
+                Version = playerData.Version
+            };
+
+            context.SlotOptions.Add(primarySlotOptions);
+            await context.SaveChangesAsync();
+
+            var primarySlotSettings = new WorldSettings
+            {
+                SlotId = primarySlot.Id
+            };
+
+            context.WorldSettings.Add(primarySlotSettings);
+            await context.SaveChangesAsync();
+
+            var realm = new Entities.Realm
+            {
+                Name = "",
+                Description = "",
+                State = nameof(RealmState.UNINITIALIZED),
+                Players = [owner],
+                Slots = [primarySlot],
+                WorldType = nameof(WorldType.NORMAL),
+                ActiveSlotId = primarySlot.Id
+            };
+
+            context.Realms.Add(realm);
+            await context.SaveChangesAsync();
+
+            subscription.RealmId = realm.Id;
+
+            context.Subscriptions.Update(subscription);
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+            realms.Add(realm);
+        }
 
         foreach (var realm in realms)
         {
