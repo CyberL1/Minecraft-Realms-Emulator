@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Core.Entities;
 
-namespace Core.Models;
+namespace Core.Responses;
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public class Realm
