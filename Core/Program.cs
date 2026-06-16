@@ -33,6 +33,7 @@ if (!app.Environment.IsDevelopment())
 app.UseRouting();
 
 app.UseMiddleware<AuthorizationMiddleware>();
+app.UseMiddleware<CheckRealmAccessMiddleware>();
 
 app.MapControllers();
 
