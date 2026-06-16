@@ -13,7 +13,7 @@ public class Realm
     public required string State { get; set; }
     public required string Owner { get; set; }
     public required string OwnerUUID { get; set; }
-    public List<CookiePlayerData>? Players { get; set; }
+    public List<Player>? Players { get; set; }
     public List<Slot>? Slots { get; set; }
     public required bool Expired { get; set; }
     public required bool ExpiredTrial { get; set; }
