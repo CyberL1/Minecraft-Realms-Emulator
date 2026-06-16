@@ -4,10 +4,12 @@ public class Subscription
 {
     public int Id { get; set; }
     public required string SubscriptionId { get; set; }
-    public required int DaysLeft { get; set; }
+    public required DateTime StartDate { get; set; }
+    public required string Type { get; set; }
     public int? RealmId { get; set; }
     public Realm Realm { get; set; } = null!;
 
     // Helper fields
-    public bool Ended => DaysLeft > 0;
+    public int DaysLeft => (StartDate.AddDays(30) - DateTime.Today).Days;
+    public bool Ended => DaysLeft < 0;
 }

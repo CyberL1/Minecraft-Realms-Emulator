@@ -37,7 +37,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             var subscription = new Subscription
             {
                 SubscriptionId = Guid.NewGuid().ToString(),
-                DaysLeft = 30
+                StartDate = DateTime.UtcNow,
+                Type = nameof(SubscriptionType.NORMAL)
             };
 
             context.Subscriptions.Add(subscription);
@@ -146,7 +147,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
     [HasRealmAccess(true)]
     public async Task<ActionResult<Realm>> PostInitialize(int realmId, RealmInitialize body)
     {
-        var realm = await context.Realms.FirstAsync(realm => realm.Id == realmId);
+        var realm = await context.Realms.Include(realm => realm.Subscription).FirstAsync(realm => realm.Id == realmId);
 
         if (realm.State != nameof(RealmState.UNINITIALIZED))
         {
@@ -163,6 +164,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
 
         if (body.Description != null && body.Description.Trim() != string.Empty)
             realm.Description = body.Description;
+
+        realm.Subscription.StartDate = DateTime.UtcNow;
 
         realm.State = nameof(RealmState.OPEN);
 
