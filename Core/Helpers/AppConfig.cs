@@ -1,6 +1,6 @@
+using System.Text.Json;
 using Core.Data;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
 namespace Core.Helpers;
 
@@ -21,7 +21,7 @@ public class AppConfig
         var defaultConfig = properties.Select(property => new Entities.AppConfig
         {
             Key = property.Name,
-            Value = JsonConvert.SerializeObject(property.GetValue(appConfigModel))
+            Value = JsonSerializer.Serialize(property.GetValue(appConfigModel))
         });
 
         foreach (var config in defaultConfig)
@@ -33,7 +33,7 @@ public class AppConfig
         foreach (var property in properties)
             if (dbConfigs.TryGetValue(property.Name, out var dbJsonValue) && dbJsonValue != null)
             {
-                var deserializedValue = JsonConvert.DeserializeObject(dbJsonValue, property.PropertyType);
+                var deserializedValue = JsonSerializer.Deserialize(dbJsonValue, property.PropertyType);
                 property.SetValue(AppConfigTyped, deserializedValue);
             }
     }

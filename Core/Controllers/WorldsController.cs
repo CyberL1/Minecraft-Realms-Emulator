@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Core.Attributes;
 using Core.Data;
 using Core.Enums;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AppConfig = Core.Models.AppConfig;
 using Player = Core.Entities.Player;
-using Realm = Core.Models.Realm;
+using Realm = Core.Entities.Realm;
 using Slot = Core.Entities.Slot;
 using SlotOptions = Core.Entities.SlotOptions;
 using Subscription = Core.Entities.Subscription;
@@ -81,7 +82,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             context.WorldSettings.Add(primarySlotSettings);
             await context.SaveChangesAsync();
 
-            var realm = new Entities.Realm
+            var realm = new Realm
             {
                 Name = "",
                 Description = "",
@@ -106,7 +107,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
 
         foreach (var realm in realms)
         {
-            var server = new Realm
+            var server = new Responses.Realm
             {
                 Id = realm.Id,
                 RemoteSubscriptionId = realm.Subscription.SubscriptionId.Replace("-", ""),
