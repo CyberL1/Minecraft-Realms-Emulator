@@ -9,8 +9,8 @@ namespace Core.Controllers;
 [Route("[controller]")]
 public class RegionsController : ControllerBase
 {
-    [HttpGet("ping/stat")]
-    public ActionResult GetPing()
+    [HttpPost("ping/stat")]
+    public ActionResult PostPing()
     {
         return Ok();
     }
