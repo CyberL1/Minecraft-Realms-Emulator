@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Core.Entities;
 
 public class Player
@@ -7,6 +9,6 @@ public class Player
     public required string Name { get; set; }
     public required bool Operator { get; set; }
     public required bool Accepted { get; set; }
-    public int? RealmId { get; set; }
-    public Realm Realm { get; set; } = null!;
+    [JsonIgnore] public int? RealmId { get; set; }
+    [JsonIgnore] public Realm Realm { get; set; } = null!;
 }

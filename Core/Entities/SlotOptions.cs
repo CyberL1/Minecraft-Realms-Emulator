@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Core.Entities;
 
 public class SlotOptions
@@ -9,6 +11,6 @@ public class SlotOptions
     public int Gamemode { get; set; }
     public required string SlotName { get; set; }
     public required string Version { get; set; }
-    public required int SlotId { get; set; }
-    public Slot Slot { get; set; } = null!;
+    [JsonIgnore] public int SlotId { get; set; }
+    [JsonIgnore] public Slot Slot { get; set; } = null!;
 }
