@@ -122,7 +122,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 server.ActiveSlot = realm.ActiveSlot.SlotId;
             }
 
-            // TOOO: Improve this
+            // TODO: Improve this
             server.Compatibility = playerData.Version == realm.ActiveSlot.Options.Version
                 ? nameof(RealmCompatibility.COMPATIBLE)
                 : nameof(RealmCompatibility.INCOMPATIBLE);
@@ -139,16 +139,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
     {
         var realm = await context.Realms.Include(realm => realm.Subscription).FirstAsync(realm => realm.Id == realmId);
 
-        if (realm.State != nameof(RealmState.UNINITIALIZED))
-        {
-            var apiError = new ApiError
-            {
-                ErrorCode = 401,
-                ErrorMsg = "World already initialized"
-            };
-
-            return StatusCode(401, apiError);
-        }
+        if (realm.State != nameof(RealmState.UNINITIALIZED)) return StatusCode(409, ApiError.WorldAlreadyInitialized);
 
         realm.Name = body.Name;
 

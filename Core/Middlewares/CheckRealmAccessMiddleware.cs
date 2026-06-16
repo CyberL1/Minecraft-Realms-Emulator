@@ -24,42 +24,24 @@ public class CheckRealmAccessMiddleware(RequestDelegate next)
 
         if (realm == null)
         {
-            var apiError = new ApiError
-            {
-                ErrorCode = 404,
-                ErrorMsg = "World not found"
-            };
-
             httpContext.Response.StatusCode = 404;
-            await httpContext.Response.WriteAsJsonAsync(apiError);
+            await httpContext.Response.WriteAsJsonAsync(ApiError.WorldNotFound);
 
             return;
         }
 
         if (realm.Players.All(player => player.Uuid != playerData.Uuid))
         {
-            var apiError = new ApiError // TODO: Check if this is correct
-            {
-                ErrorCode = 403,
-                ErrorMsg = "Missing access"
-            };
-
             httpContext.Response.StatusCode = 403;
-            await httpContext.Response.WriteAsJsonAsync(apiError);
+            await httpContext.Response.WriteAsJsonAsync(ApiError.NotAWorldMember);
 
             return;
         }
 
         if (attribute.IsOwner && realm.Players.First().Uuid.Replace("-", "") != playerData.Uuid)
         {
-            var apiError = new ApiError
-            {
-                ErrorCode = 403,
-                ErrorMsg = "Not owner"
-            };
-
             httpContext.Response.StatusCode = 403;
-            await httpContext.Response.WriteAsJsonAsync(apiError);
+            await httpContext.Response.WriteAsJsonAsync(ApiError.NotOwner);
 
             return;
         }
