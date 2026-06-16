@@ -11,7 +11,6 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<Slot> Slots { get; set; }
     public DbSet<SlotOptions> SlotOptions { get; set; }
     public DbSet<Subscription> Subscriptions { get; set; }
-    public DbSet<WorldSettings> WorldSettings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,8 +28,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
         modelBuilder.Entity<Slot>().HasOne(slot => slot.Options).WithOne(options => options.Slot)
             .HasForeignKey<SlotOptions>(options => options.SlotId).OnDelete(DeleteBehavior.Cascade);
-        
-        modelBuilder.Entity<Slot>().HasOne(slot => slot.Settings).WithOne(settings => settings.Slot)
-            .HasForeignKey<WorldSettings>(settings => settings.SlotId).OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Slot>().Property(slot => slot.Settings).HasDefaultValueSql("'{}'");
     }
 }

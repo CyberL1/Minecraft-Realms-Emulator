@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Core.Attributes;
 using Core.Data;
 using Core.Enums;
@@ -13,7 +12,6 @@ using Realm = Core.Entities.Realm;
 using Slot = Core.Entities.Slot;
 using SlotOptions = Core.Entities.SlotOptions;
 using Subscription = Core.Entities.Subscription;
-using WorldSettings = Core.Entities.WorldSettings;
 
 namespace Core.Controllers;
 
@@ -24,9 +22,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
     [HttpGet]
     public async Task<ActionResult<RealmsList>> GetRealms()
     {
-        var realms = await context.Realms.Include(realm => realm.Subscription)
-            .Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Settings)
-            .Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Options).Include(realm => realm.Players)
+        var realms = await context.Realms.Include(realm => realm.Subscription).Include(realm => realm.ActiveSlot)
+            .ThenInclude(slot => slot.Options).Include(realm => realm.Players)
             .ToListAsync();
 
         var servers = new RealmsList { Servers = [] };
@@ -74,14 +71,6 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             context.SlotOptions.Add(primarySlotOptions);
             await context.SaveChangesAsync();
 
-            var primarySlotSettings = new WorldSettings
-            {
-                SlotId = primarySlot.Id
-            };
-
-            context.WorldSettings.Add(primarySlotSettings);
-            await context.SaveChangesAsync();
-
             var realm = new Realm
             {
                 Name = "",
@@ -119,7 +108,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 Expired = realm.Subscription.Ended,
                 ExpiredTrial = false,
                 DaysLeft = realm.Subscription.Ended ? -1 : 0,
-                IsHardcore = realm.ActiveSlot.Settings.Hardcore,
+                IsHardcore = realm.ActiveSlot.Settings.Contains("hardcore"),
                 GameMode = realm.ActiveSlot.Options.Gamemode,
                 ActiveSlot = -1,
                 ActiveVersion = realm.ActiveSlot.Options.Version,
