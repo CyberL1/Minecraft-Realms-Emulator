@@ -1,12 +1,18 @@
+using Core.Attributes;
 using Core.Data;
-using Core.Entities;
 using Core.Enums;
 using Core.Models;
+using Core.Requests;
 using Core.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AppConfig = Core.Models.AppConfig;
+using Player = Core.Entities.Player;
 using Realm = Core.Models.Realm;
+using Slot = Core.Entities.Slot;
+using SlotOptions = Core.Entities.SlotOptions;
+using Subscription = Core.Entities.Subscription;
+using WorldSettings = Core.Entities.WorldSettings;
 
 namespace Core.Controllers;
 
@@ -134,5 +140,33 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
         }
 
         return Ok(servers);
+    }
+
+    [HttpPost("{realmId:int}/initialize")]
+    [HasRealmAccess(true)]
+    public async Task<ActionResult<Realm>> PostInitialize(int realmId, RealmInitialize body)
+    {
+        var realm = await context.Realms.FirstAsync(realm => realm.Id == realmId);
+
+        if (realm.State != nameof(RealmState.UNINITIALIZED))
+        {
+            var apiError = new ApiError
+            {
+                ErrorCode = 401,
+                ErrorMsg = "World already initialized"
+            };
+
+            return StatusCode(401, apiError);
+        }
+
+        realm.Name = body.Name;
+
+        if (body.Description != null && body.Description.Trim() != string.Empty)
+            realm.Description = body.Description;
+
+        realm.State = nameof(RealmState.OPEN);
+
+        await context.SaveChangesAsync();
+        return Ok();
     }
 }
