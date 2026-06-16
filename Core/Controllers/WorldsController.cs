@@ -15,7 +15,7 @@ namespace Core.Controllers;
 public class WorldsController(DataContext context, CookiePlayerData playerData) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<RealmsList>> GetReleasedRealms()
+    public async Task<ActionResult<RealmsList>> GetRealms()
     {
         var realms = await context.Realms.Include(realm => realm.Subscription)
             .Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Settings)
