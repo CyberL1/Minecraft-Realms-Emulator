@@ -1,4 +1,5 @@
 using Core.Entities;
+using Core.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Core.Data;
@@ -11,6 +12,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<Slot> Slots { get; set; }
     public DbSet<SlotOptions> SlotOptions { get; set; }
     public DbSet<Subscription> Subscriptions { get; set; }
+    public DbSet<RealmRegionSelectionPreference> RegionSelectionPreferences { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,5 +32,12 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
             .HasForeignKey<SlotOptions>(options => options.SlotId).OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Slot>().Property(slot => slot.Settings).HasDefaultValueSql("'{}'");
+
+        modelBuilder.Entity<Realm>().HasOne(realm => realm.RegionSelectionPreference)
+            .WithOne(regionSelectionPreference => regionSelectionPreference.Realm).OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RealmRegionSelectionPreference>()
+            .Property(preference => preference.RegionSelectionPreference)
+            .HasDefaultValue(RegionSelectionPreference.AutomaticOwner);
     }
 }

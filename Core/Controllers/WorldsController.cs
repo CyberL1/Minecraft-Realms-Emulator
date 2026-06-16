@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using AppConfig = Core.Models.AppConfig;
 using Player = Core.Entities.Player;
 using Realm = Core.Entities.Realm;
+using RealmRegionSelectionPreference = Core.Entities.RealmRegionSelectionPreference;
+using Region = Core.Enums.Region;
 using Slot = Core.Entities.Slot;
 using SlotOptions = Core.Entities.SlotOptions;
 using Subscription = Core.Entities.Subscription;
@@ -24,6 +26,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
     {
         var realms = await context.Realms.Include(realm => realm.Subscription).Include(realm => realm.ActiveSlot)
             .ThenInclude(slot => slot.Options).Include(realm => realm.Players)
+            .Include(realm => realm.RegionSelectionPreference)
             .ToListAsync();
 
         var servers = new RealmsList { Servers = [] };
@@ -71,6 +74,12 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             context.SlotOptions.Add(primarySlotOptions);
             await context.SaveChangesAsync();
 
+            var regionSelectionPreference = new RealmRegionSelectionPreference
+            {
+                RegionSelectionPreference = RegionSelectionPreference.AutomaticOwner,
+                PreferredRegion = nameof(Region.WestEurope)
+            };
+
             var realm = new Realm
             {
                 Name = "",
@@ -79,7 +88,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 Players = [owner],
                 Slots = [primarySlot],
                 WorldType = nameof(WorldType.NORMAL),
-                ActiveSlotId = primarySlot.Id
+                ActiveSlotId = primarySlot.Id,
+                RegionSelectionPreference = regionSelectionPreference
             };
 
             context.Realms.Add(realm);
@@ -108,6 +118,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 Expired = realm.Subscription.Ended,
                 ExpiredTrial = false,
                 DaysLeft = realm.Subscription.Ended ? -1 : 0,
+                WorldType = realm.WorldType,
                 IsHardcore = realm.ActiveSlot.Settings.Contains("hardcore"),
                 GameMode = realm.ActiveSlot.Options.Gamemode,
                 ActiveSlot = -1,

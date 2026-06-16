@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Core.Entities;
+using RealmRegionSelectionPreference = Core.Models.RealmRegionSelectionPreference;
 
 namespace Core.Responses;
 
@@ -13,12 +14,12 @@ public class Realm
     public required string State { get; set; }
     public required string Owner { get; set; }
     public required string OwnerUUID { get; set; }
-    public List<Player>? Players { get; set; }
-    public List<Slot>? Slots { get; set; }
+    public IEnumerable<Player>? Players { get; set; }
+    public IEnumerable<Slot>? Slots { get; set; }
     public required bool Expired { get; set; }
     public required bool ExpiredTrial { get; set; }
     public required int DaysLeft { get; set; }
-    public string? WorldType { get; set; }
+    public required string WorldType { get; set; }
     public required bool IsHardcore { get; set; }
     public required int GameMode { get; set; }
     public required int ActiveSlot { get; set; }
@@ -26,4 +27,5 @@ public class Realm
     public string? ParentWorldName { get; set; }
     public required string ActiveVersion { get; set; }
     public required string Compatibility { get; set; }
+    public RealmRegionSelectionPreference? RegionSelectionPreference { get; set; }
 }
