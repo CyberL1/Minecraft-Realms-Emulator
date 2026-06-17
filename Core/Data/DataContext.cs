@@ -13,6 +13,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<SlotOptions> SlotOptions { get; set; }
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<RealmRegionSelectionPreference> RegionSelectionPreferences { get; set; }
+    public DbSet<RealmConnection> RealmConnections { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,5 +42,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
             .HasDefaultValue(RegionSelectionPreference.AutomaticOwner);
 
         modelBuilder.Entity<SlotOptions>().Property(options => options.SlotName).HasDefaultValueSql("''");
+
+        modelBuilder.Entity<Realm>().HasOne(realm => realm.Connection)
+            .WithOne(connection => connection.Realm).OnDelete(DeleteBehavior.Cascade);
     }
 }

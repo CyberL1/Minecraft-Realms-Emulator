@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using AppConfig = Core.Models.AppConfig;
 using Player = Core.Entities.Player;
 using Realm = Core.Entities.Realm;
+using RealmConnection = Core.Entities.RealmConnection;
 using RealmRegionSelectionPreference = Core.Entities.RealmRegionSelectionPreference;
 using Region = Core.Enums.Region;
 using Slot = Core.Entities.Slot;
@@ -83,6 +84,11 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 PreferredRegion = nameof(Region.WestEurope)
             };
 
+            var connection = new RealmConnection
+            {
+                Address = "127.0.0.1"
+            };
+
             var realm = new Realm
             {
                 Name = "",
@@ -92,7 +98,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 Slots = [primarySlot],
                 WorldType = nameof(WorldType.NORMAL),
                 ActiveSlotId = primarySlot.Id,
-                RegionSelectionPreference = regionSelectionPreference
+                RegionSelectionPreference = regionSelectionPreference,
+                Connection = connection
             };
 
             context.Realms.Add(realm);
@@ -167,6 +174,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
         await context.SaveChangesAsync();
         return Ok();
     }
+
 
     [HttpGet("{realmId:int}")]
     [HasRealmAccess(true)]

@@ -16,4 +16,5 @@ public class Realm
     [JsonIgnore] public Slot ActiveSlot { get; set; } = null!;
     [JsonIgnore] public Realm? ParentWorld { get; set; }
     [JsonIgnore] public required RealmRegionSelectionPreference RegionSelectionPreference { get; set; }
+    public required RealmConnection Connection { get; set; } = null!;
 }
