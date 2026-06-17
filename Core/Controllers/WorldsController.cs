@@ -120,7 +120,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 DaysLeft = realm.Subscription.Ended ? -1 : 0,
                 WorldType = realm.WorldType,
                 IsHardcore = realm.ActiveSlot.Settings.Contains("hardcore"),
-                GameMode = realm.ActiveSlot.Options.GameMode,
+                GameMode = (int)realm.ActiveSlot.Options.GameMode,
                 ActiveSlot = -1,
                 ActiveVersion = realm.ActiveSlot.Options.Version,
                 Compatibility = nameof(RealmCompatibility.UNVERIFIABLE)
@@ -203,8 +203,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                     {
                         SpawnProtection = slot.Options.SpawnProtection,
                         ForceGeeMode = slot.Options.ForceGameMode,
-                        Difficulty = slot.Options.Difficulty,
-                        GameMode = slot.Options.GameMode,
+                        Difficulty = (int)slot.Options.Difficulty,
+                        GameMode = (int)slot.Options.GameMode,
                         SlotName = slot.Options.SlotName,
                         Version = slot.Options.Version,
                         Compatibility = playerData.Version == slot.Options.Version
@@ -219,7 +219,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             DaysLeft = realm.Subscription.DaysLeft,
             WorldType = realm.WorldType,
             IsHardcore = realm.ActiveSlot.Settings.Contains("hardcore"),
-            GameMode = realm.ActiveSlot.Options.GameMode,
+            GameMode = (int)realm.ActiveSlot.Options.GameMode,
             ActiveSlot = realm.ActiveSlot.SlotId,
             ActiveVersion = realm.ActiveSlot.Options.Version,
             Compatibility = nameof(RealmCompatibility.UNVERIFIABLE),
