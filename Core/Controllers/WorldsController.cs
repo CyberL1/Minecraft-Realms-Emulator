@@ -68,6 +68,9 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             var primarySlotOptions = new SlotOptions
             {
                 SlotId = primarySlot.Id,
+                SpawnProtection = 16,
+                Difficulty = SlotOptionsDifficulty.Normal,
+                GameMode = SlotOptionsGameMode.Survival,
                 Version = playerData.Version
             };
 
