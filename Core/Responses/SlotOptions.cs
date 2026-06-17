@@ -4,7 +4,7 @@ namespace Core.Responses;
 
 public class SlotOptions
 {
-    [JsonPropertyName("spanProtection")] public int SpawnProtection { get; set; }
+    [JsonPropertyName("spawnProtection")] public int SpawnProtection { get; set; }
 
     [JsonPropertyName("forceGameMode")] public bool ForceGeeMode { get; set; }
 
