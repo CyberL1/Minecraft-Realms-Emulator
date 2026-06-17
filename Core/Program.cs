@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<CookiePlayerData>();
 
+builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
 
 var connectionString = builder.Configuration.GetValue<string>("Database");
@@ -32,7 +33,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseRouting();
 
-app.UseMiddleware<AuthorizationMiddleware>();
+app.UseMiddleware<AuthorizationMiddleware>(app.Services);
 app.UseMiddleware<CheckRealmAccessMiddleware>();
 
 app.MapControllers();
