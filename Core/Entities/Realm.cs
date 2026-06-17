@@ -12,9 +12,9 @@ public class Realm
     public required List<Player> Players { get; set; }
     public required List<Slot> Slots { get; set; }
     public required string WorldType { get; set; }
-    [JsonIgnore] public required int ActiveSlotId { get; set; }
+    [JsonIgnore] public int ActiveSlotId { get; set; }
     [JsonIgnore] public Slot ActiveSlot { get; set; } = null!;
     [JsonIgnore] public Realm? ParentWorld { get; set; }
-    [JsonIgnore] public required RealmRegionSelectionPreference RegionSelectionPreference { get; set; }
+    [JsonIgnore] public RealmRegionSelectionPreference RegionSelectionPreference { get; set; }
     public required RealmConnection Connection { get; set; } = null!;
 }
