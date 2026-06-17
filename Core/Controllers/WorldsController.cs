@@ -200,7 +200,18 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 new Responses.Slot
                 {
                     SlotId = slot.SlotId,
-                    Options = JsonSerializer.Serialize(slot.Options),
+                    Options = JsonSerializer.Serialize(new Responses.SlotOptions
+                    {
+                        SpawnProtection = slot.Options.SpawnProtection,
+                        ForceGeeMode = slot.Options.ForceGamemode,
+                        Difficulty = slot.Options.Difficulty,
+                        GameMode = slot.Options.Gamemode,
+                        SlotName = slot.Options.SlotName,
+                        Version = slot.Options.Version,
+                        Compatibility = playerData.Version == slot.Options.Version
+                            ? nameof(RealmCompatibility.COMPATIBLE)
+                            : nameof(RealmCompatibility.INCOMPATIBLE)
+                    }),
                     Settings = slot.Settings
                 }
             ]),
