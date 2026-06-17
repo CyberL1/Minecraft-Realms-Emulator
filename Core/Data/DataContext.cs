@@ -39,5 +39,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
         modelBuilder.Entity<RealmRegionSelectionPreference>()
             .Property(preference => preference.RegionSelectionPreference)
             .HasDefaultValue(RegionSelectionPreference.AutomaticOwner);
+
+        modelBuilder.Entity<SlotOptions>().Property(options => options.SlotName).HasDefaultValueSql("''");
     }
 }

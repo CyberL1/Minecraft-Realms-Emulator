@@ -68,7 +68,6 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             var primarySlotOptions = new SlotOptions
             {
                 SlotId = primarySlot.Id,
-                SlotName = "Slot #1",
                 Version = playerData.Version
             };
 

@@ -9,7 +9,7 @@ public class SlotOptions
     public bool ForceGamemode { get; set; }
     public int Difficulty { get; set; }
     public int Gamemode { get; set; }
-    public required string SlotName { get; set; }
+    public string SlotName { get; set; } = null!;
     public required string Version { get; set; }
     [JsonIgnore] public int SlotId { get; set; }
     [JsonIgnore] public Slot Slot { get; set; } = null!;
