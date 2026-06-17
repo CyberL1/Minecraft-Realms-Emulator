@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Core.Attributes;
 using Core.Data;
 using Core.Enums;
@@ -163,5 +164,67 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
 
         await context.SaveChangesAsync();
         return Ok();
+    }
+
+    [HttpGet("{realmId:int}")]
+    [HasRealmAccess(true)]
+    public async Task<ActionResult<Realm>> GetOwnRealm(int realmId)
+    {
+        var realm = await context.Realms.Include(realm => realm.Players).Include(realm => realm.Subscription)
+            .Include(realm => realm.RegionSelectionPreference).Include(realm => realm.Slots)
+            .ThenInclude(slot => slot.Options).Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Options)
+            .FirstAsync(realm => realm.Id == realmId);
+
+        var realmResponse = new Responses.Realm
+        {
+            Id = realm.Id,
+            RemoteSubscriptionId = realm.Subscription.SubscriptionId.Replace("-", ""),
+            Name = realm.Name,
+            Motd = realm.Description,
+            State = realm.State,
+            Owner = realm.Players.First().Name,
+            OwnerUUID = realm.Players.First().Uuid.Replace("-", ""),
+            Players = realm.Players.FindAll(player => player.Uuid != realm.Players.First().Uuid)
+                .SelectMany<Player, Responses.Player>(player =>
+                [
+                    new Responses.Player
+                    {
+                        Uuid = player.Uuid.Replace("-", ""),
+                        Name = player.Name,
+                        Operator = player.Operator,
+                        Accepted = player.Accepted
+                    }
+                ]),
+            Slots = realm.Slots.SelectMany<Slot, Responses.Slot>(slot =>
+            [
+                new Responses.Slot
+                {
+                    SlotId = slot.SlotId,
+                    Options = JsonSerializer.Serialize(slot.Options),
+                    Settings = slot.Settings
+                }
+            ]),
+            Expired = realm.Subscription.Ended,
+            ExpiredTrial = AppConfig.Trial && realm.Subscription.Ended,
+            DaysLeft = realm.Subscription.DaysLeft,
+            WorldType = realm.WorldType,
+            IsHardcore = realm.ActiveSlot.Settings.Contains("hardcore"),
+            GameMode = realm.ActiveSlot.Options.Gamemode,
+            ActiveSlot = realm.ActiveSlot.SlotId,
+            ActiveVersion = realm.ActiveSlot.Options.Version,
+            Compatibility = nameof(RealmCompatibility.UNVERIFIABLE),
+            RegionSelectionPreference = new Models.RealmRegionSelectionPreference
+            {
+                RegionSelectionPreference = realm.RegionSelectionPreference.RegionSelectionPreference,
+                PreferredRegion = realm.RegionSelectionPreference.PreferredRegion
+            }
+        };
+
+        // TODO: Improve this
+        realmResponse.Compatibility = playerData.Version == realm.ActiveSlot.Options.Version
+            ? nameof(RealmCompatibility.COMPATIBLE)
+            : nameof(RealmCompatibility.INCOMPATIBLE);
+
+        return Ok(realmResponse);
     }
 }

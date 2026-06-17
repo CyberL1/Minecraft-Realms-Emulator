@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Core.Entities;
 using RealmRegionSelectionPreference = Core.Models.RealmRegionSelectionPreference;
 
 namespace Core.Responses;
