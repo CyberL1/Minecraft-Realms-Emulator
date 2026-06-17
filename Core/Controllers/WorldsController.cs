@@ -175,6 +175,27 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
         return Ok();
     }
 
+    [HttpGet("v1/{realmId:int}/join/pc")]
+    [HasRealmAccess]
+    public async Task<ActionResult<Realm>> JoinRealm(int realmId)
+    {
+        var realm = await context.Realms.Include(realm => realm.Connection)
+            .Include(realm => realm.RegionSelectionPreference).FirstAsync(realm => realm.Id == realmId);
+
+        var realmJoinResponse = new Responses.RealmConnection
+        {
+            Address = realm.Connection.Address,
+            ResourcePackUrl = realm.Connection.ResourcePackUrl,
+            ResourcePackHash = realm.Connection.ResourcePackHash,
+            SessionRegionData = new Models.Region
+            {
+                RegionName = realm.RegionSelectionPreference.PreferredRegion,
+                ServiceQuality = ServiceQuality.Great
+            }
+        };
+
+        return Ok(realmJoinResponse);
+    }
 
     [HttpGet("{realmId:int}")]
     [HasRealmAccess(true)]
