@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using AppConfig = Core.Models.AppConfig;
 using Player = Core.Entities.Player;
 using Realm = Core.Entities.Realm;
+using RealmCompatibility = Core.Helpers.RealmCompatibility;
 using RealmConnection = Core.Entities.RealmConnection;
 using RealmRegionSelectionPreference = Core.Entities.RealmRegionSelectionPreference;
 using Region = Core.Enums.Region;
@@ -72,7 +73,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 SpawnProtection = 16,
                 Difficulty = SlotOptionsDifficulty.Normal,
                 GameMode = SlotOptionsGameMode.Survival,
-                Version = playerData.Version
+                Version = playerData.Version!
             };
 
             context.SlotOptions.Add(primarySlotOptions);
@@ -133,7 +134,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 GameMode = (int)realm.ActiveSlot.Options.GameMode,
                 ActiveSlot = -1,
                 ActiveVersion = realm.ActiveSlot.Options.Version,
-                Compatibility = nameof(RealmCompatibility.UNVERIFIABLE)
+                Compatibility =
+                    RealmCompatibility.CheckRealmCompatibility(playerData.Version, realm.ActiveSlot.Options.Version)
             };
 
             if (playerData.Uuid == server.OwnerUUID.Replace("-", ""))
@@ -142,11 +144,6 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 server.DaysLeft = realm.Subscription.DaysLeft;
                 server.ActiveSlot = realm.ActiveSlot.SlotId;
             }
-
-            // TODO: Improve this
-            server.Compatibility = playerData.Version == realm.ActiveSlot.Options.Version
-                ? nameof(RealmCompatibility.COMPATIBLE)
-                : nameof(RealmCompatibility.INCOMPATIBLE);
 
             servers.Servers.Add(server);
         }
@@ -239,9 +236,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                         GameMode = (int)slot.Options.GameMode,
                         SlotName = slot.Options.SlotName,
                         Version = slot.Options.Version,
-                        Compatibility = playerData.Version == slot.Options.Version
-                            ? nameof(RealmCompatibility.COMPATIBLE)
-                            : nameof(RealmCompatibility.INCOMPATIBLE)
+                        Compatibility = RealmCompatibility.CheckRealmCompatibility(playerData.Version,
+                            realm.ActiveSlot.Options.Version)
                     }),
                     Settings = slot.Settings
                 }
@@ -254,18 +250,14 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             GameMode = (int)realm.ActiveSlot.Options.GameMode,
             ActiveSlot = realm.ActiveSlot.SlotId,
             ActiveVersion = realm.ActiveSlot.Options.Version,
-            Compatibility = nameof(RealmCompatibility.UNVERIFIABLE),
+            Compatibility =
+                RealmCompatibility.CheckRealmCompatibility(playerData.Version, realm.ActiveSlot.Options.Version),
             RegionSelectionPreference = new Models.RealmRegionSelectionPreference
             {
                 RegionSelectionPreference = realm.RegionSelectionPreference.RegionSelectionPreference,
                 PreferredRegion = realm.RegionSelectionPreference.PreferredRegion
             }
         };
-
-        // TODO: Improve this
-        realmResponse.Compatibility = playerData.Version == realm.ActiveSlot.Options.Version
-            ? nameof(RealmCompatibility.COMPATIBLE)
-            : nameof(RealmCompatibility.INCOMPATIBLE);
 
         return Ok(realmResponse);
     }
