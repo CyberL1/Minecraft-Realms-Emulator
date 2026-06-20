@@ -73,7 +73,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 SpawnProtection = 16,
                 Difficulty = SlotOptionsDifficulty.Normal,
                 GameMode = SlotOptionsGameMode.Survival,
-                Version = playerData.Version!
+                Version = playerData.Version
             };
 
             context.SlotOptions.Add(primarySlotOptions);
@@ -155,7 +155,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
     [HasRealmAccess(true)]
     public async Task<ActionResult<Realm>> PostInitialize(int realmId, RealmInitialize body)
     {
-        var realm = await context.Realms.Include(realm => realm.Subscription).FirstAsync(realm => realm.Id == realmId);
+        var realm = await context.Realms.Include(realm => realm.Subscription).Include(realm => realm.ActiveSlot)
+            .ThenInclude(slot => slot.Options).FirstAsync(realm => realm.Id == realmId);
 
         if (realm.State != nameof(RealmState.UNINITIALIZED)) return StatusCode(409, ApiError.WorldAlreadyInitialized);
 
@@ -165,8 +166,9 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             realm.Description = body.Description;
 
         realm.Subscription.StartDate = DateTime.UtcNow;
-
+        
         realm.State = nameof(RealmState.OPEN);
+        realm.ActiveSlot.Options.Version = playerData.Version;
 
         await context.SaveChangesAsync();
         return Ok();
