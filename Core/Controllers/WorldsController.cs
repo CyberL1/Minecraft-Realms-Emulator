@@ -160,13 +160,13 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
 
         if (realm.State != nameof(RealmState.UNINITIALIZED)) return StatusCode(409, ApiError.WorldAlreadyInitialized);
 
-        realm.Name = body.Name;
+        realm.Name = body.Name.Trim();
 
-        if (body.Description != null && body.Description.Trim() != string.Empty)
-            realm.Description = body.Description;
+        if (!string.IsNullOrEmpty(body.Description))
+            realm.Description = body.Description.Trim();
 
         realm.Subscription.StartDate = DateTime.UtcNow;
-        
+
         realm.State = nameof(RealmState.OPEN);
         realm.ActiveSlot.Options.Version = playerData.Version;
 
