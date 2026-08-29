@@ -293,4 +293,33 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
         await context.SaveChangesAsync();
         return Ok(realm);
     }
+
+
+    [HttpPut("{realmId:int}/open")]
+    [HasRealmAccess(true)]
+    public async Task<ActionResult<bool>> OpenRealm(int realmId)
+    {
+        var realm = await context.Realms.FirstOrDefaultAsync(realm => realm.Id == realmId);
+
+        if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
+
+        realm.State = nameof(RealmState.OPEN);
+
+        await context.SaveChangesAsync();
+        return Ok(true);
+    }
+
+    [HttpPut("{realmId:int}/close")]
+    [HasRealmAccess(true)]
+    public async Task<ActionResult<bool>> CloseRealm(int realmId)
+    {
+        var realm = await context.Realms.FirstOrDefaultAsync(realm => realm.Id == realmId);
+
+        if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
+
+        realm.State = nameof(RealmState.CLOSED);
+
+        await context.SaveChangesAsync();
+        return Ok(true);
+    }
 }
