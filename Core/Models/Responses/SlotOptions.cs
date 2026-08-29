@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Core.Responses;
+namespace Core.Models.Responses;
 
 public class SlotOptions
 {

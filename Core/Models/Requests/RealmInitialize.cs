@@ -1,4 +1,4 @@
-namespace Core.Requests;
+namespace Core.Models.Requests;
 
 public class RealmInitialize
 {

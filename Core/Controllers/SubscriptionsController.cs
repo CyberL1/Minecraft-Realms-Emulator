@@ -16,7 +16,7 @@ public class SubscriptionsController(DataContext context) : ControllerBase
     {
         var realm = await context.Realms.Include(realm => realm.Subscription).FirstAsync(w => w.Id == wId);
 
-        var subscriptionResponse = new Responses.Subscription
+        var subscriptionResponse = new Models.Responses.Subscription
         {
             StartDate = ((DateTimeOffset)realm.Subscription.StartDate).ToUnixTimeMilliseconds(),
             DaysLeft = realm.Subscription.DaysLeft,

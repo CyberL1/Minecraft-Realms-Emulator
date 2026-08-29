@@ -3,8 +3,8 @@ using Core.Attributes;
 using Core.Data;
 using Core.Enums;
 using Core.Models;
-using Core.Requests;
-using Core.Responses;
+using Core.Models.Requests;
+using Core.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AppConfig = Core.Models.AppConfig;
@@ -117,7 +117,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
 
         foreach (var realm in realms)
         {
-            var server = new Responses.Realm
+            var server = new Models.Responses.Realm
             {
                 Id = realm.Id,
                 RemoteSubscriptionId = realm.Subscription.SubscriptionId.Replace("-", ""),
@@ -181,7 +181,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
         var realm = await context.Realms.Include(realm => realm.Connection)
             .Include(realm => realm.RegionSelectionPreference).FirstAsync(realm => realm.Id == realmId);
 
-        var realmJoinResponse = new Responses.RealmConnection
+        var realmJoinResponse = new Models.Responses.RealmConnection
         {
             Address = realm.Connection.Address,
             ResourcePackUrl = realm.Connection.ResourcePackUrl,
@@ -205,7 +205,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             .ThenInclude(slot => slot.Options).Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Options)
             .FirstAsync(realm => realm.Id == realmId);
 
-        var realmResponse = new Responses.Realm
+        var realmResponse = new Models.Responses.Realm
         {
             Id = realm.Id,
             RemoteSubscriptionId = realm.Subscription.SubscriptionId.Replace("-", ""),
@@ -215,9 +215,9 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             Owner = realm.Players.First().Name,
             OwnerUUID = realm.Players.First().Uuid.Replace("-", ""),
             Players = realm.Players.FindAll(player => player.Uuid != realm.Players.First().Uuid)
-                .SelectMany<Player, Responses.Player>(player =>
+                .SelectMany<Player, Models.Responses.Player>(player =>
                 [
-                    new Responses.Player
+                    new Models.Responses.Player
                     {
                         Uuid = player.Uuid.Replace("-", ""),
                         Name = player.Name,
@@ -225,12 +225,12 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                         Accepted = player.Accepted
                     }
                 ]),
-            Slots = realm.Slots.SelectMany<Slot, Responses.Slot>(slot =>
+            Slots = realm.Slots.SelectMany<Slot, Models.Responses.Slot>(slot =>
             [
-                new Responses.Slot
+                new Models.Responses.Slot
                 {
                     SlotId = slot.SlotId,
-                    Options = JsonSerializer.Serialize(new Responses.SlotOptions
+                    Options = JsonSerializer.Serialize(new Models.Responses.SlotOptions
                     {
                         SpawnProtection = slot.Options.SpawnProtection,
                         ForceGeeMode = slot.Options.ForceGameMode,

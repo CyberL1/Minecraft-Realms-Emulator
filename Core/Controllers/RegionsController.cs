@@ -1,5 +1,5 @@
 using Core.Enums;
-using Core.Responses;
+using Core.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Region = Core.Enums.Region;
 

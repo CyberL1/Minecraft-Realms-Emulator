@@ -1,6 +1,6 @@
 using Core.Enums;
 using Core.Models;
-using Core.Responses;
+using Core.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Core.Controllers;

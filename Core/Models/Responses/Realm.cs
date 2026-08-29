@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using RealmRegionSelectionPreference = Core.Models.RealmRegionSelectionPreference;
 
-namespace Core.Responses;
+namespace Core.Models.Responses;
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public class Realm

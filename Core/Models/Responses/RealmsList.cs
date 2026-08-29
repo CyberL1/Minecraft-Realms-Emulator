@@ -1,6 +1,4 @@
-using Core.Models;
-
-namespace Core.Responses;
+namespace Core.Models.Responses;
 
 public class RealmsList
 {
