@@ -263,4 +263,34 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
 
         return Ok(realmResponse);
     }
+
+    [HttpPost("{realmId:int}/configuration")]
+    [HasRealmAccess(true)]
+    public async Task<ActionResult<Realm>> ConfigureRealm(int realmId, RealmConfiguration body)
+    {
+        var realm = await context.Realms.Include(realm => realm.RegionSelectionPreference)
+            .FirstOrDefaultAsync(realm => realm.Id == realmId);
+
+        if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
+
+        if (body.Description != null)
+        {
+            if (!string.IsNullOrEmpty(body.Description.Name)) realm.Name = body.Description.Name.Trim();
+
+            if (body.Description.Description != null)
+                realm.Description = body.Description.Description.Trim();
+        }
+
+        if (body.RegionSelectionPreference != null)
+        {
+            realm.RegionSelectionPreference.RegionSelectionPreference =
+                body.RegionSelectionPreference.RegionSelectionPreference;
+
+            if (!string.IsNullOrEmpty(body.RegionSelectionPreference.PreferredRegion))
+                realm.RegionSelectionPreference.PreferredRegion = body.RegionSelectionPreference.PreferredRegion;
+        }
+
+        await context.SaveChangesAsync();
+        return Ok(realm);
+    }
 }
