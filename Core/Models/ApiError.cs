@@ -15,4 +15,5 @@ public class ApiError
     public static ApiError NotAWorldMember => new(403, "Not a world member"); // TODO: Check if this is correct
     public static ApiError NotOwner => new(403, "Not owner");
     public static ApiError WorldAlreadyInitialized => new(409, "World already initialized");
+    public static ApiError InviteNotFound => new(404, "Invite not found");
 }
