@@ -1,3 +1,4 @@
+using Core.Attributes;
 using Core.Data;
 using Core.Models;
 using Core.Models.Requests;
@@ -63,6 +64,7 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
     }
 
     [HttpDelete("{realmId:int}")]
+    [HasRealmAccess]
     public async Task<ActionResult<bool>> LeaveRealm(int realmId)
     {
         var realm = await context.Realms.FirstOrDefaultAsync(realm => realm.Id == realmId);
@@ -81,6 +83,7 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
     }
 
     [HttpPost("{realmId:int}")]
+    [HasRealmAccess(true)]
     public async Task<ActionResult<bool>> InvitePlayer(int realmId, RealmInvite body)
     {
         if (string.Equals(body.Name, playerData.Name, StringComparison.CurrentCultureIgnoreCase))
@@ -128,6 +131,7 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
     }
 
     [HttpDelete("{realmId:int}/invite/{playerUuid}")]
+    [HasRealmAccess(true)]
     public async Task<ActionResult<bool>> RemovePlayer(int realmId, string playerUuid)
     {
         var realm = await context.Realms.FirstOrDefaultAsync(realm => realm.Id == realmId);
