@@ -145,7 +145,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 server.ActiveSlot = realm.ActiveSlot.SlotId;
             }
 
-            servers.Servers.Add(server);
+            if (realm.Players.Any(player => player.Uuid == playerData.Uuid)) servers.Servers.Add(server);
         }
 
         return Ok(servers);
