@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Core.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260830163956_PendingInvites_Player")]
+    partial class PendingInvites_Player
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,7 +65,8 @@ namespace Core.Migrations
 
                     b.HasIndex("PlayerId");
 
-                    b.HasIndex("RealmId");
+                    b.HasIndex("RealmId")
+                        .IsUnique();
 
                     b.ToTable("PendingInvites");
                 });
@@ -302,8 +306,8 @@ namespace Core.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Core.Entities.Realm", "Realm")
-                        .WithMany()
-                        .HasForeignKey("RealmId")
+                        .WithOne()
+                        .HasForeignKey("Core.Entities.PendingInvite", "RealmId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Player");

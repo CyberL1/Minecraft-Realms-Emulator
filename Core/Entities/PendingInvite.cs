@@ -7,4 +7,6 @@ public class PendingInvite
     public required DateTime Date { get; set; }
     public int? RealmId { get; set; }
     public required Realm Realm { get; set; }
+    public int? PlayerId { get; set; }
+    public required Player Player { get; set; }
 }
