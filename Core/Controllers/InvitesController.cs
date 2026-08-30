@@ -66,4 +66,22 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
 
         return Ok(true);
     }
+
+    [HttpDelete("{realmId:int}")]
+    public async Task<ActionResult<bool>> LeaveRealm(int realmId)
+    {
+        var realm = await context.Realms.FirstOrDefaultAsync(realm => realm.Id == realmId);
+
+        if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
+
+        var player = await context.Players.Where(player => player.RealmId == realmId)
+            .FirstOrDefaultAsync(player => player.Uuid == playerData.Uuid);
+
+        if (player == null) return StatusCode(403, ApiError.NotAWorldMember);
+
+        context.Players.Remove(player);
+        await context.SaveChangesAsync();
+
+        return Ok(true);
+    }
 }
