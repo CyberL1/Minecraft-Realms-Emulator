@@ -20,7 +20,9 @@ public class CheckRealmAccessMiddleware(RequestDelegate next)
         }
 
         var realmId = int.Parse(realmIdValue.ToString()!);
-        var realm = await db.Realms.Include(realm => realm.Players).FirstOrDefaultAsync(realm => realm.Id == realmId);
+
+        var realm = await db.Realms.Include(realm => realm.Players).Include(realm => realm.Owner)
+            .FirstOrDefaultAsync(realm => realm.Id == realmId);
 
         if (realm == null)
         {
@@ -38,7 +40,7 @@ public class CheckRealmAccessMiddleware(RequestDelegate next)
             return;
         }
 
-        if (attribute.IsOwner && realm.Players.First().Uuid.Replace("-", "") != playerData.Uuid)
+        if (attribute.IsOwner && realm.Owner.Uuid.Replace("-", "") != playerData.Uuid)
         {
             httpContext.Response.StatusCode = 403;
             await httpContext.Response.WriteAsJsonAsync(ApiError.NotOwner);

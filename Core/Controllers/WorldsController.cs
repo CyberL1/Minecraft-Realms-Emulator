@@ -29,12 +29,11 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
     {
         var realms = await context.Realms.Include(realm => realm.Subscription).Include(realm => realm.ActiveSlot)
             .ThenInclude(slot => slot.Options).Include(realm => realm.Players)
-            .Include(realm => realm.RegionSelectionPreference)
-            .ToListAsync();
+            .Include(realm => realm.RegionSelectionPreference).Include(realm => realm.Owner).ToListAsync();
 
         var servers = new RealmsList { Servers = [] };
 
-        if (realms.All(realm => realm.Players.First().Uuid != playerData.Uuid))
+        if (realms.All(realm => realm.Owner.Uuid != playerData.Uuid))
         {
             await using var transaction = await context.Database.BeginTransactionAsync();
 
@@ -100,7 +99,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 WorldType = nameof(WorldType.NORMAL),
                 ActiveSlotId = primarySlot.Id,
                 RegionSelectionPreference = regionSelectionPreference,
-                Connection = connection
+                Connection = connection,
+                Owner = owner
             };
 
             context.Realms.Add(realm);
@@ -124,8 +124,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 Name = realm.Name,
                 Motd = realm.Description,
                 State = realm.State,
-                Owner = realm.Players.First().Name,
-                OwnerUUID = realm.Players.First().Uuid.Replace("-", ""),
+                Owner = realm.Owner.Name,
+                OwnerUUID = realm.Owner.Uuid.Replace("-", ""),
                 Expired = realm.Subscription.Ended,
                 ExpiredTrial = false,
                 DaysLeft = realm.Subscription.Ended ? -1 : 0,
@@ -203,7 +203,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
         var realm = await context.Realms.Include(realm => realm.Players).Include(realm => realm.Subscription)
             .Include(realm => realm.RegionSelectionPreference).Include(realm => realm.Slots)
             .ThenInclude(slot => slot.Options).Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Options)
-            .FirstAsync(realm => realm.Id == realmId);
+            .Include(realm => realm.Owner).FirstAsync(realm => realm.Id == realmId);
 
         var realmResponse = new Models.Responses.Realm
         {
@@ -212,9 +212,9 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             Name = realm.Name,
             Motd = realm.Description,
             State = realm.State,
-            Owner = realm.Players.First().Name,
-            OwnerUUID = realm.Players.First().Uuid.Replace("-", ""),
-            Players = realm.Players.FindAll(player => player.Uuid != realm.Players.First().Uuid)
+            Owner = realm.Owner.Name,
+            OwnerUUID = realm.Owner.Uuid.Replace("-", ""),
+            Players = realm.Players.FindAll(player => player.Uuid != realm.Owner.Uuid)
                 .SelectMany<Player, Models.Responses.Player>(player =>
                 [
                     new Models.Responses.Player

@@ -52,5 +52,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
         modelBuilder.Entity<PendingInvite>().HasOne(pendingInvite => pendingInvite.Player).WithMany()
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Realm>().HasOne(realm => realm.Owner).WithMany().OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -17,8 +17,9 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
     public async Task<ActionResult<PendingInvitesList>> GetPendingInvites()
     {
         var pendingInvitesListDb = await context.PendingInvites.Where(invite => invite.Player.Uuid == playerData.Uuid)
+            .Include(pendingInvite => pendingInvite.Realm).ThenInclude(realm => realm.Players)
             .Include(pendingInvite => pendingInvite.Realm)
-            .ThenInclude(realm => realm.Players).ToListAsync();
+            .ThenInclude(realm => realm.Owner).ToListAsync();
 
         var pendingInvitesListResponse = new PendingInvitesList { Invites = [] };
 
@@ -27,7 +28,7 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
             {
                 InvitationId = invite.InvitationId,
                 WorldName = invite.Realm.Name,
-                WorldOwnerUuid = invite.Realm.Players[0].Uuid,
+                WorldOwnerUuid = invite.Realm.Owner.Uuid,
                 Date = ((DateTimeOffset)invite.Date).ToUnixTimeMilliseconds()
             });
 

@@ -17,4 +17,6 @@ public class Realm
     [JsonIgnore] public Realm? ParentWorld { get; set; }
     [JsonIgnore] public RealmRegionSelectionPreference RegionSelectionPreference { get; set; }
     public required RealmConnection Connection { get; set; } = null!;
+    public int? OwnerId { get; set; }
+    public required Player Owner { get; set; }
 }
