@@ -6,6 +6,7 @@ using Core.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Player = Core.Entities.Player;
+using RealmCompatibility = Core.Helpers.RealmCompatibility;
 
 namespace Core.Controllers;
 
@@ -90,7 +91,9 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
         if (string.Equals(body.Name, playerData.Name, StringComparison.CurrentCultureIgnoreCase))
             return StatusCode(500, ApiError.CannotInviteYourself);
 
-        var realm = await context.Realms.Include(w => w.Players).FirstOrDefaultAsync(w => w.Id == realmId);
+        var realm = await context.Realms.Include(w => w.Players).Include(realm => realm.Owner)
+            .Include(realm => realm.Subscription).Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Options)
+            .FirstOrDefaultAsync(w => w.Id == realmId);
 
         if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
 
@@ -127,8 +130,38 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
         context.PendingInvites.Add(invite);
         await context.SaveChangesAsync();
 
-        realm.Players.RemoveAt(0);
-        return Ok(realm);
+        var realmResponse = new Realm
+        {
+            Id = realm.Id,
+            RemoteSubscriptionId = realm.Subscription.SubscriptionId,
+            Name = realm.Name,
+            Motd = realm.Description,
+            State = realm.State,
+            Owner = realm.Owner.Name,
+            OwnerUUID = realm.Owner.Uuid,
+            Expired = realm.Subscription.Ended,
+            ExpiredTrial = AppConfig.Trial && realm.Subscription.Ended,
+            DaysLeft = realm.Subscription.DaysLeft,
+            WorldType = realm.WorldType,
+            IsHardcore = realm.ActiveSlot.Settings.Contains("hardcore"),
+            GameMode = (int)realm.ActiveSlot.Options.GameMode,
+            ActiveSlot = realm.ActiveSlot.SlotId,
+            ActiveVersion = realm.ActiveSlot.Options.Version,
+            Compatibility =
+                RealmCompatibility.CheckRealmCompatibility(playerData.Version, realm.ActiveSlot.Options.Version),
+            Players = realm.Players.Where(player => player.Uuid != realm.Owner.Uuid).SelectMany(player => new[]
+            {
+                new Models.Responses.Player
+                {
+                    Uuid = player.Uuid,
+                    Name = player.Name,
+                    Operator = player.Operator,
+                    Accepted = player.Accepted
+                }
+            })
+        };
+
+        return Ok(realmResponse);
     }
 
     [HttpDelete("{realmId:int}/invite/{playerUuid}")]
