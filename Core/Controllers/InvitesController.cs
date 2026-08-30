@@ -40,17 +40,10 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
 
         if (invite == null) return StatusCode(404, ApiError.InviteNotFound);
 
-        context.Players.Add(new Player
-        {
-            Uuid = playerData.Uuid,
-            Name = playerData.Name,
-            Operator = false,
-            Accepted = true,
-            RealmId = invite.RealmId
-        });
+        await context.Players.Where(player => player.Id == invite.PlayerId)
+            .ExecuteUpdateAsync(s => s.SetProperty(player => player.Accepted, true));
 
         context.PendingInvites.Remove(invite);
-
         await context.SaveChangesAsync();
 
         return Ok(true);
