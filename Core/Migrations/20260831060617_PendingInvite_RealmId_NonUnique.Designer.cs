@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Core.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260830195453_Realm_OwnerId")]
-    partial class Realm_OwnerId
+    [Migration("20260831060617_PendingInvite_RealmId_NonUnique")]
+    partial class PendingInvite_RealmId_NonUnique
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -121,9 +121,6 @@ namespace Core.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("OwnerId")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("ParentWorldId")
                         .HasColumnType("integer");
 
@@ -139,8 +136,6 @@ namespace Core.Migrations
 
                     b.HasIndex("ActiveSlotId")
                         .IsUnique();
-
-                    b.HasIndex("OwnerId");
 
                     b.HasIndex("ParentWorldId");
 
@@ -337,18 +332,11 @@ namespace Core.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Core.Entities.Player", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("Core.Entities.Realm", "ParentWorld")
                         .WithMany()
                         .HasForeignKey("ParentWorldId");
 
                     b.Navigation("ActiveSlot");
-
-                    b.Navigation("Owner");
 
                     b.Navigation("ParentWorld");
                 });

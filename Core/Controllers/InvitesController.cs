@@ -19,8 +19,7 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
     {
         var pendingInvitesListDb = await context.PendingInvites.Where(invite => invite.Player.Uuid == playerData.Uuid)
             .Include(pendingInvite => pendingInvite.Realm).ThenInclude(realm => realm.Players)
-            .Include(pendingInvite => pendingInvite.Realm)
-            .ThenInclude(realm => realm.Owner).ToListAsync();
+            .Include(pendingInvite => pendingInvite.Realm).ToListAsync();
 
         var pendingInvitesListResponse = new PendingInvitesList { Invites = [] };
 
@@ -91,8 +90,8 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
         if (string.Equals(body.Name, playerData.Name, StringComparison.CurrentCultureIgnoreCase))
             return StatusCode(500, ApiError.CannotInviteYourself);
 
-        var realm = await context.Realms.Include(w => w.Players).Include(realm => realm.Owner)
-            .Include(realm => realm.Subscription).Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Options)
+        var realm = await context.Realms.Include(w => w.Players).Include(realm => realm.Subscription)
+            .Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Options)
             .FirstOrDefaultAsync(w => w.Id == realmId);
 
         if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
@@ -114,6 +113,7 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
             Name = playerInfo.Name,
             Operator = false,
             Accepted = false,
+            Owner = false,
             Realm = realm
         };
 

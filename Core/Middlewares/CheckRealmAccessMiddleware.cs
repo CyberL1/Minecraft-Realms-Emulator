@@ -20,9 +20,7 @@ public class CheckRealmAccessMiddleware(RequestDelegate next)
         }
 
         var realmId = int.Parse(realmIdValue.ToString()!);
-
-        var realm = await db.Realms.Include(realm => realm.Players).Include(realm => realm.Owner)
-            .FirstOrDefaultAsync(realm => realm.Id == realmId);
+        var realm = await db.Realms.Include(realm => realm.Players).FirstOrDefaultAsync(realm => realm.Id == realmId);
 
         if (realm == null)
         {

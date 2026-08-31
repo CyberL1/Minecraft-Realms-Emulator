@@ -29,7 +29,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
     {
         var realms = await context.Realms.Include(realm => realm.Subscription).Include(realm => realm.ActiveSlot)
             .ThenInclude(slot => slot.Options).Include(realm => realm.Players)
-            .Include(realm => realm.RegionSelectionPreference).Include(realm => realm.Owner).ToListAsync();
+            .Include(realm => realm.RegionSelectionPreference).ToListAsync();
 
         var servers = new RealmsList { Servers = [] };
 
@@ -52,7 +52,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 Uuid = playerData.Uuid,
                 Name = playerData.Name,
                 Operator = false,
-                Accepted = false
+                Accepted = false,
+                Owner = true
             };
 
             context.Players.Add(owner);
@@ -99,8 +100,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 WorldType = nameof(WorldType.NORMAL),
                 ActiveSlotId = primarySlot.Id,
                 RegionSelectionPreference = regionSelectionPreference,
-                Connection = connection,
-                Owner = owner
+                Connection = connection
             };
 
             context.Realms.Add(realm);
@@ -203,7 +203,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
         var realm = await context.Realms.Include(realm => realm.Players).Include(realm => realm.Subscription)
             .Include(realm => realm.RegionSelectionPreference).Include(realm => realm.Slots)
             .ThenInclude(slot => slot.Options).Include(realm => realm.ActiveSlot).ThenInclude(slot => slot.Options)
-            .Include(realm => realm.Owner).FirstAsync(realm => realm.Id == realmId);
+            .FirstAsync(realm => realm.Id == realmId);
 
         var realmResponse = new Models.Responses.Realm
         {
@@ -318,6 +318,20 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
         if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
 
         realm.State = nameof(RealmState.CLOSED);
+
+        await context.SaveChangesAsync();
+        return Ok(true);
+    }
+
+    [HttpDelete("{realmId:int}")]
+    [HasRealmAccess(true)]
+    public async Task<ActionResult<bool>> DeleteRealm(int realmId)
+    {
+        var realm = await context.Realms.FirstOrDefaultAsync(realm => realm.Id == realmId);
+
+        if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
+
+        context.Realms.Remove(realm);
 
         await context.SaveChangesAsync();
         return Ok(true);
