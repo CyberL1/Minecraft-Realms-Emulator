@@ -325,7 +325,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
 
     [HttpDelete("{realmId:int}")]
     [HasRealmAccess(true)]
-    public async Task<ActionResult<bool>> DeleteRealm(int realmId)
+    public async Task<ActionResult> DeleteRealm(int realmId)
     {
         var realm = await context.Realms.FirstOrDefaultAsync(realm => realm.Id == realmId);
 
@@ -334,6 +334,6 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
         context.Realms.Remove(realm);
 
         await context.SaveChangesAsync();
-        return Ok(true);
+        return NoContent();
     }
 }
