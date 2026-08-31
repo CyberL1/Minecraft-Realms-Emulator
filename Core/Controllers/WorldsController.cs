@@ -332,7 +332,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
 
         if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
 
-        if (!realm.Subscription.Ended) return StatusCode(401, ApiError.WorldIsNotExpired);
+        if (!realm.Subscription.Ended) return StatusCode(403, ApiError.WorldIsNotExpired);
         context.Realms.Remove(realm);
 
         await context.SaveChangesAsync();
