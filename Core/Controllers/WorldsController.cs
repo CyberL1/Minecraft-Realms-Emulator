@@ -327,10 +327,12 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
     [HasRealmAccess(true)]
     public async Task<ActionResult> DeleteRealm(int realmId)
     {
-        var realm = await context.Realms.FirstOrDefaultAsync(realm => realm.Id == realmId);
+        var realm = await context.Realms.Include(realm => realm.Subscription).FirstOrDefaultAsync(realm => realm.Id == realmId);
 
         if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
 
+        if (!realm.Subscription.Ended) return StatusCode(401, ApiError.WorldIsNotExpired);
+        
         context.Realms.Remove(realm);
 
         await context.SaveChangesAsync();

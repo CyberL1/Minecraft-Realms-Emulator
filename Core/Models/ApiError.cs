@@ -21,4 +21,5 @@ public class ApiError
     public static ApiError FailedToGetPlayerData => new(500, "Failed to get player data");
     public static ApiError PlayerAlreadyInvited => new(500, "Player already invited");
     public static ApiError PlayerNotInvited => new(500, "Player not invited");
+    public static ApiError WorldIsNotExpired => new(401, "World is not expired");
 }
