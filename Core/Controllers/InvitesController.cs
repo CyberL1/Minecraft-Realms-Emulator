@@ -133,7 +133,7 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
         var realmResponse = new Realm
         {
             Id = realm.Id,
-            RemoteSubscriptionId = realm.Subscription.SubscriptionId,
+            RemoteSubscriptionId = realm.Subscription.SubscriptionId.Replace("-", ""),
             Name = realm.Name,
             Motd = realm.Description,
             State = realm.State,
