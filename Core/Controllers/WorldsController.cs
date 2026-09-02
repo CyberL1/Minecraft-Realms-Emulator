@@ -241,7 +241,14 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                         Compatibility = RealmCompatibility.CheckRealmCompatibility(playerData.Version,
                             realm.ActiveSlot.Options.Version)
                     }),
-                    Settings = slot.Settings
+                    Settings =
+                    [
+                        new SlotSetting
+                        {
+                            Name = "hardcore",
+                            Value = slot.Settings.Contains("hardcore")
+                        }
+                    ]
                 }
             ]),
             Expired = realm.Subscription.Ended,
@@ -337,5 +344,86 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
 
         await context.SaveChangesAsync();
         return NoContent();
+    }
+
+
+    [HttpPut("{realmId:int}/backups/upload")]
+    [HasRealmAccess(true)]
+    public ActionResult<UploadInfo> GetUploadInfo(int realmId, UploadInfoRequest body)
+    {
+        var uploadInfo = new UploadInfo
+        {
+            UploadEndpoint = "http://localhost",
+            Port = 8080,
+            WorldClosed = true,
+            Token = Guid.NewGuid().ToString()
+        };
+
+        return Ok(uploadInfo);
+    }
+
+    [HttpPost("{realmId:int}/slot/{slotId:int}")]
+    [HasRealmAccess(true)]
+    public async Task<ActionResult> UpdateSlot(int realmId, int slotId, WorldOptions body)
+    {
+        var realm = await context.Realms.FirstOrDefaultAsync(realm => realm.Id == realmId);
+
+        if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
+
+        var slot = await context.Slots.Include(slot => slot.Options).FirstOrDefaultAsync(slot => slot.SlotId == slotId);
+
+        if (slot == null)
+        {
+            slot = new Slot
+            {
+                SlotId = slotId,
+                Realm = realm,
+                Options = new SlotOptions { Version = body.Version.Trim() }
+            };
+            context.Slots.Add(slot);
+        }
+
+        slot.Options.SpawnProtection = body.SpawnProtection;
+        slot.Options.ForceGameMode = body.ForceGameMode;
+        slot.Options.Difficulty = body.Difficulty;
+        slot.Options.GameMode = body.GameMode;
+        slot.Options.SlotName = body.SlotName.Trim();
+        slot.Options.Version = body.Version.Trim();
+
+        if (body.Hardcore && !slot.Settings.Contains("hardcore")) slot.Settings.Add("hardcore");
+        else if (!body.Hardcore) slot.Settings.Remove("hardcore");
+
+
+        realm.ActiveSlot = slot;
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpPut("{realmId:int}/slot/{slotId:int}")]
+    [HasRealmAccess(true)]
+    public async Task<ActionResult<bool>> SwitchSlot(int realmId, int slotId)
+    {
+        var realm = await context.Realms.FirstOrDefaultAsync(realm => realm.Id == realmId);
+
+        if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
+
+        var slot = await context.Slots.Include(slot => slot.Options).FirstOrDefaultAsync(slot => slot.SlotId == slotId);
+
+        if (slot == null)
+        {
+            slot = new Slot
+            {
+                SlotId = slotId,
+                Realm = realm,
+                Options = new SlotOptions { Version = playerData.Version }
+            };
+            context.Slots.Add(slot);
+        }
+
+        realm.ActiveSlot = slot;
+        await context.SaveChangesAsync();
+
+        return Ok(true);
     }
 }
