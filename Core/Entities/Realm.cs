@@ -11,7 +11,6 @@ public class Realm
     public required string State { get; set; }
     public required List<Player> Players { get; set; }
     public required List<Slot> Slots { get; set; }
-    public required string WorldType { get; set; }
     [JsonIgnore] public int ActiveSlotId { get; set; }
     [JsonIgnore] public Slot ActiveSlot { get; set; } = null!;
     [JsonIgnore] public Realm? ParentWorld { get; set; }

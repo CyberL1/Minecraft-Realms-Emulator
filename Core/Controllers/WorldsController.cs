@@ -61,7 +61,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
 
             var primarySlot = new Slot
             {
-                SlotId = 1
+                SlotId = 1,
+                WorldType = nameof(WorldType.NORMAL)
             };
 
             context.Slots.Add(primarySlot);
@@ -97,7 +98,6 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 State = nameof(RealmState.UNINITIALIZED),
                 Players = [owner],
                 Slots = [primarySlot],
-                WorldType = nameof(WorldType.NORMAL),
                 ActiveSlotId = primarySlot.Id,
                 RegionSelectionPreference = regionSelectionPreference,
                 Connection = connection
@@ -129,7 +129,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
                 Expired = realm.Subscription.Ended,
                 ExpiredTrial = false,
                 DaysLeft = realm.Subscription.Ended ? -1 : 0,
-                WorldType = realm.WorldType,
+                WorldType = realm.ActiveSlot.WorldType,
                 IsHardcore = realm.ActiveSlot.Settings.Contains("hardcore"),
                 GameMode = (int)realm.ActiveSlot.Options.GameMode,
                 ActiveSlot = -1,
@@ -254,7 +254,7 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             Expired = realm.Subscription.Ended,
             ExpiredTrial = AppConfig.Trial && realm.Subscription.Ended,
             DaysLeft = realm.Subscription.DaysLeft,
-            WorldType = realm.WorldType,
+            WorldType = realm.ActiveSlot.WorldType,
             IsHardcore = realm.ActiveSlot.Settings.Contains("hardcore"),
             GameMode = (int)realm.ActiveSlot.Options.GameMode,
             ActiveSlot = realm.ActiveSlot.SlotId,
@@ -300,7 +300,6 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
         await context.SaveChangesAsync();
         return Ok(realm);
     }
-
 
     [HttpPut("{realmId:int}/open")]
     [HasRealmAccess(true)]
@@ -378,7 +377,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             {
                 SlotId = slotId,
                 Realm = realm,
-                Options = new SlotOptions { Version = body.Version.Trim() }
+                Options = new SlotOptions { Version = body.Version.Trim() },
+                WorldType = nameof(WorldType.NORMAL)
             };
             context.Slots.Add(slot);
         }
@@ -416,7 +416,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
             {
                 SlotId = slotId,
                 Realm = realm,
-                Options = new SlotOptions { Version = playerData.Version }
+                Options = new SlotOptions { Version = playerData.Version },
+                WorldType = nameof(WorldType.NORMAL)
             };
             context.Slots.Add(slot);
         }

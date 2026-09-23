@@ -128,10 +128,6 @@ namespace Core.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("WorldType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ActiveSlotId")
@@ -218,6 +214,12 @@ namespace Core.Migrations
 
                     b.Property<int>("SlotId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("WorldType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NORMAL");
 
                     b.HasKey("Id");
 

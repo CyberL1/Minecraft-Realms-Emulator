@@ -142,7 +142,7 @@ public class InvitesController(DataContext context, CookiePlayerData playerData)
             Expired = realm.Subscription.Ended,
             ExpiredTrial = AppConfig.Trial && realm.Subscription.Ended,
             DaysLeft = realm.Subscription.DaysLeft,
-            WorldType = realm.WorldType,
+            WorldType = realm.ActiveSlot.WorldType,
             IsHardcore = realm.ActiveSlot.Settings.Contains("hardcore"),
             GameMode = (int)realm.ActiveSlot.Options.GameMode,
             ActiveSlot = realm.ActiveSlot.SlotId,
