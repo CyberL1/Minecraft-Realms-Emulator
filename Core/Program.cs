@@ -1,11 +1,23 @@
+using System.Reflection;
+using Core;
 using Core.Data;
 using Core.Middlewares;
 using Core.Models;
+using EngineLib;
 using Microsoft.EntityFrameworkCore;
 using AppConfig = Core.Helpers.AppConfig;
 
 var builder = WebApplication.CreateBuilder(args);
+var engineLocation = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "Engine", "Engine.dll"));
 
+var loadContext = new PluginLoadContext(engineLocation);
+var engineAssembly =
+    loadContext.LoadFromAssemblyName(new AssemblyName(Path.GetFileNameWithoutExtension(engineLocation)));
+
+var engineType = engineAssembly.GetTypes().First(t => t.Name == "Engine");
+var engine = (IEngine)Activator.CreateInstance(engineType)!;
+
+builder.Services.AddSingleton(engine);
 builder.Services.AddScoped<CookiePlayerData>();
 
 builder.Services.AddMemoryCache();

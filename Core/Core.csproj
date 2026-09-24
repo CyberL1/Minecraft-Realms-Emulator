@@ -17,4 +17,8 @@
         <PackageReference Include="Semver" Version="3.0.0"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\EngineLib\EngineLib.csproj"/>
+    </ItemGroup>
+
 </Project>
