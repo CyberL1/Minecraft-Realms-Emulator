@@ -302,6 +302,35 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
         return Ok(realm);
     }
 
+    [HttpGet("{realmId:int}/configuration/tier")]
+    [HasRealmAccess(true)]
+    public async Task<ActionResult<RealmTierConfiguration>> GetRealmTier(int realmId)
+    {
+        var realm = await context.Realms.Include(realm => realm.Tier).FirstOrDefaultAsync(realm => realm.Id == realmId);
+
+        if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
+
+        var realmTierConfigurationResponse = new RealmTierConfiguration
+        {
+            RenderDistance = new RealmTierRangeConfiguration
+            {
+                Min = realm.Tier.RenderMinimum,
+                Max = realm.Tier.RenderMaximum,
+                DefaultValue = realm.Tier.RenderDefault,
+                Current = null
+            },
+            SimDistance = new RealmTierRangeConfiguration
+            {
+                Min = realm.Tier.SimulationMinimum,
+                Max = realm.Tier.SimulationMaximum,
+                DefaultValue = realm.Tier.SimulationDefault,
+                Current = null
+            }
+        };
+
+        return Ok(realmTierConfigurationResponse);
+    }
+
     [HttpPut("{realmId:int}/open")]
     [HasRealmAccess(true)]
     public async Task<ActionResult<bool>> OpenRealm(int realmId)

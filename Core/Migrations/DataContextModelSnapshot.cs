@@ -128,12 +128,19 @@ namespace Core.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("TierId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
                     b.HasKey("Id");
 
                     b.HasIndex("ActiveSlotId")
                         .IsUnique();
 
                     b.HasIndex("ParentWorldId");
+
+                    b.HasIndex("TierId");
 
                     b.ToTable("Realms");
                 });
@@ -193,6 +200,37 @@ namespace Core.Migrations
                         .IsUnique();
 
                     b.ToTable("RegionSelectionPreferences");
+                });
+
+            modelBuilder.Entity("Core.Entities.RealmTier", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("RenderDefault")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RenderMaximum")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RenderMinimum")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SimulationDefault")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SimulationMaximum")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SimulationMinimum")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RealmTiers");
                 });
 
             modelBuilder.Entity("Core.Entities.Slot", b =>
@@ -338,9 +376,17 @@ namespace Core.Migrations
                         .WithMany()
                         .HasForeignKey("ParentWorldId");
 
+                    b.HasOne("Core.Entities.RealmTier", "Tier")
+                        .WithMany()
+                        .HasForeignKey("TierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("ActiveSlot");
 
                     b.Navigation("ParentWorld");
+
+                    b.Navigation("Tier");
                 });
 
             modelBuilder.Entity("Core.Entities.RealmConnection", b =>

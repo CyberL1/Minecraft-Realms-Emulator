@@ -16,6 +16,8 @@ public class Realm
     [JsonIgnore] public Realm? ParentWorld { get; set; }
     [JsonIgnore] public RealmRegionSelectionPreference RegionSelectionPreference { get; set; }
     public required RealmConnection Connection { get; set; } = null!;
+    public int TierId { get; set; }
+    public RealmTier? Tier { get; set; }
 
     // Helper fields
     public Player Owner => Players.First(player => player.Owner);

@@ -15,6 +15,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<RealmRegionSelectionPreference> RegionSelectionPreferences { get; set; }
     public DbSet<RealmConnection> RealmConnections { get; set; }
     public DbSet<PendingInvite> PendingInvites { get; set; }
+    public DbSet<RealmTier> RealmTiers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,5 +55,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Slot>().Property(slot => slot.WorldType).HasDefaultValue(nameof(WorldType.NORMAL));
+
+        modelBuilder.Entity<Realm>().Property(realm => realm.TierId).HasDefaultValue(1);
+        modelBuilder.Entity<Realm>().HasOne(realm => realm.Tier).WithMany().OnDelete(DeleteBehavior.Restrict);
     }
 }
