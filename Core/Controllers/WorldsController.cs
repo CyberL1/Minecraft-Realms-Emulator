@@ -16,6 +16,7 @@ using RealmRegionSelectionPreference = Core.Entities.RealmRegionSelectionPrefere
 using Region = Core.Enums.Region;
 using Slot = Core.Entities.Slot;
 using SlotOptions = Core.Entities.SlotOptions;
+using SlotSetting = Core.Models.Responses.SlotSetting;
 using Subscription = Core.Entities.Subscription;
 
 namespace Core.Controllers;
