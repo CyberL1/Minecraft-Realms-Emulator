@@ -22,4 +22,5 @@ public class ApiError
     public static ApiError PlayerAlreadyInvited => new(500, "Player already invited");
     public static ApiError PlayerNotInvited => new(500, "Player not invited");
     public static ApiError WorldIsNotExpired => new(403, "World is not expired");
+    public static ApiError WeAreSoFucked => new(500, "We are so fucked");
 }

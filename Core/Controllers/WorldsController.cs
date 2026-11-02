@@ -310,6 +310,8 @@ public class WorldsController(DataContext context, CookiePlayerData playerData) 
 
         if (realm == null) return StatusCode(404, ApiError.WorldNotFound);
 
+        if (realm.Tier == null) return StatusCode(500, ApiError.WeAreSoFucked);
+
         var realmTierConfigurationResponse = new RealmTierConfiguration
         {
             RenderDistance = new RealmTierRangeConfiguration
